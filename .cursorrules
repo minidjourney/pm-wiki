@@ -1,0 +1,43 @@
+# Project: 퍼모위키 (Pumo Wiki) - Personal Mobility Used-Market Database Platform
+# Role: You are an expert Next.js (App Router), React, Zustand, and Supabase developer.
+
+## 1. Project Overview & Architecture
+당근마켓, 번개장터 등 중고 거래에서 퍼스널 모빌리티를 검색하는 유저들을 위한 '최고급 스펙 비교 및 시세 정보 플랫폼'입니다. 
+- **DB Web-App Track (`/models/[slug]`)**: 직관적인 스펙 데이터, 장단점, 고질병, 신품가 대비 중고 시세 밴드(최저~최고), 직거래 체크리스트 제공.
+- **SEO Content Hub Track (`/blog/[slug]`)**: 검색 트래픽을 위한 정보성 아티클 및 본문 내 미니 스펙 카드 렌더링.
+- **Killer Features**: Cmd+K 통합 검색(Search Modal), 장바구니식 스펙 비교함(`/compare`), 하드웨어 기반 '퍼모위키 스코어(가성비 지수)'.
+
+## 2. Tech Stack
+- Frontend: Next.js 14+ (App Router), React, TypeScript
+- State Management: Zustand (비교함 장바구니 용도)
+- Styling: Tailwind CSS, shadcn/ui (Sheet, Dialog, Command, Table 등 적극 활용)
+- Backend & DB: Supabase (PostgreSQL) @supabase/ssr
+- Data Visualization: Recharts (가격 시세 밴드 그래프), Lucide React (Icons)
+
+## 3. Database Schema (v3.0)
+TypeScript Interface 작성 및 Supabase Fetching 시 아래 최신 스키마를 반드시 준수하세요.
+
+### Table A: `pm_models` (메인 기기 스펙 DB)
+- id (uuid), status (string: 'draft' | 'published')
+- category (string: 'kickboard' | 'ebike' | 'scooter' | 'unicycle')
+- manufacturer (string), model_name (string), sub_model (string), slug (string)
+- original_price (number), used_price_min (number), used_price_max (number)
+- one_line_summary (string) // 퍼모위키 코멘트 (에디터 픽)
+- [핵심 스펙]: motor_power_peak (number), battery_capacity (number), battery_voltage (number), range_official (number), range_real_80kg (number), max_speed (number), weight (number), tire_size (number), brake_type (string), suspension_type (string), dimensions (string), release_year (number), is_discontinued (boolean)
+- [부가 팁]: charger_spec (string), bluetooth_enabled (boolean), battery_check_method (string)
+- [배열 데이터]: pros (JSONB Array), cons (JSONB Array), safety_rules (JSONB Array), chronic_defects (JSONB Array: { issue, frequency, repair_cost, prevention }), used_checklist (JSONB Array), compatible_accessories (JSONB Array)
+
+### Table B: `blog_posts` (콘텐츠 허브 DB)
+- id, title, slug, content, thumbnail_url, related_models (Array of strings)
+
+## 4. UI/UX & Design Guidelines
+- **모바일 퍼스트 & Card-based UI:** 토스(Toss), 필라이즈 스타일의 둥근 모서리(`rounded-xl`), 넉넉한 패딩, 은은한 그림자(`shadow-sm`)를 적용.
+- **Visual Hierarchy:** 중요한 숫자(수리비, 가격, 점수)는 크고 진하게, 부가 설명은 `text-muted-foreground`로 명확히 분리.
+- **퍼모위키 스코어(가성비 지수):** `Math.round(((battery_capacity * 36) + motor_power_peak) / (original_price / 10000))` 공식을 사용하여 카드/상세 페이지에 뱃지로 노출.
+- **시세 분석 그래프:** Recharts를 사용하여 '신품가'와 '중고 시세 밴드(최저~최고)'를 직관적인 막대로 비교 (주관적인 S/A급 배제).
+- **외부 링크 아웃바운드:** 중고 플랫폼(당근, 번장, 중고나라) 실시간 매물 검색 버튼 제공 시 새 탭(`target="_blank"`)으로 열리도록 구성.
+
+## 5. SEO Guidelines (Crucial)
+- 화면 H1 태그는 군더더기 없는 `model_name`만 렌더링. 
+- `<title>` 태그는 `generateMetadata`를 사용하여 "[모델명] 중고 거래 적정가 및 고질병 정리 - 퍼모위키" 최적화.
+- Product 스키마 마크업(JSON-LD) 주입 시 `offers`에 `lowPrice`(used_price_min)와 `highPrice`(used_price_max)를 매핑.
