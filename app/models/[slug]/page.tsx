@@ -193,7 +193,7 @@ export default async function ModelPage({ params }: Props) {
   const specCards: { label: string; value: string | number; icon: ReactElement }[] = [];
   if (model.range_real_80kg != null)
     specCards.push({
-      label: "현실 주행거리",
+      label: "주행거리",
       value: `${model.range_real_80kg}km`,
       icon: <Gauge className="size-3.5" />,
     });
@@ -241,7 +241,7 @@ export default async function ModelPage({ params }: Props) {
     });
   if (model.range_official != null && model.range_official > 0)
     specCards.push({
-      label: "공인 주행거리",
+      label: "주행거리",
       value: `${model.range_official}km`,
       icon: <Gauge className="size-3.5" />,
     });
