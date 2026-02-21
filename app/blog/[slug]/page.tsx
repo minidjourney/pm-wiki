@@ -4,6 +4,8 @@ import type { Metadata } from "next";
 import type { BlogPost } from "@/types/database";
 import { RelatedModels } from "@/components/blog/RelatedModels";
 
+export const revalidate = 3600;
+
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

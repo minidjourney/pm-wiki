@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { ModelGrid } from "@/components/home/ModelGrid";
 import type { PmModel } from "@/types/database";
 
+export const revalidate = 3600;
+
 export default async function Home() {
   const supabase = await createClient();
   const { data: models, error } = await supabase

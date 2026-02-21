@@ -3,6 +3,8 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import type { BlogPost } from "@/types/database";
 
+export const revalidate = 3600;
+
 export const metadata = {
   title: "블로그 - 퍼모위키",
   description: "퍼스널 모빌리티 구매 가이드, 비교 후기, 시세 정보",
@@ -28,7 +30,7 @@ export default async function BlogListPage() {
         <p className="text-muted-foreground">등록된 글이 없습니다.</p>
       ) : (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {list.map((post) => (
+          {list.map((post, index) => (
             <Link
               key={post.id}
               href={`/blog/${post.slug}`}
@@ -42,6 +44,7 @@ export default async function BlogListPage() {
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    priority={index < 3}
                   />
                 </div>
               ) : (
