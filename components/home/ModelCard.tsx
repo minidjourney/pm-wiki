@@ -60,6 +60,7 @@ export function ModelCard({ model }: ModelCardProps) {
   return (
     <Link
       href={`/models/${model.slug}`}
+      prefetch={true}
       className={cn(
         "group relative flex flex-col rounded-xl border border-slate-100 bg-white p-4 shadow-sm",
         "transition-all duration-200 hover:-translate-y-1 hover:shadow-md",

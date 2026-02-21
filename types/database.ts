@@ -33,6 +33,8 @@ export interface PmModel {
   manufacturer: string;
   model_name: string;
   slug: string;
+  /** 모델 대표 이미지 URL */
+  image_url?: string | null;
   /** 선택: 서브 모델명 (예: 프로, 라이트) */
   sub_model?: string | null;
   /** 한 줄 총평 (Hero 강조용) */

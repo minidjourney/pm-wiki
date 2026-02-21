@@ -34,6 +34,7 @@ export function RecommendationWidget({
           <Link
             key={m.id}
             href={`/models/${m.slug}`}
+            prefetch={true}
             className="flex w-[160px] shrink-0 flex-col gap-1 rounded-xl border border-slate-100 bg-slate-50/80 p-3 transition-colors hover:border-slate-200 hover:bg-slate-100/80"
           >
             <span className="text-xs text-muted-foreground">{m.manufacturer}</span>

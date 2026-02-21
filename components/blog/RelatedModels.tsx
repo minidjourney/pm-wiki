@@ -46,6 +46,7 @@ export async function RelatedModels({ slugs }: RelatedModelsProps) {
             <Link
               key={m.id}
               href={`/models/${m.slug}`}
+              prefetch={true}
               className="flex flex-col gap-2 rounded-xl border border-slate-100 bg-white p-4 transition-colors hover:border-slate-200 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700"
             >
               <p className="text-xs font-medium text-muted-foreground">

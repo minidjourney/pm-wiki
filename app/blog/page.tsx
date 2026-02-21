@@ -34,6 +34,7 @@ export default async function BlogListPage() {
             <Link
               key={post.id}
               href={`/blog/${post.slug}`}
+              prefetch={true}
               className="group flex flex-col overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
             >
               {post.thumbnail_url ? (

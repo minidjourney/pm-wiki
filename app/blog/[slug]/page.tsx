@@ -62,3 +62,9 @@ export default async function BlogPostPage({ params }: Props) {
     </main>
   );
 }
+
+export async function generateStaticParams() {
+  const supabase = await createClient();
+  const { data } = await supabase.from("blog_posts").select("slug");
+  return (data ?? []).map((row: { slug: string }) => ({ slug: row.slug }));
+}

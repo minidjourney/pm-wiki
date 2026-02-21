@@ -1,4 +1,5 @@
 import type { ReactElement } from "react";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -315,6 +316,21 @@ export default async function ModelPage({ params }: Props) {
           )}
         </section>
 
+        {model.image_url && (
+          <div className="px-4 pt-6">
+            <div className="relative overflow-hidden rounded-xl shadow-md">
+              <Image
+                src={model.image_url}
+                alt={model.model_name}
+                width={800}
+                height={600}
+                className="w-full h-auto object-cover"
+                priority
+              />
+            </div>
+          </div>
+        )}
+
         <div className="space-y-6 px-4 pt-6">
           {/* 시세 분석 */}
           <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
@@ -568,4 +584,13 @@ export default async function ModelPage({ params }: Props) {
       </main>
     </>
   );
+}
+
+export async function generateStaticParams() {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("pm_models")
+    .select("slug")
+    .eq("status", "published");
+  return (data ?? []).map((row: { slug: string }) => ({ slug: row.slug }));
 }
