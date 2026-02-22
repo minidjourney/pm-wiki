@@ -18,9 +18,9 @@ export const metadata: Metadata = {
   title: "PM Wiki - 퍼스널 모빌리티 중고 거래 정보",
   description: "킥보드·전동킥보드·전기자전거 적정 중고가, 고질병, 직거래 체크리스트",
   verification: {
-    google: "pTILOViGpUSjnK32INYRp7sbanSMSHnOQT_22p063zo",
+    google: "OMiYAuXHSu_D00cqwCqpxUGrS6UCgfhnA_B7z9MU95A",
     other: {
-      "naver-site-verification": "76706624c3a9d7aa796f0b329cd485ccfd7592e1",
+      "naver-site-verification": ["157fb14cd8ec9a9a55cd63e06182cf172969eabc"],
     },
   },
 };
