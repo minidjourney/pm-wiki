@@ -8,7 +8,7 @@ const getSupabase = () =>
   );
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://peomowiki.com"; // 실제 도메인으로 변경 필요
+  const baseUrl = "https://pmwiki.kr"; // 실제 도메인으로 변경 필요
   const supabase = getSupabase();
 
   // 1. DB에서 퍼블리싱된 모델 슬러그 가져오기
