@@ -22,7 +22,12 @@ import {
   Clock,
   User,
   Smartphone,
-  Activity
+  Activity,
+  Timer,
+  CircleDashed,
+  Octagon,
+  Ruler,
+  Calendar,
 } from "lucide-react";
 import { PriceChart } from "@/components/models/PriceChart";
 import { UsedMarketSearch } from "@/components/models/UsedMarketSearch";
@@ -68,14 +73,20 @@ export default async function ModelPage({ params }: Props) {
   const cons = (Array.isArray(model.cons) ? model.cons : []) as string[];
 
   const specCards: { label: string; value: string | number; icon: ReactElement }[] = [];
+  if (model.release_year) specCards.push({ label: "출시 연도", value: `${model.release_year}년`, icon: <Calendar className="size-3.5" /> });
+  if (model.max_speed) specCards.push({ label: "최고 속도", value: `${model.max_speed}km/h`, icon: <Timer className="size-3.5" /> });
   if (model.range_official) specCards.push({ label: "공식 주행거리", value: `${model.range_official}km`, icon: <Gauge className="size-3.5" /> });
-  if (model.battery_wh) specCards.push({ label: "배터리 전력량", value: `${model.battery_wh}Wh`, icon: <Battery className="size-3.5" /> });
-  if (model.charge_time) specCards.push({ label: "충전 소요시간", value: `약 ${model.charge_time}시간`, icon: <Clock className="size-3.5" /> });
-  if (model.max_load) specCards.push({ label: "최대 하중", value: `${model.max_load}kg`, icon: <User className="size-3.5" /> });
   if (model.motor_power_rated) specCards.push({ label: "정격 출력", value: `${model.motor_power_rated}W`, icon: <Activity className="size-3.5" /> });
   if (model.motor_power_peak) specCards.push({ label: "최대 출력", value: `${model.motor_power_peak}W`, icon: <Zap className="size-3.5" /> });
+  if (model.battery_wh) specCards.push({ label: "배터리 전력량", value: `${model.battery_wh}Wh`, icon: <Battery className="size-3.5" /> });
+  if (model.nominal_voltage && model.battery_capacity) specCards.push({ label: "배터리 상세", value: `${model.nominal_voltage}V ${model.battery_capacity}Ah`, icon: <Plug className="size-3.5" /> });
+  if (model.charge_time) specCards.push({ label: "충전 소요시간", value: `약 ${model.charge_time}시간`, icon: <Clock className="size-3.5" /> });
+  if (model.max_load) specCards.push({ label: "최대 하중", value: `${model.max_load}kg`, icon: <User className="size-3.5" /> });
   if (model.weight) specCards.push({ label: "기체 무게", value: `${model.weight}kg`, icon: <Weight className="size-3.5" /> });
+  if (model.tire_size) specCards.push({ label: "타이어 크기", value: `${model.tire_size}인치`, icon: <CircleDashed className="size-3.5" /> });
+  if (model.brake_type) specCards.push({ label: "브레이크", value: model.brake_type, icon: <Octagon className="size-3.5" /> });
   if (model.suspension_type) specCards.push({ label: "서스펜션", value: model.suspension_type, icon: <Wrench className="size-3.5" /> });
+  if (model.dimensions) specCards.push({ label: "기체 크기", value: model.dimensions, icon: <Ruler className="size-3.5" /> });
 
   return (
     <>
@@ -108,8 +119,22 @@ export default async function ModelPage({ params }: Props) {
 
         {model.image_url && !model.image_url.includes('placeholder') && (
           <div className="px-4 pt-6">
-            <div className="relative overflow-hidden rounded-xl shadow-md">
-              <Image src={model.image_url} alt={model.model_name} width={800} height={600} className="w-full h-auto object-cover" priority />
+            <div className="relative flex w-full items-center justify-center overflow-hidden rounded-3xl bg-gradient-to-b from-slate-100 to-slate-200/50 p-8 shadow-inner dark:from-slate-800/50 dark:to-slate-900/50">
+              {/* 뒷배경 은은한 빛 효과 */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="h-4/5 w-4/5 rounded-full bg-white/60 blur-3xl dark:bg-blue-900/20"></div>
+              </div>
+              {/* 실제 이미지 */}
+              <div className="relative z-10 w-full max-w-[280px] drop-shadow-2xl sm:max-w-[340px]">
+                <Image
+                  src={model.image_url}
+                  alt={model.model_name}
+                  width={800}
+                  height={800}
+                  className="h-auto w-full object-contain"
+                  priority
+                />
+              </div>
             </div>
           </div>
         )}
