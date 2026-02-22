@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import type { BlogPost } from "@/types/database";
 import { RelatedModels } from "@/components/blog/RelatedModels";
+import { createClient as createStaticClient } from "@supabase/supabase-js";
 
 export const revalidate = 3600;
 
@@ -64,7 +65,14 @@ export default async function BlogPostPage({ params }: Props) {
 }
 
 export async function generateStaticParams() {
-  const supabase = await createClient();
+  // 1. 빌드용(쿠키 안 보는) 정적 클라이언트 생성
+  const supabase = createStaticClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
+  // 2. 블로그 글의 slug만 빠르게 가져오기 (테이블명이 다를 경우 blog_posts 부분을 수정하세요)
   const { data } = await supabase.from("blog_posts").select("slug");
-  return (data ?? []).map((row: { slug: string }) => ({ slug: row.slug }));
+  
+  return (data ?? []).map((row) => ({ slug: row.slug }));
 }
