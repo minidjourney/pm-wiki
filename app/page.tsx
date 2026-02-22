@@ -11,7 +11,7 @@ export default async function Home() {
     .select("*")
     .eq("status", "published")
     .order("release_year", { ascending: false, nullsFirst: false })
-    .order("used_price_a", { ascending: true, nullsFirst: false });
+    .order("used_price_min", { ascending: true, nullsFirst: false });
 
   const publishedModels = (models ?? []) as PmModel[];
 
