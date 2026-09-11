@@ -3,6 +3,7 @@ import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
+import { SITE_URL } from "@/lib/site";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,8 +16,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "PM Wiki - 퍼스널 모빌리티 중고 거래 정보",
-  description: "킥보드·전동킥보드·전기자전거 적정 중고가, 고질병, 직거래 체크리스트",
+  description:
+    "킥보드·전동킥보드·전기자전거 적정 중고가, 고질병, 직거래 체크리스트",
   verification: {
     google: "OMiYAuXHSu_D00cqwCqpxUGrS6UCgfhnA_B7z9MU95A",
     other: {
