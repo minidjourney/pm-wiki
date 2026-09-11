@@ -73,7 +73,7 @@ export function ModelCard({ model }: ModelCardProps) {
         aria-label={`${model.manufacturer} ${model.model_name} 상세 보기`}
       />
 
-      {/* 상단: 카테고리 뱇지 + 비교함 담기 + 가성비 + 단종 */}
+      {/* 상단: 카테고리 뱃지 + 비교함 담기 + 가성비 + 단종 */}
       <div className="relative z-10 mb-3 flex items-start justify-between gap-2">
         <span className="pointer-events-none rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-muted-foreground dark:bg-slate-800">
           {categoryLabel}
