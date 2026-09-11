@@ -1,5 +1,5 @@
 // components/models/JsonLd.tsx
-// import type { PmModel } from "@/types/database";
+import { SITE_URL } from "@/lib/site";
 
 export function JsonLd({ model }: { model: any }) {
   const validUntilYear = new Date().getFullYear() + 1;
@@ -7,7 +7,7 @@ export function JsonLd({ model }: { model: any }) {
   // JSON 배열 데이터를 문자열로 안전하게 변환 (에러 방지 핵심)
   const formatArrayToText = (data: any) => {
     if (!data || !Array.isArray(data)) return "정보가 업데이트 중입니다.";
-    return data.map((item) => (typeof item === 'object' ? item.issue : item)).join(", ");
+    return data.map((item) => (typeof item === "object" ? item.issue : item)).join(", ");
   };
 
   const productSchema = {
@@ -15,24 +15,26 @@ export function JsonLd({ model }: { model: any }) {
     "@type": "Product",
     name: `${model.manufacturer} ${model.model_name}`,
     image: model.image_url ? [model.image_url] : [],
-    description: model.one_line_summary || `${model.model_name} 상세 스펙 및 중고 시세`,
+    description:
+      model.one_line_summary || `${model.model_name} 상세 스펙 및 중고 시세`,
     sku: model.slug,
     brand: {
       "@type": "Brand",
       name: model.manufacturer,
     },
-    ...(model.used_price_min && model.used_price_max && {
-      offers: {
-        "@type": "AggregateOffer",
-        url: `https://peomowiki.com/models/${model.slug}`,
-        priceCurrency: "KRW",
-        lowPrice: model.used_price_min,
-        highPrice: model.used_price_max,
-        offerCount: 1,
-        itemCondition: "https://schema.org/UsedCondition",
-        priceValidUntil: `${validUntilYear}-12-31`,
-      },
-    }),
+    ...(model.used_price_min &&
+      model.used_price_max && {
+        offers: {
+          "@type": "AggregateOffer",
+          url: `${SITE_URL}/models/${model.slug}`,
+          priceCurrency: "KRW",
+          lowPrice: model.used_price_min,
+          highPrice: model.used_price_max,
+          offerCount: 1,
+          itemCondition: "https://schema.org/UsedCondition",
+          priceValidUntil: `${validUntilYear}-12-31`,
+        },
+      }),
     ...(model.pm_score && {
       aggregateRating: {
         "@type": "AggregateRating",
@@ -68,8 +70,14 @@ export function JsonLd({ model }: { model: any }) {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
     </>
   );
 }
