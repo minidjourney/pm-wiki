@@ -35,16 +35,16 @@ export function Header() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <Link
             href="/"
-            className="text-xl font-bold text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+            className="min-h-11 inline-flex items-center text-xl font-bold text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
           >
             퍼모위키
           </Link>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
-              className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800"
               aria-label="검색 (⌘K)"
             >
               <Search className="size-5" />
@@ -53,7 +53,7 @@ export function Header() {
             {compareCount >= 2 ? (
               <Link
                 href="/compare"
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800"
+                className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800"
                 aria-label="모델 비교"
               >
                 <Scale className="size-5" />
@@ -64,7 +64,7 @@ export function Header() {
               </Link>
             ) : (
               <span
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground"
+                className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-medium text-muted-foreground"
                 title="2개 이상 담으면 비교하기가 활성화됩니다"
               >
                 <Scale className="size-5" />
@@ -79,7 +79,7 @@ export function Header() {
               <SheetTrigger asChild>
                 <button
                   type="button"
-                  className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800 md:hidden"
+                  className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800 md:hidden"
                   aria-label="메뉴 열기"
                 >
                   <Menu className="size-5" />
@@ -93,28 +93,35 @@ export function Header() {
                   <Link
                     href="/"
                     onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+                    className="flex min-h-11 items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
                   >
                     홈
                   </Link>
                   <Link
                     href="/?category=kickboard"
                     onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+                    className="flex min-h-11 items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
                   >
                     전동킥보드
                   </Link>
                   <Link
                     href="/?category=ebike"
                     onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+                    className="flex min-h-11 items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
                   >
                     전기자전거
                   </Link>
                   <Link
+                    href="/?category=scooter"
+                    onClick={() => setIsOpen(false)}
+                    className="flex min-h-11 items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+                  >
+                    전동스쿠터
+                  </Link>
+                  <Link
                     href="/?category=unicycle"
                     onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+                    className="flex min-h-11 items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
                   >
                     전동 외발휠
                   </Link>

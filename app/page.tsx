@@ -1,8 +1,32 @@
+import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { ModelGrid } from "@/components/home/ModelGrid";
 import type { PmModel } from "@/types/database";
 
 export const revalidate = 3600;
+
+function ModelGridFallback() {
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap gap-2">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div
+            key={i}
+            className="h-11 w-24 animate-pulse rounded-full bg-slate-200 dark:bg-slate-800"
+          />
+        ))}
+      </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div
+            key={i}
+            className="h-48 animate-pulse rounded-xl border border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-900"
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default async function Home() {
   const supabase = await createClient();
@@ -52,7 +76,9 @@ export default async function Home() {
             </p>
           </div>
         ) : (
-          <ModelGrid models={publishedModels} />
+          <Suspense fallback={<ModelGridFallback />}>
+            <ModelGrid models={publishedModels} />
+          </Suspense>
         )}
       </section>
     </main>
