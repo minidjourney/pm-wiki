@@ -1,7 +1,16 @@
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { ModelGrid } from "@/components/home/ModelGrid";
+import type { Metadata } from "next";
 import type { PmModel } from "@/types/database";
+import { SITE_URL } from "@/lib/site";
+
+export const metadata: Metadata = {
+  title: "퍼스널 모빌리티 중고 시세·스펙 비교",
+  description:
+    "전동킥보드·전기자전거·외발휠 중고 적정가와 스펙, 고질병, 직거래 체크리스트를 비교하세요. 퍼모위키.",
+  alternates: { canonical: SITE_URL },
+};
 
 export const revalidate = 3600;
 
