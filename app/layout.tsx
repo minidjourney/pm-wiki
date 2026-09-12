@@ -3,6 +3,8 @@ import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
+import { SiteFooter } from "@/components/layout/SiteFooter";
+import { AdSenseScript } from "@/components/ads/AdSenseScript";
 import { SITE_URL } from "@/lib/site";
 
 const geistSans = Geist({
@@ -107,8 +109,10 @@ export default function RootLayout({
             gtag('config', 'G-DT72L2RRJS');
           `}
         </Script>
+        <AdSenseScript />
         <Header />
         {children}
+        <SiteFooter />
       </body>
     </html>
   );

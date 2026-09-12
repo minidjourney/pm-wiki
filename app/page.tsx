@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { ModelGrid } from "@/components/home/ModelGrid";
+import { AdSlot } from "@/components/ads/AdSlot";
 import type { Metadata } from "next";
 import type { PmModel } from "@/types/database";
 import { SITE_URL } from "@/lib/site";
@@ -64,13 +65,15 @@ export default async function Home() {
             스펙 비교부터 중고 적정가, 고질병까지 한 번에 확인하세요.
           </p>
         </div>
-        {/* 배경 패턴 */}
         <div className="absolute inset-0 -z-10 opacity-5">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.3),transparent_50%)]" />
         </div>
       </section>
 
-      {/* 카탈로그 섹션 */}
+      <div className="mx-auto max-w-6xl px-4 pt-6">
+        <AdSlot slot="home-mid" className="min-h-[90px] w-full overflow-hidden rounded-xl" />
+      </div>
+
       <section className="mx-auto max-w-6xl px-4 py-12">
         {error ? (
           <div className="rounded-xl border border-red-100 bg-red-50 p-8 text-center dark:border-red-900/30 dark:bg-red-950/20">
