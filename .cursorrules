@@ -3,9 +3,9 @@
 - Styling: Tailwind CSS, shadcn/ui
 - Database: Supabase (PostgreSQL)
 
-# Database Schema: pm_models (v3.1)
+# Database Schema: pm_models (v3.2)
 모든 컴포넌트와 타입 정의 시 아래 스키마를 엄수하세요.
-- [식별]: id(uuid), slug(unique), model_name, manufacturer, sub_model, category('kickboard'|'ebike'|'unicycle'), status
+- [식별]: id(uuid), slug(unique), model_name(한국어 노출명), model_name_en(영문 원본), manufacturer, sub_model, category('kickboard'|'ebike'|'scooter'|'unicycle'), status
 - [가격/평점]: original_price, used_price_min, used_price_max, battery_replace_cost, pm_score
 - [전력/출력]: motor_power_rated(정격), motor_power_peak(최대), battery_wh(직접입력), nominal_voltage, battery_capacity
 - [주행/물리]: range_official(공식거리), max_speed, max_load(최대하중), charge_time(충전시간), weight, tire_size, dimensions, suspension_type, brake_type
@@ -13,6 +13,11 @@
 - [기타/콘텐츠]: charger_spec, release_year, is_discontinued, image_url, one_line_summary
 - [JSONB 배열]: chronic_defects, pros, cons, used_checklist, safety_rules, compatible_accessories, affiliate_links
 
+# Naming / i18n
+- UI·SEO·JSON-LD 노출명은 항상 `model_name`(한국어)을 사용한다.
+- `model_name_en`은 영문 원본 보관 및 향후 `/en` 라우트용이다.
+
 # SEO & Schema Guidelines
 - 상세 페이지는 Product 및 FAQPage JSON-LD 스키마를 삽입하여 구글 Rich Snippets에 최적화합니다.
 - 배열 데이터(JSONB)를 스키마의 텍스트로 넣을 때는 반드시 `.join(', ')` 등을 사용하여 문자열(String)로 변환해야 합니다.
+- Canonical base URL은 `https://www.pmwiki.kr`이다.

@@ -31,7 +31,10 @@ export interface PmModel {
   status: PmStatus;
   category: PmCategory;
   manufacturer: string;
+  /** 한국어 노출명 (UI / SEO / JSON-LD) */
   model_name: string;
+  /** 영문 원본명 (en 라우트·내부용) */
+  model_name_en?: string | null;
   slug: string;
   /** 모델 대표 이미지 URL */
   image_url?: string | null;
@@ -80,6 +83,7 @@ export interface PmModelSummary {
   id: string;
   slug: string;
   model_name: string;
+  model_name_en?: string | null;
   manufacturer: string;
   used_price_a: number | null;
   range_real_80kg: number | null;
