@@ -90,12 +90,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <head>
-        <AdSenseScript />
-      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <AdSenseScript />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
