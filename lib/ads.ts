@@ -1,9 +1,16 @@
-/** Google AdSense helpers. Set NEXT_PUBLIC_ADSENSE_CLIENT_ID=ca-pub-XXXXXXXX */
+/** Google AdSense helpers.
+ * Default client is the verified publisher for pmwiki.kr (public ca-pub).
+ * Override with NEXT_PUBLIC_ADSENSE_CLIENT_ID if needed.
+ */
+
+const DEFAULT_ADSENSE_CLIENT_ID = "ca-pub-5912452512065794";
 
 export function getAdSenseClientId(): string | null {
-  const raw = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID?.trim();
+  const raw =
+    process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID?.trim() || DEFAULT_ADSENSE_CLIENT_ID;
   if (!raw) return null;
   if (raw.startsWith("ca-pub-")) return raw;
+  if (/^pub-/.test(raw)) return `ca-${raw}`;
   if (/^\d+$/.test(raw)) return `ca-pub-${raw}`;
   return null;
 }
