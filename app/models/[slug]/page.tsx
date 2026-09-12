@@ -32,9 +32,15 @@ import {
 import { PriceChart } from "@/components/models/PriceChart";
 import { UsedMarketSearch } from "@/components/models/UsedMarketSearch";
 import { ChecklistAccordion } from "@/components/models/ChecklistAccordion";
-import { RecommendationWidget } from "@/components/models/RecommendationWidget";
 import { JsonLd } from "@/components/models/JsonLd";
-import type { PmCategory } from "@/types/database";
+import { ModelFaq } from "@/components/models/ModelFaq";
+import {
+  absoluteUrl,
+  buildAnswerCapsule,
+  buildModelDescription,
+  buildModelFaqs,
+} from "@/lib/seo";
+import { SITE_URL } from "@/lib/site";
 
 export const revalidate = 3600;
 
@@ -55,9 +61,40 @@ const CATEGORY_LABEL: Record<string, string> = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const supabase = getSupabase();
-  const { data } = await supabase.from("pm_models").select("model_name").eq("slug", slug).single();
-  if (!data) return { title: "모델 없음 - PM Wiki" };
-  return { title: `${data.model_name} 중고 거래 적정가 및 상세 스펙 - PM Wiki` };
+  const { data } = await supabase
+    .from("pm_models")
+    .select(
+      "model_name, manufacturer, one_line_summary, used_price_min, used_price_max, range_official, weight, image_url, category"
+    )
+    .eq("slug", slug)
+    .single();
+  if (!data) return { title: "모델 없음 - 퍼모위키" };
+
+  const title = `${data.manufacturer} ${data.model_name} 중고가·스펙·고질병 | 퍼모위키`;
+  const description = buildModelDescription(data);
+  const url = absoluteUrl(`/models/${slug}`);
+  const images = data.image_url ? [{ url: data.image_url }] : undefined;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      type: "website",
+      locale: "ko_KR",
+      url,
+      siteName: "퍼모위키",
+      title,
+      description,
+      images,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: data.image_url ? [data.image_url] : undefined,
+    },
+  };
 }
 
 export default async function ModelPage({ params }: Props) {
@@ -66,6 +103,9 @@ export default async function ModelPage({ params }: Props) {
   const { data: model, error } = await supabase.from("pm_models").select("*").eq("slug", slug).single();
 
   if (error || !model) notFound();
+
+  const faqs = buildModelFaqs(model);
+  const answerCapsule = buildAnswerCapsule(model);
 
   const defects = (Array.isArray(model.chronic_defects) ? model.chronic_defects : []) as any[];
   const checklist = (Array.isArray(model.used_checklist) ? model.used_checklist : []) as any[];
@@ -90,7 +130,7 @@ export default async function ModelPage({ params }: Props) {
 
   return (
     <>
-      <JsonLd model={model} />
+      <JsonLd model={model} faqs={faqs} />
       <main className="min-h-screen bg-slate-50/80 pb-12 md:max-w-2xl md:mx-auto">
         <section className="border-b border-slate-100 bg-white px-4 pt-6 pb-6">
           <p className="text-sm font-medium text-muted-foreground">{model.manufacturer}</p>
@@ -106,6 +146,18 @@ export default async function ModelPage({ params }: Props) {
               <span className="rounded-md bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">단종</span>
             )}
           </div>
+          <nav aria-label="breadcrumb" className="mt-3 text-xs text-muted-foreground">
+            <ol className="flex flex-wrap items-center gap-1">
+              <li>
+                <a href={SITE_URL} className="hover:text-foreground">홈</a>
+              </li>
+              <li aria-hidden="true">/</li>
+              <li className="text-foreground">{model.model_name}</li>
+            </ol>
+          </nav>
+          <p className="mt-4 text-sm leading-relaxed text-foreground" data-speakable="true">
+            {answerCapsule}
+          </p>
           {model.one_line_summary && (
             <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50/80 p-4">
               <div className="mb-2 flex items-center gap-1.5">
@@ -241,6 +293,8 @@ export default async function ModelPage({ params }: Props) {
               <ChecklistAccordion items={checklist} />
             </section>
           )}
+
+          <ModelFaq items={faqs} />
         </div>
       </main>
     </>
