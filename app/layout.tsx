@@ -90,6 +90,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
+      <head>
+        <AdSenseScript />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -109,7 +112,6 @@ export default function RootLayout({
             gtag('config', 'G-DT72L2RRJS');
           `}
         </Script>
-        <AdSenseScript />
         <Header />
         {children}
         <SiteFooter />
