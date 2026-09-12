@@ -34,6 +34,7 @@ import { UsedMarketSearch } from "@/components/models/UsedMarketSearch";
 import { ChecklistAccordion } from "@/components/models/ChecklistAccordion";
 import { JsonLd } from "@/components/models/JsonLd";
 import { ModelFaq } from "@/components/models/ModelFaq";
+import { AdSlot } from "@/components/ads/AdSlot";
 import {
   absoluteUrl,
   buildAnswerCapsule,
@@ -200,6 +201,8 @@ export default async function ModelPage({ params }: Props) {
             <PriceChart originalPrice={model.original_price ?? 0} usedPriceMin={model.used_price_min} usedPriceMax={model.used_price_max} />
           </section>
 
+          <AdSlot slot="model-mid" className="min-h-[90px] w-full overflow-hidden rounded-xl" />
+
           <UsedMarketSearch modelName={model.model_name} />
 
           <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
@@ -293,6 +296,8 @@ export default async function ModelPage({ params }: Props) {
               <ChecklistAccordion items={checklist} />
             </section>
           )}
+
+          <AdSlot slot="model-bottom" className="min-h-[90px] w-full overflow-hidden rounded-xl" />
 
           <ModelFaq items={faqs} />
         </div>
