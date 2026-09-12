@@ -11,6 +11,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { SearchModal } from "./SearchModal";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useCompareStore, MAX_COMPARE_COUNT } from "@/store/useCompareStore";
 
 export function Header() {
@@ -41,6 +42,8 @@ export function Header() {
           </Link>
 
           <div className="flex items-center gap-1 sm:gap-2">
+            <LanguageSwitcher />
+
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
