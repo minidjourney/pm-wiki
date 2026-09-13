@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { PmModel, PmCategory } from "@/types/database";
 import { CategoryFilter } from "./CategoryFilter";
 import { ModelCard } from "./ModelCard";
+import { getLocaleFromPath } from "@/lib/i18n";
 
 const PAGE_SIZE = 24;
 
@@ -32,6 +33,8 @@ export function ModelGrid({ models }: ModelGridProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  const locale = getLocaleFromPath(pathname ?? "/");
+  const isEn = locale === "en";
 
   const selectedCategory = parseCategory(searchParams.get("category"));
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
@@ -62,7 +65,11 @@ export function ModelGrid({ models }: ModelGridProps) {
 
   return (
     <div className="space-y-6">
-      <CategoryFilter selected={selectedCategory} onSelect={setSelectedCategory} />
+      <CategoryFilter
+        selected={selectedCategory}
+        onSelect={setSelectedCategory}
+        locale={locale}
+      />
       {filteredModels.length > 0 ? (
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -73,14 +80,18 @@ export function ModelGrid({ models }: ModelGridProps) {
           {hasMore && (
             <div className="flex flex-col items-center gap-2 pt-2">
               <p className="text-sm text-muted-foreground">
-                {filteredModels.length}개 중 {visibleModels.length}개 표시 중
+                {isEn
+                  ? `Showing ${visibleModels.length} of ${filteredModels.length}`
+                  : `${filteredModels.length}개 중 ${visibleModels.length}개 표시 중`}
               </p>
               <button
                 type="button"
                 onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
                 className="min-h-11 min-w-[8rem] rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 active:scale-95"
               >
-                더 보기 ({remaining}개 남음)
+                {isEn
+                  ? `Load more (${remaining} left)`
+                  : `더 보기 (${remaining}개 남음)`}
               </button>
             </div>
           )}
@@ -88,7 +99,9 @@ export function ModelGrid({ models }: ModelGridProps) {
       ) : (
         <div className="rounded-xl border border-slate-100 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
           <p className="text-muted-foreground">
-            선택한 카테고리에 해당하는 기기가 없습니다.
+            {isEn
+              ? "No models in this category yet."
+              : "선택한 카테고리에 해당하는 기기가 없습니다."}
           </p>
         </div>
       )}
