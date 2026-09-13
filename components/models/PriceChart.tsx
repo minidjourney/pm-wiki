@@ -39,13 +39,16 @@ interface PriceChartProps {
   originalPrice: number;
   usedPriceMin: number | null;
   usedPriceMax: number | null;
+  locale?: "ko" | "en";
 }
 
 export function PriceChart({
   originalPrice,
   usedPriceMin,
   usedPriceMax,
+  locale = "ko",
 }: PriceChartProps) {
+  const isEn = locale === "en";
   const hasUsed =
     usedPriceMin != null &&
     usedPriceMax != null &&
@@ -54,17 +57,21 @@ export function PriceChart({
 
   const chartData: ChartDataItem[] = [
     {
-      category: "신품가",
+      category: isEn ? "MSRP" : "신품가",
       price: originalPrice,
-      label: `${(originalPrice / 10000).toFixed(0)}만 원`,
+      label: isEn
+        ? `₩${Math.round(originalPrice).toLocaleString("en-US")}`
+        : `${(originalPrice / 10000).toFixed(0)}만 원`,
       fill: "#f97316",
     },
     ...(hasUsed
       ? [
           {
-            category: "중고 적정가",
+            category: isEn ? "Used fair price" : "중고 적정가",
             price: usedPriceMax,
-            label: `${(usedPriceMin! / 10000).toFixed(0)}만 ~ ${(usedPriceMax / 10000).toFixed(0)}만 원`,
+            label: isEn
+              ? `₩${Math.round(usedPriceMin!).toLocaleString("en-US")}–₩${Math.round(usedPriceMax).toLocaleString("en-US")}`
+              : `${(usedPriceMin! / 10000).toFixed(0)}만 ~ ${(usedPriceMax / 10000).toFixed(0)}만 원`,
             fill: "#0f766e",
           },
         ]
