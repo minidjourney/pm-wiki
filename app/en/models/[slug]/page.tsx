@@ -1,1 +1,1 @@
-PLACEHOLDER_LOAD_FROM_FILE
+@/workspace/pm-wiki/app/en/models/[slug]/page.tsx
