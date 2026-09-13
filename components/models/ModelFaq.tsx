@@ -1,6 +1,12 @@
 import type { FaqItem } from "@/lib/seo";
 
-export function ModelFaq({ items }: { items: FaqItem[] }) {
+export function ModelFaq({
+  items,
+  title = "자주 묻는 질문",
+}: {
+  items: FaqItem[];
+  title?: string;
+}) {
   if (!items.length) return null;
 
   return (
@@ -9,7 +15,7 @@ export function ModelFaq({ items }: { items: FaqItem[] }) {
       aria-labelledby="model-faq-heading"
     >
       <h2 id="model-faq-heading" className="mb-3 text-base font-semibold text-foreground">
-        자주 묻는 질문
+        {title}
       </h2>
       <div className="space-y-2">
         {items.map((item) => (
