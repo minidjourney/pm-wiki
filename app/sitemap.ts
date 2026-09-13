@@ -19,6 +19,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1.0,
     },
     {
+      url: `${baseUrl}/en`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.95,
+    },
+    {
       url: `${baseUrl}/blog`,
       lastModified: new Date(),
       changeFrequency: "daily",
@@ -50,12 +56,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       return staticUrls;
     }
 
-    const modelUrls = (models ?? []).map((model) => ({
-      url: `${baseUrl}/models/${model.slug}`,
-      lastModified: new Date(),
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
-    }));
+    const modelUrls = (models ?? []).flatMap((model) => [
+      {
+        url: `${baseUrl}/models/${model.slug}`,
+        lastModified: new Date(),
+        changeFrequency: "weekly" as const,
+        priority: 0.8,
+      },
+      {
+        url: `${baseUrl}/en/models/${model.slug}`,
+        lastModified: new Date(),
+        changeFrequency: "weekly" as const,
+        priority: 0.75,
+      },
+    ]);
 
     return [...staticUrls, ...modelUrls];
   } catch (err) {
