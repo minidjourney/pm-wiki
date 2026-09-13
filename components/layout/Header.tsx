@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Menu, Search, Scale } from "lucide-react";
 import {
   Sheet,
@@ -59,7 +59,9 @@ export function Header() {
           </Link>
 
           <div className="flex items-center gap-0.5 sm:gap-2">
-            <LanguageSwitcher />
+            <Suspense fallback={<div className="inline-flex h-11 min-w-[4.5rem] rounded-lg border border-slate-200 dark:border-slate-700" aria-hidden />}>
+              <LanguageSwitcher />
+            </Suspense>
 
             <button
               type="button"
@@ -139,7 +141,9 @@ export function Header() {
                   </Link>
                 </nav>
                 <div className="mt-8 border-t border-slate-100 pt-4 dark:border-slate-800">
-                  <LanguageSwitcher variant="menu" />
+                  <Suspense fallback={null}>
+                    <LanguageSwitcher variant="menu" />
+                  </Suspense>
                 </div>
               </SheetContent>
             </Sheet>
