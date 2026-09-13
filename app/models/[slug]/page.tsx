@@ -42,6 +42,7 @@ import {
   buildModelFaqs,
 } from "@/lib/seo";
 import { SITE_URL } from "@/lib/site";
+import { displayModelName } from "@/lib/locale";
 
 export const revalidate = 3600;
 
@@ -107,6 +108,7 @@ export default async function ModelPage({ params }: Props) {
 
   const faqs = buildModelFaqs(model);
   const answerCapsule = buildAnswerCapsule(model);
+  const displayName = displayModelName(model, "ko");
 
   const defects = (Array.isArray(model.chronic_defects) ? model.chronic_defects : []) as any[];
   const checklist = (Array.isArray(model.used_checklist) ? model.used_checklist : []) as any[];
@@ -133,10 +135,10 @@ export default async function ModelPage({ params }: Props) {
     <>
       <JsonLd model={model} faqs={faqs} />
       <main className="min-h-screen bg-slate-50/80 pb-12 md:max-w-2xl md:mx-auto">
-        <section className="border-b border-slate-100 bg-white px-4 pt-6 pb-6">
+        <section className="border-b border-slate-100 bg-white px-4 pt-5 pb-5">
           <p className="text-sm font-medium text-muted-foreground">{model.manufacturer}</p>
-          <h1 className="mt-0.5 text-2xl font-bold tracking-tight text-foreground md:text-3xl">
-            {model.model_name}
+          <h1 className="mt-0.5 text-[1.65rem] font-bold leading-tight tracking-tight text-foreground md:text-3xl">
+            {displayName}
             {model.sub_model && <span className="ml-1.5 text-xl font-normal text-muted-foreground">{model.sub_model}</span>}
           </h1>
           <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -153,7 +155,7 @@ export default async function ModelPage({ params }: Props) {
                 <a href={SITE_URL} className="hover:text-foreground">홈</a>
               </li>
               <li aria-hidden="true">/</li>
-              <li className="text-foreground">{model.model_name}</li>
+              <li className="text-foreground">{displayName}</li>
             </ol>
           </nav>
           <p className="mt-4 text-sm leading-relaxed text-foreground" data-speakable="true">
@@ -181,7 +183,7 @@ export default async function ModelPage({ params }: Props) {
               <div className="relative z-10 w-full max-w-[280px] drop-shadow-2xl sm:max-w-[340px]">
                 <Image
                   src={model.image_url}
-                  alt={model.model_name}
+                  alt={displayName}
                   width={800}
                   height={800}
                   className="h-auto w-full object-contain"

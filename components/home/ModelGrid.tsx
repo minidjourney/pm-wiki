@@ -61,11 +61,11 @@ export function ModelGrid({ models }: ModelGridProps) {
   const remaining = filteredModels.length - visibleCount;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6">
       <CategoryFilter selected={selectedCategory} onSelect={setSelectedCategory} />
       {filteredModels.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
             {visibleModels.map((model) => (
               <ModelCard key={model.id} model={model} />
             ))}

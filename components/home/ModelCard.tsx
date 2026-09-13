@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { PmModel } from "@/types/database";
 import { Gauge, Weight, Zap, GaugeCircle, Scale } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { displayModelName, getLocaleFromPath } from "@/lib/locale";
 import { Badge } from "@/components/ui/badge";
 import { calculateValueScore } from "@/lib/pm-score";
 import { useCompareStore, MAX_COMPARE_COUNT } from "@/store/useCompareStore";
@@ -26,6 +28,8 @@ interface ModelCardProps {
 }
 
 export function ModelCard({ model }: ModelCardProps) {
+  const locale = getLocaleFromPath(usePathname() ?? "/");
+  const displayName = displayModelName(model, locale);
   const add = useCompareStore((s) => s.add);
   const remove = useCompareStore((s) => s.remove);
   const has = useCompareStore((s) => s.has);
@@ -51,7 +55,7 @@ export function ModelCard({ model }: ModelCardProps) {
       if (count >= MAX_COMPARE_COUNT) return;
       add({
         slug: model.slug,
-        model_name: model.model_name,
+        model_name: displayName,
         manufacturer: model.manufacturer,
       });
     }
@@ -60,7 +64,7 @@ export function ModelCard({ model }: ModelCardProps) {
   return (
     <article
       className={cn(
-        "group relative flex flex-col rounded-xl border border-slate-100 bg-white p-4 shadow-sm",
+        "group relative flex flex-col rounded-xl border border-slate-100 bg-white p-3.5 shadow-sm sm:p-4",
         "transition-all duration-200 hover:-translate-y-1 hover:shadow-md",
         "dark:border-slate-800 dark:bg-slate-900"
       )}
@@ -70,36 +74,36 @@ export function ModelCard({ model }: ModelCardProps) {
         href={`/models/${model.slug}`}
         prefetch={true}
         className="absolute inset-0 z-0 rounded-xl"
-        aria-label={`${model.manufacturer} ${model.model_name} 상세 보기`}
+        aria-label={`${model.manufacturer} ${displayName} 상세 보기`}
       />
 
       {/* 상단: 카테고리 뱃지 + 비교함 담기 + 가성비 + 단종 */}
-      <div className="relative z-10 mb-3 flex items-start justify-between gap-2">
-        <span className="pointer-events-none rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-muted-foreground dark:bg-slate-800">
+      <div className="relative z-10 mb-2.5 flex items-start justify-between gap-2">
+        <span className="pointer-events-none rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-muted-foreground dark:bg-slate-800">
           {categoryLabel}
         </span>
-        <div className="flex flex-wrap items-center justify-end gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-1.5">
           <button
             type="button"
             onClick={handleCompareClick}
             title={inCompare ? "비교함에서 제거" : "VS 비교함 담기"}
             aria-pressed={inCompare}
             className={cn(
-              "relative z-10 flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-md px-3 text-xs font-medium transition-colors",
+              "relative z-10 inline-flex min-h-11 items-center justify-center gap-1 rounded-md px-2.5 text-xs font-medium transition-colors",
               inCompare
                 ? "bg-primary text-primary-foreground"
                 : "bg-slate-100 text-muted-foreground hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700"
             )}
           >
             <Scale className="size-3.5" />
-            {inCompare ? "담김" : "VS 담기"}
+            <span>{inCompare ? "담김" : "VS"}</span>
           </button>
           {valueScore != null && (
             <Badge
               variant="default"
-              className="pointer-events-none bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-sm"
+              className="pointer-events-none bg-gradient-to-r from-amber-500 to-orange-500 px-1.5 text-[11px] text-white shadow-sm"
             >
-              ⚡가성비 {valueScore}점
+              가성비 {valueScore}
             </Badge>
           )}
           {model.is_discontinued && (
@@ -111,12 +115,12 @@ export function ModelCard({ model }: ModelCardProps) {
       </div>
 
       {/* 제목부 */}
-      <div className="pointer-events-none relative z-10 mb-3">
-        <p className="text-xs font-medium text-muted-foreground">
+      <div className="pointer-events-none relative z-10 mb-2.5">
+        <p className="text-[11px] font-medium tracking-wide text-muted-foreground">
           {model.manufacturer}
         </p>
-        <h3 className="mt-0.5 line-clamp-2 text-base font-bold leading-snug text-foreground group-hover:text-primary">
-          {model.model_name}
+        <h3 className="mt-0.5 line-clamp-2 text-[15px] font-bold leading-snug text-foreground group-hover:text-primary sm:text-base">
+          {displayName}
           {model.sub_model && (
             <span className="ml-1 text-sm font-normal text-muted-foreground">
               {model.sub_model}
@@ -127,20 +131,20 @@ export function ModelCard({ model }: ModelCardProps) {
 
       {/* 가격부: 신품가 */}
       {hasPrice ? (
-        <div className="pointer-events-none relative z-10 mb-3 rounded-lg bg-blue-50 px-3 py-2 dark:bg-blue-950/30">
-          <p className="text-xs text-muted-foreground">신품가</p>
-          <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
+        <div className="pointer-events-none relative z-10 mb-2.5 rounded-lg bg-blue-50 px-3 py-1.5 dark:bg-blue-950/30 sm:py-2">
+          <p className="text-[11px] text-muted-foreground">신품가</p>
+          <p className="text-base font-bold text-blue-600 sm:text-lg dark:text-blue-400">
             {formatPrice(model.original_price)}
           </p>
         </div>
       ) : (
-        <div className="pointer-events-none relative z-10 mb-3 rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-800">
+        <div className="pointer-events-none relative z-10 mb-2.5 rounded-lg bg-slate-50 px-3 py-1.5 dark:bg-slate-800 sm:py-2">
           <p className="text-xs text-muted-foreground">가격 정보 없음</p>
         </div>
       )}
 
       {/* 스펙 요약 */}
-      <div className="pointer-events-none relative z-10 mt-auto flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
+      <div className="pointer-events-none relative z-10 mt-auto flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted-foreground">
         {hasRange && (
           <div className="flex items-center gap-1.5">
             <Gauge className="size-3.5 shrink-0" />

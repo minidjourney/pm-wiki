@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Search, Trophy, Bike, Zap, Circle, CircleDot } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -15,6 +15,7 @@ import {
 import type { PmModel } from "@/types/database";
 import type { ChronicDefect } from "@/types/database";
 import { cn } from "@/lib/utils";
+import { displayModelName, getLocaleFromPath } from "@/lib/locale";
 
 interface SearchModalProps {
   open: boolean;
@@ -48,6 +49,7 @@ function getSearchableText(model: PmModel): string {
   const defectText = defects.map((d) => d.issue).join(" ");
   return [
     model.model_name,
+    model.model_name_en ?? "",
     model.manufacturer,
     model.sub_model ?? "",
     defectText,
@@ -58,6 +60,7 @@ function getSearchableText(model: PmModel): string {
 
 export function SearchModal({ open, onOpenChange }: SearchModalProps) {
   const router = useRouter();
+  const locale = getLocaleFromPath(usePathname() ?? "/");
   const [models, setModels] = useState<PmModel[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -112,14 +115,14 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
               key={m.id}
               value={getSearchableText(m)}
               onSelect={() => handleSelect(m.slug)}
-              className="cursor-pointer py-3"
+              className="min-h-11 cursor-pointer py-3"
             >
               <div className="flex w-full items-center justify-between gap-3">
                 <div className="flex min-w-0 flex-1 items-center gap-2">
                   {getCategoryIcon(m.category ?? "")}
                   <div className="flex min-w-0 flex-col">
                     <span className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">
-                      {m.model_name}
+                      {displayModelName(m, locale)}
                       {m.sub_model ? ` ${m.sub_model}` : ""}
                     </span>
                     <span className="text-[10px] text-slate-500 dark:text-slate-400">

@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { SiteFooter } from "@/components/layout/SiteFooter";
+import { CompareBar } from "@/components/layout/CompareBar";
 import { AdSenseScript } from "@/components/ads/AdSenseScript";
 import { SITE_URL } from "@/lib/site";
 
@@ -112,6 +113,7 @@ export default function RootLayout({
         </Script>
         <Header />
         {children}
+        <CompareBar />
         <SiteFooter />
       </body>
     </html>

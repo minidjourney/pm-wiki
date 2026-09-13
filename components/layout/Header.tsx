@@ -30,25 +30,42 @@ export function Header() {
     return () => document.removeEventListener("keydown", down);
   }, []);
 
+  const compareIcon = (
+    <>
+      <Scale className="size-5" />
+      {compareCount > 0 ? (
+        <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-600 px-1 text-[10px] font-bold leading-none text-white">
+          {compareCount}
+        </span>
+      ) : null}
+      <span className="sr-only">
+        모델 비교 ({compareCount}/{MAX_COMPARE_COUNT})
+      </span>
+    </>
+  );
+
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/80">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+      <header
+        className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/80"
+        style={{ paddingTop: "env(safe-area-inset-top)" }}
+      >
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-3 py-2 sm:px-4 sm:py-3">
           <Link
             href="/"
-            className="min-h-11 inline-flex items-center text-xl font-bold text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+            className="inline-flex min-h-11 items-center text-lg font-bold text-blue-600 transition-colors hover:text-blue-700 sm:text-xl dark:text-blue-400 dark:hover:text-blue-300"
           >
             퍼모위키
           </Link>
 
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center gap-0.5 sm:gap-2">
             <LanguageSwitcher />
 
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
               className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800"
-              aria-label="검색 (⌘K)"
+              aria-label="검색"
             >
               <Search className="size-5" />
             </button>
@@ -56,25 +73,17 @@ export function Header() {
             {compareCount >= 2 ? (
               <Link
                 href="/compare"
-                className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800"
+                className="relative inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800"
                 aria-label="모델 비교"
               >
-                <Scale className="size-5" />
-                <span className="hidden sm:inline">
-                  모델 비교 ({compareCount}/{MAX_COMPARE_COUNT})
-                </span>
-                <span className="sm:hidden">비교 ({compareCount})</span>
+                {compareIcon}
               </Link>
             ) : (
               <span
-                className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-medium text-muted-foreground"
+                className="relative inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-muted-foreground"
                 title="2개 이상 담으면 비교하기가 활성화됩니다"
               >
-                <Scale className="size-5" />
-                <span className="hidden sm:inline">
-                  모델 비교 ({compareCount}/{MAX_COMPARE_COUNT})
-                </span>
-                <span className="sm:hidden">비교 ({compareCount})</span>
+                {compareIcon}
               </span>
             )}
 
@@ -129,6 +138,9 @@ export function Header() {
                     전동 외발휠
                   </Link>
                 </nav>
+                <div className="mt-8 border-t border-slate-100 pt-4 dark:border-slate-800">
+                  <LanguageSwitcher variant="menu" />
+                </div>
               </SheetContent>
             </Sheet>
           </div>

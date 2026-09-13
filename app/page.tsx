@@ -52,16 +52,16 @@ export default async function Home() {
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
       {/* Hero 배너 */}
-      <section className="relative overflow-hidden border-b border-slate-200 bg-gradient-to-br from-blue-50 via-slate-50 to-blue-50/50 px-4 py-16 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900 md:py-24">
+      <section className="relative overflow-hidden border-b border-slate-200 bg-gradient-to-br from-blue-50 via-slate-50 to-blue-50/50 px-4 py-8 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900 sm:py-12 md:py-20">
         <div className="mx-auto max-w-6xl">
-          <h1 className="mb-4 text-3xl font-bold tracking-tight text-foreground md:text-4xl lg:text-5xl">
+          <h1 className="mb-3 text-[1.65rem] font-bold leading-tight tracking-tight text-foreground sm:text-3xl md:mb-4 md:text-4xl lg:text-5xl">
             내게 딱 맞는 퍼스널 모빌리티 찾기,
             <br />
             <span className="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent dark:from-blue-400 dark:to-blue-600">
               퍼모위키
             </span>
           </h1>
-          <p className="text-lg text-muted-foreground md:text-xl">
+          <p className="text-base text-muted-foreground md:text-xl">
             스펙 비교부터 중고 적정가, 고질병까지 한 번에 확인하세요.
           </p>
         </div>
@@ -70,11 +70,12 @@ export default async function Home() {
         </div>
       </section>
 
-      <div className="mx-auto max-w-6xl px-4 pt-6">
-        <AdSlot slot="home-mid" className="min-h-[90px] w-full overflow-hidden rounded-xl" />
-      </div>
+      <AdSlot
+        slot="home-mid"
+        className="mx-auto mt-6 max-w-6xl min-h-[90px] overflow-hidden rounded-xl px-4"
+      />
 
-      <section className="mx-auto max-w-6xl px-4 py-12">
+      <section className="mx-auto max-w-6xl px-4 py-8 sm:py-12">
         {error ? (
           <div className="rounded-xl border border-red-100 bg-red-50 p-8 text-center dark:border-red-900/30 dark:bg-red-950/20">
             <p className="text-red-800 dark:text-red-200">

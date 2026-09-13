@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { displayModelName, getLocaleFromPath } from "@/lib/locale";
+import { usePathname } from "next/navigation";
 
 function formatPrice(value: number | null) {
   if (value == null || value === 0) return "—";
@@ -24,6 +26,7 @@ function formatPrice(value: number | null) {
 }
 
 export default function ComparePage() {
+  const locale = getLocaleFromPath(usePathname() ?? "/");
   const items = useCompareStore((s) => s.items);
   const slugs = items.map((i) => i.slug);
   const clear = useCompareStore((s) => s.clear);
@@ -91,7 +94,7 @@ export default function ComparePage() {
   }
 
   const rows: Array<{ label: string; key: string; get: (m: PmModel) => string | number }> = [
-    { label: "모델명", key: "name", get: (m) => `${m.manufacturer} ${m.model_name}` },
+    { label: "모델명", key: "name", get: (m) => `${m.manufacturer} ${displayModelName(m, locale)}` },
     { label: "신품가", key: "op", get: (m) => formatPrice(m.original_price ?? null) },
     { label: "중고 적정 시세", key: "used_range", get: formatUsedRange },
     { label: "배터리 용량 (Wh)", key: "cap", get: (m) => m.battery_capacity ?? "—" },
@@ -109,8 +112,8 @@ export default function ComparePage() {
   ];
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+    <main className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm" asChild>
             <Link href="/">
@@ -131,14 +134,16 @@ export default function ComparePage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[140px] font-semibold">스펙</TableHead>
+              <TableHead className="sticky left-0 z-10 w-[112px] bg-white font-semibold dark:bg-slate-900">
+                스펙
+              </TableHead>
               {models.map((m) => (
-                <TableHead key={m.id} className="min-w-[160px] font-semibold">
+                <TableHead key={m.id} className="min-w-[148px] font-semibold">
                   <Link
                     href={`/models/${m.slug}`}
                     className="text-primary hover:underline"
                   >
-                    {m.manufacturer} {m.model_name}
+                    {m.manufacturer} {displayModelName(m, locale)}
                   </Link>
                 </TableHead>
               ))}
@@ -147,7 +152,7 @@ export default function ComparePage() {
           <TableBody>
             {rows.map((row) => (
               <TableRow key={row.key}>
-                <TableCell className="font-medium text-muted-foreground">
+                <TableCell className="sticky left-0 z-10 bg-white font-medium text-muted-foreground dark:bg-slate-900">
                   {row.label}
                 </TableCell>
                 {models.map((m) => (

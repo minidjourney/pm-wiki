@@ -10,11 +10,11 @@ export const metadata: Metadata = {
 export default function JapaneseComingSoonPage() {
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <section className="mx-auto flex max-w-6xl flex-col items-center justify-center px-4 py-24 text-center">
+      <section className="mx-auto flex max-w-6xl flex-col items-center justify-center px-5 py-16 text-center sm:py-24">
         <p className="mb-3 text-sm font-medium uppercase tracking-wide text-blue-600 dark:text-blue-400">
           日本語
         </p>
-        <h1 className="mb-4 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+        <h1 className="mb-4 text-2xl font-bold tracking-tight text-foreground sm:text-3xl md:text-4xl">
           준비 중
         </h1>
         <p className="mb-2 max-w-md text-lg text-muted-foreground">
