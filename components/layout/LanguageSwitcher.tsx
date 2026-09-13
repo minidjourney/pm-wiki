@@ -1,39 +1,29 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Globe } from "lucide-react";
+import {
+  getLocaleFromPath,
+  switchLocalePath,
+  withSearchParams,
+  type Locale,
+} from "@/lib/i18n";
 
 const LOCALES = [
-  { code: "ko", label: "한국어", shortLabel: "한", href: "/" },
-  { code: "en", label: "English", shortLabel: "EN", href: "/en" },
-  { code: "ja", label: "日本語", shortLabel: "日", href: "/ja" },
-] as const;
-
-type LocaleCode = (typeof LOCALES)[number]["code"];
-
-function getLocaleFromPath(pathname: string): LocaleCode {
-  if (pathname === "/en" || pathname.startsWith("/en/")) return "en";
-  if (pathname === "/ja" || pathname.startsWith("/ja/")) return "ja";
-  return "ko";
-}
-
-function hrefForLocale(code: LocaleCode, pathname: string): string {
-  if (code === "ko") {
-    // Keep current Korean path; leave en/ja stubs for home
-    if (getLocaleFromPath(pathname) === "ko") return pathname || "/";
-    return "/";
-  }
-  return LOCALES.find((l) => l.code === code)!.href;
-}
+  { code: "ko" as const, label: "한국어", shortLabel: "한" },
+  { code: "en" as const, label: "English", shortLabel: "EN" },
+  { code: "ja" as const, label: "日本語", shortLabel: "日" },
+];
 
 export function LanguageSwitcher() {
   const pathname = usePathname() ?? "/";
+  const searchParams = useSearchParams();
   const current = getLocaleFromPath(pathname);
 
   return (
     <nav
-      aria-label="언어 선택"
+      aria-label="Language"
       className="inline-flex items-center gap-0.5 rounded-lg border border-slate-200 p-0.5 dark:border-slate-700"
     >
       <span className="hidden sm:inline-flex min-h-11 min-w-9 items-center justify-center text-muted-foreground" aria-hidden>
@@ -41,17 +31,18 @@ export function LanguageSwitcher() {
       </span>
       {LOCALES.map((locale) => {
         const selected = current === locale.code;
-        const href = hrefForLocale(locale.code, pathname);
+        const base = switchLocalePath(pathname, locale.code as Locale);
+        const href = withSearchParams(base, searchParams);
 
         return (
           <Link
             key={locale.code}
             href={href}
-            hrefLang={locale.code === "ko" ? "ko" : locale.code}
-            lang={locale.code === "ko" ? "ko" : locale.code}
+            hrefLang={locale.code}
+            lang={locale.code}
             aria-current={selected ? "true" : undefined}
-            aria-label={`${locale.label}${selected ? " (선택됨)" : ""}`}
-            title={locale.code === "ko" ? locale.label : `${locale.label} — 준비 중`}
+            aria-label={`${locale.label}${selected ? " (current)" : ""}`}
+            title={locale.code === "ja" ? `${locale.label} — Coming soon` : locale.label}
             className={
               selected
                 ? "inline-flex min-h-11 min-w-11 items-center justify-center rounded-md bg-slate-100 px-2.5 text-xs font-semibold text-foreground sm:px-3 sm:text-sm dark:bg-slate-800"
