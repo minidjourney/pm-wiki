@@ -26,7 +26,7 @@ export function ChecklistAccordion({ items }: { items: ChecklistItem[] }) {
 
         return (
           <AccordionItem key={index} value={`item-${index}`} className="border-b-slate-100">
-            <AccordionTrigger className="text-sm font-medium hover:no-underline hover:text-blue-600 text-left">
+            <AccordionTrigger className="min-h-11 py-3 text-sm font-medium hover:no-underline hover:text-blue-600 text-left">
               <div className="flex items-center gap-2">
                 <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[10px] font-bold text-slate-500">
                   {index + 1}

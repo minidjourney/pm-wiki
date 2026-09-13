@@ -3,6 +3,8 @@
 import Link from "next/link";
 import type { PmModelSummary } from "@/types/database";
 import { ChevronRight } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { displayModelName, getLocaleFromPath } from "@/lib/locale";
 
 function formatPrice(value: number | null) {
   if (value == null) return "—";
@@ -21,6 +23,7 @@ export function RecommendationWidget({
   items,
   currentSlug,
 }: RecommendationWidgetProps) {
+  const locale = getLocaleFromPath(usePathname() ?? "/");
   const list = items.filter((m) => m.slug !== currentSlug).slice(0, 10);
   if (list.length === 0) return null;
 
@@ -38,8 +41,8 @@ export function RecommendationWidget({
             className="flex w-[160px] shrink-0 flex-col gap-1 rounded-xl border border-slate-100 bg-slate-50/80 p-3 transition-colors hover:border-slate-200 hover:bg-slate-100/80"
           >
             <span className="text-xs text-muted-foreground">{m.manufacturer}</span>
-            <span className="font-semibold text-foreground line-clamp-2">
-              {m.model_name}
+            <span className="line-clamp-2 font-semibold text-foreground">
+              {displayModelName(m, locale)}
             </span>
             <div className="mt-1 flex flex-wrap gap-x-2 gap-y-0 text-xs text-muted-foreground">
               {m.used_price_a != null && (

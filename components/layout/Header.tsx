@@ -114,7 +114,7 @@ export function Header() {
                     onClick={() => setIsOpen(false)}
                     className="flex min-h-11 items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
                   >
-                    전동킵보드
+                    전동킥보드
                   </Link>
                   <Link
                     href="/?category=ebike"
