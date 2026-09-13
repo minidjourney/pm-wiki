@@ -2,24 +2,35 @@
 
 import type { PmCategory } from "@/types/database";
 import { cn } from "@/lib/utils";
-
-const CATEGORIES: Array<{ value: "all" | PmCategory; label: string }> = [
-  { value: "all", label: "전체" },
-  { value: "kickboard", label: "전동킥보드" },
-  { value: "ebike", label: "전기자전거" },
-  { value: "scooter", label: "전동스쿠터" },
-  { value: "unicycle", label: "전동 외발휠" },
-];
+import { CATEGORY_LABELS, type Locale } from "@/lib/i18n";
 
 interface CategoryFilterProps {
   selected: "all" | PmCategory;
   onSelect: (category: "all" | PmCategory) => void;
+  locale?: Locale;
 }
 
-export function CategoryFilter({ selected, onSelect }: CategoryFilterProps) {
+export function CategoryFilter({
+  selected,
+  onSelect,
+  locale = "ko",
+}: CategoryFilterProps) {
+  const labels = CATEGORY_LABELS[locale] ?? CATEGORY_LABELS.ko;
+  const categories: Array<{ value: "all" | PmCategory; label: string }> = [
+    { value: "all", label: labels.all },
+    { value: "kickboard", label: labels.kickboard },
+    { value: "ebike", label: labels.ebike },
+    { value: "scooter", label: labels.scooter },
+    { value: "unicycle", label: labels.unicycle },
+  ];
+
   return (
-    <div className="flex flex-wrap gap-2" role="tablist" aria-label="카테고리 필터">
-      {CATEGORIES.map((cat) => (
+    <div
+      className="flex flex-wrap gap-2"
+      role="tablist"
+      aria-label={locale === "en" ? "Category filter" : "카테고리 필터"}
+    >
+      {categories.map((cat) => (
         <button
           key={cat.value}
           type="button"
