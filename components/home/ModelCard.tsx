@@ -5,17 +5,15 @@ import { usePathname } from "next/navigation";
 import type { PmModel } from "@/types/database";
 import { Gauge, Weight, Zap, GaugeCircle, Scale } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { displayModelName, getLocaleFromPath } from "@/lib/locale";
+import {
+  CATEGORY_LABELS,
+  displayModelName,
+  getLocaleFromPath,
+  localePath,
+} from "@/lib/locale";
 import { Badge } from "@/components/ui/badge";
 import { calculateValueScore } from "@/lib/pm-score";
 import { useCompareStore, MAX_COMPARE_COUNT } from "@/store/useCompareStore";
-
-const CATEGORY_LABEL: Record<string, string> = {
-  kickboard: "전동킥보드",
-  ebike: "전기자전거",
-  scooter: "전동스쿠터",
-  unicycle: "전동 외발휠",
-};
 
 function formatPrice(value: number | null) {
   if (value == null || value === 0) return "가격 정보 없음";
@@ -30,12 +28,16 @@ interface ModelCardProps {
 export function ModelCard({ model }: ModelCardProps) {
   const locale = getLocaleFromPath(usePathname() ?? "/");
   const displayName = displayModelName(model, locale);
+  const isEn = locale === "en";
   const add = useCompareStore((s) => s.add);
   const remove = useCompareStore((s) => s.remove);
   const has = useCompareStore((s) => s.has);
   const count = useCompareStore((s) => s.items.length);
 
-  const categoryLabel = CATEGORY_LABEL[model.category] ?? model.category;
+  const categoryLabel =
+    (CATEGORY_LABELS[locale] ?? CATEGORY_LABELS.ko)[model.category] ??
+    model.category;
+  const modelHref = localePath(`/models/${model.slug}`, locale);
   const hasPrice = model.original_price != null && model.original_price > 0;
   const hasRange = model.range_real_80kg != null && model.range_real_80kg > 0;
   const hasWeight = model.weight != null && model.weight > 0;
@@ -71,10 +73,10 @@ export function ModelCard({ model }: ModelCardProps) {
     >
       {/* 카드 링크 (비교 버튼과 중첩되지 않도록 별도 레이어) */}
       <Link
-        href={`/models/${model.slug}`}
+        href={modelHref}
         prefetch={true}
         className="absolute inset-0 z-0 rounded-xl"
-        aria-label={`${model.manufacturer} ${displayName} 상세 보기`}
+        aria-label={isEn ? `${model.manufacturer} ${displayName} details` : `${model.manufacturer} ${displayName} 상세 보기`}
       />
 
       {/* 상단: 카테고리 뱃지 + 비교함 담기 + 가성비 + 단종 */}
@@ -108,7 +110,7 @@ export function ModelCard({ model }: ModelCardProps) {
           )}
           {model.is_discontinued && (
             <span className="pointer-events-none rounded-md bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900/50 dark:text-red-200">
-              단종
+              {isEn ? "Discontinued" : "단종"}
             </span>
           )}
         </div>
@@ -132,7 +134,7 @@ export function ModelCard({ model }: ModelCardProps) {
       {/* 가격부: 신품가 */}
       {hasPrice ? (
         <div className="pointer-events-none relative z-10 mb-2.5 rounded-lg bg-blue-50 px-3 py-1.5 dark:bg-blue-950/30 sm:py-2">
-          <p className="text-[11px] text-muted-foreground">신품가</p>
+          <p className="text-[11px] text-muted-foreground">{isEn ? "MSRP" : "신품가"}</p>
           <p className="text-base font-bold text-blue-600 sm:text-lg dark:text-blue-400">
             {formatPrice(model.original_price)}
           </p>
