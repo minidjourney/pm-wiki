@@ -119,3 +119,90 @@ export function buildAnswerCapsule(model: any): string {
   if (model.one_line_summary) text = `${text} ${model.one_line_summary}`;
   return text;
 }
+
+/** English SEO description — structural EN chrome; reuses KO summary when present. */
+export function buildModelDescriptionEn(model: {
+  manufacturer?: string | null;
+  model_name?: string | null;
+  model_name_en?: string | null;
+  one_line_summary?: string | null;
+  used_price_min?: number | null;
+  used_price_max?: number | null;
+  range_official?: number | null;
+  weight?: number | null;
+}): string {
+  const display =
+    (model.model_name_en?.trim() || model.model_name || "").trim();
+  const name = `${model.manufacturer ?? ""} ${display}`.trim();
+  const parts: string[] = [`${name} used price, specs, and known issues.`];
+  const min = formatKrw(model.used_price_min);
+  const max = formatKrw(model.used_price_max);
+  if (min && max) parts.push(`Used market ~${min}–${max}.`);
+  if (model.range_official) parts.push(`Official range ${model.range_official}km.`);
+  if (model.weight) parts.push(`Weight ${model.weight}kg.`);
+  if (model.one_line_summary) parts.push(String(model.one_line_summary));
+  return parts.join(" ").slice(0, 160);
+}
+
+export function buildAnswerCapsuleEn(model: any, displayName: string): string {
+  const name = `${model.manufacturer ?? ""} ${displayName}`.trim();
+  const min = formatKrw(model.used_price_min);
+  const max = formatKrw(model.used_price_max);
+  const chunks: string[] = [`${name} on Pumo Wiki:`];
+  if (min && max) chunks.push(`used price ~${min}–${max}`);
+  if (model.range_official) chunks.push(`official range ${model.range_official}km`);
+  if (model.weight) chunks.push(`weight ${model.weight}kg`);
+  let text = `${chunks.join(", ")}.`;
+  if (model.one_line_summary) text = `${text} ${model.one_line_summary}`;
+  return text;
+}
+
+export function buildModelFaqsEn(model: any, displayName: string): FaqItem[] {
+  const faqs: FaqItem[] = [];
+  const name = displayName || "this model";
+  const min = formatKrw(model.used_price_min);
+  const max = formatKrw(model.used_price_max);
+  const orig = formatKrw(model.original_price);
+
+  if (min && max) {
+    faqs.push({
+      question: `What is the used price range for ${name}?`,
+      answer: `The Korean used-market range for ${name} is about ${min}–${max}.${orig ? ` New price is about ${orig}.` : ""} Condition, battery health, and accident history affect price — check voltage and wear items before buying.`,
+    });
+  }
+
+  const defects = Array.isArray(model.chronic_defects) ? model.chronic_defects : [];
+  const defectJoined = defects.map(defectText).filter(Boolean).slice(0, 5).join("; ");
+  if (defectJoined) {
+    faqs.push({
+      question: `What are known issues with ${name}?`,
+      answer: defectJoined,
+    });
+  }
+
+  const checklist = Array.isArray(model.used_checklist) ? model.used_checklist : [];
+  const checkJoined = checklist.map(checklistText).filter(Boolean).slice(0, 4).join(" ");
+  if (checkJoined) {
+    faqs.push({
+      question: `What should I check when buying a used ${name}?`,
+      answer: checkJoined,
+    });
+  }
+
+  const bits: string[] = [];
+  if (model.range_official) bits.push(`official range ${model.range_official}km`);
+  if (model.battery_wh) bits.push(`battery ${model.battery_wh}Wh`);
+  if (model.nominal_voltage && model.battery_capacity) {
+    bits.push(`${model.nominal_voltage}V ${model.battery_capacity}Ah`);
+  }
+  if (model.weight) bits.push(`weight ${model.weight}kg`);
+  if (model.max_speed) bits.push(`top speed ${model.max_speed}km/h`);
+  if (bits.length) {
+    faqs.push({
+      question: `What are the key specs of ${name}?`,
+      answer: `Key specs: ${bits.join(", ")}.`,
+    });
+  }
+
+  return faqs.slice(0, 6);
+}
