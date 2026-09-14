@@ -209,3 +209,40 @@ export function pickLocalizedArray<T = unknown>(
   if (enArr.length) return enArr;
   return asArray(ko);
 }
+
+/** Preference cookie set by LanguageSwitcher; middleware never overrides it. */
+export const LOCALE_COOKIE_NAME = "pmwiki_locale";
+export const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
+
+export type AutoLocaleCode = "ko" | "en";
+
+/**
+ * Parse Accept-Language → ko (KR) or en (all English-speaking).
+ * Matches `en` and regional tags: en-US, en-GB, en-AU, en-CA, en-NZ, en-IE,
+ * en-SG, etc. EU (or any) browsers that prefer English also → en.
+ * Highest-q language wins among ko/en; default ko. Cookie still overrides this.
+ */
+export function detectLocaleFromAcceptLanguage(
+  header: string | null | undefined
+): AutoLocaleCode {
+  if (!header) return "ko";
+  const languages = header
+    .toLowerCase()
+    .split(",")
+    .map((part) => {
+      const [rawTag, ...params] = part.trim().split(";");
+      const tag = rawTag.trim();
+      const qParam = params.find((p) => p.trim().startsWith("q="));
+      const quality = qParam ? Number.parseFloat(qParam.split("=")[1] ?? "1") : 1;
+      return { tag, quality: Number.isFinite(quality) ? quality : 0 };
+    })
+    .sort((a, b) => b.quality - a.quality);
+
+  for (const { tag } of languages) {
+    // Korean (ko, ko-KR, …)
+    if (tag === "ko" || tag.startsWith("ko-")) return "ko";
+    // Any English preference (en, en-US, en-GB, en-AU, en-CA, en-NZ, en-IE, en-SG, …)
+    if (tag === "en" || tag.startsWith("en-")) return "en";
+  }
+  return "ko";
+}
