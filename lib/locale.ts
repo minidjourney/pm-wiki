@@ -1,8 +1,8 @@
 /**
- * Shared locale helpers for the language switcher and display names.
- * CTO owns /en route trees, hreflang, and sitemap — this file only
- * maps paths and picks model_name vs model_name_en for the UI.
+ * Shared locale helpers: path mapping, display names, hreflang, category labels.
  */
+
+import { SITE_URL } from "@/lib/site";
 
 export const LOCALES = [
   { code: "ko", label: "한국어", shortLabel: "한" },
@@ -27,25 +27,64 @@ export function stripLocalePrefix(pathname: string): string {
 }
 
 /**
- * Locale href that stays compatible with today's /en /ja stubs
- * and with future nested /en/... routes from CTO.
- *
- * - Korean always returns the unprefixed path.
- * - Switching between en/ja preserves the rest of the path.
- * - From Korean content pages, EN/JA go to the locale root so
- *   stub pages do not 404 before nested routes exist.
+ * Map path between locales.
+ * EN is live for `/` and `/models/*` → `/en`, `/en/models/*`.
+ * JA remains stub-only (`/ja`).
  */
 export function hrefForLocale(code: LocaleCode, pathname: string): string {
-  const current = getLocaleFromPath(pathname);
   const rest = stripLocalePrefix(pathname);
 
   if (code === "ko") return rest || "/";
 
-  if (current !== "ko") {
-    return rest === "/" ? `/${code}` : `/${code}${rest}`;
-  }
+  if (code === "ja") return "/ja";
 
-  return `/${code}`;
+  // code === "en" — real catalog + model routes
+  if (rest === "/") return "/en";
+  if (rest.startsWith("/models/")) return `/en${rest}`;
+  return "/en";
+}
+
+/** Prefix a content path for a locale (`/models/x` + en → `/en/models/x`). */
+export function localePath(contentPath: string, locale: LocaleCode): string {
+  const path = contentPath.startsWith("/") ? contentPath : `/${contentPath}`;
+  if (locale === "en") {
+    if (path === "/") return "/en";
+    return `/en${path}`;
+  }
+  if (locale === "ja") return "/ja";
+  return path;
+}
+
+/** Keep `?category=` when switching locales on catalog pages. */
+export function withSearchParams(
+  path: string,
+  searchParams: { get: (k: string) => string | null; toString?: () => string }
+): string {
+  const category = searchParams.get("category");
+  const isCatalog = path === "/" || path === "/en";
+  if (isCatalog && category) {
+    return `${path}?category=${encodeURIComponent(category)}`;
+  }
+  const qs =
+    typeof searchParams.toString === "function" ? searchParams.toString() : "";
+  if (!isCatalog && qs) return `${path}?${qs}`;
+  if (isCatalog && qs) return `${path}?${qs}`;
+  return path;
+}
+
+export function hreflangLanguages(
+  koPath: string,
+  enPath: string
+): Record<string, string> {
+  const ko = koPath.startsWith("http")
+    ? koPath
+    : `${SITE_URL}${koPath === "/" ? "" : koPath}`;
+  const en = enPath.startsWith("http") ? enPath : `${SITE_URL}${enPath}`;
+  return {
+    ko,
+    en,
+    "x-default": ko,
+  };
 }
 
 /** Korean UI uses model_name; English routes prefer model_name_en. */
@@ -59,3 +98,27 @@ export function displayModelName(
   }
   return model.model_name;
 }
+
+export const CATEGORY_LABELS: Record<LocaleCode, Record<string, string>> = {
+  ko: {
+    all: "전체",
+    kickboard: "전동킥보드",
+    ebike: "전기자전거",
+    scooter: "전동스쿠터",
+    unicycle: "전동 외발휠",
+  },
+  en: {
+    all: "All",
+    kickboard: "E-Kickboard",
+    ebike: "E-Bike",
+    scooter: "E-Scooter",
+    unicycle: "E-Unicycle",
+  },
+  ja: {
+    all: "すべて",
+    kickboard: "電動キックボード",
+    ebike: "電動自転車",
+    scooter: "電動スクーター",
+    unicycle: "電動一輪車",
+  },
+};

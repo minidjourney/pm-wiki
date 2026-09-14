@@ -2,13 +2,14 @@
 
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Check, ChevronDown, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   LOCALES,
   getLocaleFromPath,
   hrefForLocale,
+  withSearchParams,
   type LocaleCode,
 } from "@/lib/locale";
 
@@ -24,25 +25,28 @@ function localeMeta(code: LocaleCode) {
 function LocaleLink({
   code,
   pathname,
+  searchParams,
   selected,
   className,
   children,
 }: {
   code: LocaleCode;
   pathname: string;
+  searchParams: { get: (k: string) => string | null; toString: () => string };
   selected: boolean;
   className: string;
   children: ReactNode;
 }) {
   const meta = localeMeta(code);
+  const href = withSearchParams(hrefForLocale(code, pathname), searchParams);
   return (
     <Link
-      href={hrefForLocale(code, pathname)}
+      href={href}
       hrefLang={code}
       lang={code}
       aria-current={selected ? "page" : undefined}
       aria-label={`${meta.label}${selected ? " (selected)" : ""}`}
-      title={meta.label}
+      title={code === "ja" ? `${meta.label} — Coming soon` : meta.label}
       className={className}
     >
       {children}
@@ -52,6 +56,7 @@ function LocaleLink({
 
 export function LanguageSwitcher({ variant = "header" }: LanguageSwitcherProps) {
   const pathname = usePathname() ?? "/";
+  const searchParams = useSearchParams();
   const current = getLocaleFromPath(pathname);
   const currentMeta = localeMeta(current);
   const [open, setOpen] = useState(false);
@@ -91,6 +96,7 @@ export function LanguageSwitcher({ variant = "header" }: LanguageSwitcherProps) 
               key={locale.code}
               code={locale.code}
               pathname={pathname}
+              searchParams={searchParams}
               selected={selected}
               className={cn(
                 "flex min-h-11 items-center justify-between rounded-lg px-4 text-sm font-medium transition-colors",
@@ -147,6 +153,7 @@ export function LanguageSwitcher({ variant = "header" }: LanguageSwitcherProps) 
                   <LocaleLink
                     code={locale.code}
                     pathname={pathname}
+                    searchParams={searchParams}
                     selected={selected}
                     className={cn(
                       "flex min-h-11 items-center justify-between rounded-lg px-3 text-sm font-medium",
@@ -188,6 +195,7 @@ export function LanguageSwitcher({ variant = "header" }: LanguageSwitcherProps) 
               key={locale.code}
               code={locale.code}
               pathname={pathname}
+              searchParams={searchParams}
               selected={selected}
               className={cn(
                 "inline-flex min-h-11 items-center justify-center rounded-md px-3 text-sm transition-colors",

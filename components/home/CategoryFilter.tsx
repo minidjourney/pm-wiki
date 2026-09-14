@@ -2,28 +2,35 @@
 
 import type { PmCategory } from "@/types/database";
 import { cn } from "@/lib/utils";
-
-const CATEGORIES: Array<{ value: "all" | PmCategory; label: string }> = [
-  { value: "all", label: "전체" },
-  { value: "kickboard", label: "전동킥보드" },
-  { value: "ebike", label: "전기자전거" },
-  { value: "scooter", label: "전동스쿠터" },
-  { value: "unicycle", label: "전동 외발휠" },
-];
+import { CATEGORY_LABELS, type LocaleCode } from "@/lib/locale";
 
 interface CategoryFilterProps {
   selected: "all" | PmCategory;
   onSelect: (category: "all" | PmCategory) => void;
+  locale?: LocaleCode;
 }
 
-export function CategoryFilter({ selected, onSelect }: CategoryFilterProps) {
+export function CategoryFilter({
+  selected,
+  onSelect,
+  locale = "ko",
+}: CategoryFilterProps) {
+  const labels = CATEGORY_LABELS[locale] ?? CATEGORY_LABELS.ko;
+  const categories: Array<{ value: "all" | PmCategory; label: string }> = [
+    { value: "all", label: labels.all },
+    { value: "kickboard", label: labels.kickboard },
+    { value: "ebike", label: labels.ebike },
+    { value: "scooter", label: labels.scooter },
+    { value: "unicycle", label: labels.unicycle },
+  ];
+
   return (
     <div
-      className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0"
+      className="flex flex-wrap gap-2"
       role="tablist"
-      aria-label="카테고리 필터"
+      aria-label={locale === "en" ? "Category filter" : "카테고리 필터"}
     >
-      {CATEGORIES.map((cat) => (
+      {categories.map((cat) => (
         <button
           key={cat.value}
           type="button"
@@ -31,7 +38,7 @@ export function CategoryFilter({ selected, onSelect }: CategoryFilterProps) {
           aria-selected={selected === cat.value}
           onClick={() => onSelect(cat.value)}
           className={cn(
-            "min-h-11 shrink-0 snap-start rounded-full px-4 text-sm font-medium transition-all",
+            "min-h-11 rounded-full px-4 text-sm font-medium transition-all",
             "hover:scale-105 active:scale-95",
             selected === cat.value
               ? "bg-primary text-primary-foreground shadow-sm"
