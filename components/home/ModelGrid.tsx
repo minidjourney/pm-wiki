@@ -6,6 +6,7 @@ import type { PmModel, PmCategory } from "@/types/database";
 import { CategoryFilter } from "./CategoryFilter";
 import { ModelCard } from "./ModelCard";
 import { getLocaleFromPath } from "@/lib/locale";
+import { uiCopy } from "@/lib/ui-copy";
 
 const PAGE_SIZE = 24;
 
@@ -34,7 +35,7 @@ export function ModelGrid({ models }: ModelGridProps) {
   const router = useRouter();
   const pathname = usePathname();
   const locale = getLocaleFromPath(pathname ?? "/");
-  const isEn = locale === "en";
+  const t = uiCopy(locale);
 
   const selectedCategory = parseCategory(searchParams.get("category"));
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
@@ -80,18 +81,14 @@ export function ModelGrid({ models }: ModelGridProps) {
           {hasMore && (
             <div className="flex flex-col items-center gap-2 pt-2">
               <p className="text-sm text-muted-foreground">
-                {isEn
-                  ? `Showing ${visibleModels.length} of ${filteredModels.length}`
-                  : `${filteredModels.length}개 중 ${visibleModels.length}개 표시 중`}
+                {t.showing(visibleModels.length, filteredModels.length)}
               </p>
               <button
                 type="button"
                 onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
                 className="min-h-11 min-w-[8rem] rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 active:scale-95"
               >
-                {isEn
-                  ? `Load more (${remaining} left)`
-                  : `더 보기 (${remaining}개 남음)`}
+                {t.loadMore(remaining)}
               </button>
             </div>
           )}
@@ -99,9 +96,7 @@ export function ModelGrid({ models }: ModelGridProps) {
       ) : (
         <div className="rounded-xl border border-slate-100 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
           <p className="text-muted-foreground">
-            {isEn
-              ? "No models in this category yet."
-              : "선택한 카테고리에 해당하는 기기가 없습니다."}
+            {t.emptyCategory}
           </p>
         </div>
       )}

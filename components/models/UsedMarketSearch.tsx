@@ -1,4 +1,5 @@
 import { Search } from "lucide-react";
+import { uiCopy } from "@/lib/ui-copy";
 
 const PLATFORMS = [
   {
@@ -27,19 +28,17 @@ export function UsedMarketSearch({
   modelName,
   locale = "ko",
 }: UsedMarketSearchProps) {
-  const isEn = locale === "en";
+  const t = uiCopy(locale);
   return (
     <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <div className="mb-3 flex items-center gap-2">
         <Search className="size-4 text-muted-foreground" />
         <h2 className="text-base font-semibold tracking-tight text-foreground">
-          {isEn ? "🔍 Find used listings" : "🔍 실시간 중고 매물 찾아보기"}
+          {t.findListings}
         </h2>
       </div>
       <p className="mb-4 text-xs text-muted-foreground">
-        {isEn
-          ? <>Opens search results for &quot;{modelName}&quot; on each Korean marketplace.</>
-          : <>클릭 시 해당 플랫폼에서 &quot;{modelName}&quot; 검색 결과로 이동합니다.</>}
+        {t.findListingsHint(modelName)}
       </p>
       <div className="flex flex-wrap gap-3">
         {PLATFORMS.map((p) => (
