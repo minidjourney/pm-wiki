@@ -126,6 +126,7 @@ export function buildModelDescriptionEn(model: {
   model_name?: string | null;
   model_name_en?: string | null;
   one_line_summary?: string | null;
+  one_line_summary_en?: string | null;
   used_price_min?: number | null;
   used_price_max?: number | null;
   range_official?: number | null;
@@ -140,7 +141,9 @@ export function buildModelDescriptionEn(model: {
   if (min && max) parts.push(`Used market ~${min}–${max}.`);
   if (model.range_official) parts.push(`Official range ${model.range_official}km.`);
   if (model.weight) parts.push(`Weight ${model.weight}kg.`);
-  if (model.one_line_summary) parts.push(String(model.one_line_summary));
+  const summary =
+    model.one_line_summary_en?.trim() || model.one_line_summary?.trim();
+  if (summary) parts.push(summary);
   return parts.join(" ").slice(0, 160);
 }
 
@@ -153,7 +156,12 @@ export function buildAnswerCapsuleEn(model: any, displayName: string): string {
   if (model.range_official) chunks.push(`official range ${model.range_official}km`);
   if (model.weight) chunks.push(`weight ${model.weight}kg`);
   let text = `${chunks.join(", ")}.`;
-  if (model.one_line_summary) text = `${text} ${model.one_line_summary}`;
+  const summary =
+    (typeof model.one_line_summary_en === "string" &&
+      model.one_line_summary_en.trim()) ||
+    (typeof model.one_line_summary === "string" && model.one_line_summary.trim()) ||
+    "";
+  if (summary) text = `${text} ${summary}`;
   return text;
 }
 
