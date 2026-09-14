@@ -54,11 +54,17 @@ export interface PmModel {
   battery_replace_cost: number;
   tire_size: number;
   suspension_type: string;
+  /** English suspension label (/en); fallback to suspension_type */
+  suspension_type_en?: string | null;
   battery_voltage: number;
   weight: number;
   range_real_80kg: number;
   chronic_defects: ChronicDefect[];
+  /** English chronic defects (/en); same jsonb shape; fallback to chronic_defects */
+  chronic_defects_en?: ChronicDefect[] | null;
   used_checklist: UsedChecklistItem[];
+  /** English used checklist (/en); same jsonb shape; fallback to used_checklist */
+  used_checklist_en?: UsedChecklistItem[] | null;
   affiliate_links: AffiliateLink[];
   // 확장 스펙
   motor_power_peak?: number | null;
@@ -66,6 +72,8 @@ export interface PmModel {
   range_official?: number | null;
   max_speed?: number | null;
   brake_type?: string | null;
+  /** English brake label (/en); fallback to brake_type */
+  brake_type_en?: string | null;
   is_discontinued?: boolean | null;
   release_year?: number | null;
   dimensions?: string | null;
@@ -80,8 +88,12 @@ export interface PmModel {
   charger_spec?: string | null;
   bluetooth_enabled?: boolean | null;
   battery_check_method?: string | null;
+  /** English battery check method (/en); fallback to battery_check_method */
+  battery_check_method_en?: string | null;
   // 안전 규정 (경찰청 기준 등)
   safety_rules?: string[] | null;
+  /** English safety rules (/en); same shape as safety_rules; fallback to safety_rules */
+  safety_rules_en?: string[] | null;
 }
 
 /** 추천 위젯 / 목록용 최소 필드 */
