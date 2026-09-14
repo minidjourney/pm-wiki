@@ -1,4 +1,5 @@
 import type { ReactElement } from "react";
+import { localizeKoDuration } from "@/lib/ui-copy";
 import {
   ListChecks,
   Plug,
@@ -72,7 +73,7 @@ export function EnModelSections({
                 {chargerSpec && (
                   <div>
                     <p className="text-xs font-medium text-muted-foreground">{t.chargerSpec}</p>
-                    <p className="mt-0.5 text-sm font-medium text-foreground">{chargerSpec}</p>
+                    <p className="mt-0.5 text-sm font-medium text-foreground">{localizeKoDuration(chargerSpec, "en")}</p>
                   </div>
                 )}
                 {batteryCheckMethod && (
