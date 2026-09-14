@@ -209,3 +209,76 @@ export function pickLocalizedArray<T = unknown>(
   if (enArr.length) return enArr;
   return asArray(ko);
 }
+
+/** Preference cookie set by LanguageSwitcher; middleware never overrides it. */
+export const LOCALE_COOKIE_NAME = "pmwiki_locale";
+export const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
+
+export type AutoLocaleCode = "ko" | "en";
+
+/** English-majority / English-official regions (ISO 3166-1 alpha-2). */
+export const ENGLISH_SPEAKING_REGIONS = new Set([
+  "US",
+  "GB",
+  "CA",
+  "AU",
+  "NZ",
+  "IE",
+  "ZA",
+  "SG",
+  "PH",
+  "IN",
+  "HK",
+]);
+
+/**
+ * Parse Accept-Language → ko | en | null (no strong preference).
+ * Matches `en` / `en-*` and `ko` / `ko-*`. Highest-q among ko/en wins.
+ */
+export function detectLocaleFromAcceptLanguage(
+  header: string | null | undefined
+): AutoLocaleCode | null {
+  if (!header) return null;
+  const languages = header
+    .toLowerCase()
+    .split(",")
+    .map((part) => {
+      const [rawTag, ...params] = part.trim().split(";");
+      const tag = rawTag.trim();
+      const qParam = params.find((p) => p.trim().startsWith("q="));
+      const quality = qParam ? Number.parseFloat(qParam.split("=")[1] ?? "1") : 1;
+      return { tag, quality: Number.isFinite(quality) ? quality : 0 };
+    })
+    .sort((a, b) => b.quality - a.quality);
+
+  for (const { tag } of languages) {
+    if (tag === "ko" || tag.startsWith("ko-")) return "ko";
+    if (tag === "en" || tag.startsWith("en-")) return "en";
+  }
+  return null;
+}
+
+/**
+ * Auto-locale without cookie:
+ * 1) Accept-Language ko* → KO; en* → EN
+ * 2) Else country KR → KO; English-speaking region → EN
+ * 3) Default KO
+ */
+export function detectPreferredAutoLocale(opts: {
+  acceptLanguage?: string | null;
+  country?: string | null;
+}): AutoLocaleCode {
+  const fromLang = detectLocaleFromAcceptLanguage(opts.acceptLanguage);
+  if (fromLang) return fromLang;
+
+  const country = opts.country?.trim().toUpperCase();
+  if (country === "KR") return "ko";
+  if (country && ENGLISH_SPEAKING_REGIONS.has(country)) return "en";
+  return "ko";
+}
+
+/** Client-side helper: persist LanguageSwitcher choice. */
+export function setLocaleCookie(code: LocaleCode) {
+  if (typeof document === "undefined") return;
+  document.cookie = `${LOCALE_COOKIE_NAME}=${code};path=/;max-age=${LOCALE_COOKIE_MAX_AGE};samesite=lax`;
+}

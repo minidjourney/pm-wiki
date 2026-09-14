@@ -51,6 +51,12 @@ export interface PmModel {
   used_price_min?: number | null;
   /** 중고 시세 최고가 */
   used_price_max?: number | null;
+  /** EN researched used min (USD integer; no FX) — live on Supabase */
+  used_price_min_usd?: number | null;
+  /** EN researched used max (USD integer; no FX) — live on Supabase */
+  used_price_max_usd?: number | null;
+  /** EN researched MSRP (USD integer; optional; no FX) — live on Supabase */
+  original_price_usd?: number | null;
   battery_replace_cost: number;
   tire_size: number;
   suspension_type: string;

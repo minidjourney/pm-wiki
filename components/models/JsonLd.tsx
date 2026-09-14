@@ -28,42 +28,59 @@ function additionalProperties(model: any) {
 export function JsonLd({
   model,
   faqs,
+  locale = "ko",
 }: {
   model: any;
   faqs: FaqItem[];
+  locale?: "ko" | "en";
 }) {
+  const isEn = locale === "en";
   const validUntilYear = new Date().getFullYear() + 1;
-  const pageUrl = absoluteUrl(`/models/${model.slug}`);
+  const pageUrl = absoluteUrl(
+    isEn ? `/en/models/${model.slug}` : `/models/${model.slug}`
+  );
+  const homeUrl = isEn ? absoluteUrl("/en") : SITE_URL;
   const orgId = `${SITE_URL}/#organization`;
   const websiteId = `${SITE_URL}/#website`;
   const webpageId = `${pageUrl}#webpage`;
   const productId = `${pageUrl}#product`;
 
+  const usedMin = isEn ? model.used_price_min_usd : model.used_price_min;
+  const usedMax = isEn ? model.used_price_max_usd : model.used_price_max;
+  const hasUsedOffer =
+    usedMin != null &&
+    usedMax != null &&
+    Number(usedMin) > 0 &&
+    Number(usedMax) > 0;
+
   const graph: Record<string, unknown>[] = [
     {
       "@type": "Organization",
       "@id": orgId,
-      name: "퍼모위키",
+      name: isEn ? "Pumo Wiki" : "퍼모위키",
       url: SITE_URL,
-      description:
-        "퍼스널 모빌리티 중고 시세·스펙·고질병·직거래 체크리스트 정보 사이트",
+      description: isEn
+        ? "Personal mobility used prices, specs, known issues, and buying checklists"
+        : "퍼스널 모빌리티 중고 시세·스펙·고질병·직거래 체크리스트 정보 사이트",
     },
     {
       "@type": "WebSite",
       "@id": websiteId,
       url: SITE_URL,
-      name: "퍼모위키",
-      inLanguage: "ko-KR",
+      name: isEn ? "Pumo Wiki" : "퍼모위키",
+      inLanguage: isEn ? "en-US" : "ko-KR",
       publisher: { "@id": orgId },
     },
     {
       "@type": "WebPage",
       "@id": webpageId,
       url: pageUrl,
-      name: `${model.manufacturer} ${model.model_name} 중고 시세·스펙`,
+      name: isEn
+        ? `${model.manufacturer} ${model.model_name} used price & specs`
+        : `${model.manufacturer} ${model.model_name} 중고 시세·스펙`,
       isPartOf: { "@id": websiteId },
       about: { "@id": productId },
-      inLanguage: "ko-KR",
+      inLanguage: isEn ? "en-US" : "ko-KR",
     },
     {
       "@type": "BreadcrumbList",
@@ -71,8 +88,8 @@ export function JsonLd({
         {
           "@type": "ListItem",
           position: 1,
-          name: "홈",
-          item: SITE_URL,
+          name: isEn ? "Home" : "홈",
+          item: homeUrl,
         },
         {
           "@type": "ListItem",
@@ -89,7 +106,9 @@ export function JsonLd({
       image: model.image_url ? [model.image_url] : undefined,
       description:
         model.one_line_summary ||
-        `${model.model_name} 상세 스펙 및 중고 시세`,
+        (isEn
+          ? `${model.model_name} specs and used fair price`
+          : `${model.model_name} 상세 스펙 및 중고 시세`),
       sku: model.slug,
       brand: {
         "@type": "Brand",
@@ -97,23 +116,24 @@ export function JsonLd({
       },
       category: model.category,
       additionalProperty: additionalProperties(model),
-      ...(model.used_price_min &&
-        model.used_price_max && {
-          offers: {
-            "@type": "AggregateOffer",
-            url: pageUrl,
-            priceCurrency: "KRW",
-            lowPrice: model.used_price_min,
-            highPrice: model.used_price_max,
-            offerCount: 1,
-            itemCondition: "https://schema.org/UsedCondition",
-            availability: model.is_discontinued
-              ? "https://schema.org/Discontinued"
-              : "https://schema.org/InStock",
-            priceValidUntil: `${validUntilYear}-12-31`,
-            seller: { "@id": orgId },
-          },
-        }),
+      ...(hasUsedOffer
+        ? {
+            offers: {
+              "@type": "AggregateOffer",
+              url: pageUrl,
+              priceCurrency: isEn ? "USD" : "KRW",
+              lowPrice: usedMin,
+              highPrice: usedMax,
+              offerCount: 1,
+              itemCondition: "https://schema.org/UsedCondition",
+              availability: model.is_discontinued
+                ? "https://schema.org/Discontinued"
+                : "https://schema.org/InStock",
+              priceValidUntil: `${validUntilYear}-12-31`,
+              seller: { "@id": orgId },
+            },
+          }
+        : {}),
     },
   ];
 
