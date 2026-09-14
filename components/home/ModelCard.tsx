@@ -14,6 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { calculateValueScore } from "@/lib/pm-score";
 import { useCompareStore, MAX_COMPARE_COUNT } from "@/store/useCompareStore";
+import { uiCopy } from "@/lib/ui-copy";
 
 function formatPriceKrw(value: number | null) {
   if (value == null || value === 0) return "가격 정보 없음";
@@ -52,6 +53,7 @@ export function ModelCard({ model }: ModelCardProps) {
   const locale = getLocaleFromPath(usePathname() ?? "/");
   const displayName = displayModelName(model, locale);
   const isEn = locale === "en";
+  const t = uiCopy(locale);
   const add = useCompareStore((s) => s.add);
   const remove = useCompareStore((s) => s.remove);
   const has = useCompareStore((s) => s.has);
@@ -111,7 +113,7 @@ export function ModelCard({ model }: ModelCardProps) {
           <button
             type="button"
             onClick={handleCompareClick}
-            title={inCompare ? "비교함에서 제거" : "VS 비교함 담기"}
+            title={inCompare ? t.compareRemove : t.compareAdd}
             aria-pressed={inCompare}
             className={cn(
               "relative z-10 inline-flex min-h-11 items-center justify-center gap-1 rounded-md px-2.5 text-xs font-medium transition-colors",
@@ -121,14 +123,14 @@ export function ModelCard({ model }: ModelCardProps) {
             )}
           >
             <Scale className="size-3.5" />
-            <span>{inCompare ? "담김" : "VS"}</span>
+            <span>{inCompare ? t.compareAdded : t.compareShort}</span>
           </button>
           {valueScore != null && (
             <Badge
               variant="default"
               className="pointer-events-none bg-gradient-to-r from-amber-500 to-orange-500 px-1.5 text-[11px] text-white shadow-sm"
             >
-              가성비 {valueScore}
+              {t.valueScoreLabel(valueScore)}
             </Badge>
           )}
           {model.is_discontinued && (
