@@ -132,7 +132,7 @@ const en: UiCopy = {
   faq: "FAQ",
   findListings: "🔍 Find used listings",
   findListingsHint: (modelName) =>
-    `Opens search results for "${modelName}" on each Korean marketplace.`,
+    `Opens eBay and Facebook Marketplace search results for "${modelName}".`,
   checklistItem: (n) => `Checklist item ${n}`,
   checklistFallback: "See details.",
   loadMore: (remaining) => `Load more (${remaining} left)`,
