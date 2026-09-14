@@ -183,3 +183,19 @@ export function pickLocalizedStringArray(
   if (enArr.length) return enArr;
   return asStrings(ko);
 }
+
+/**
+ * Prefer EN array when non-empty; otherwise KO.
+ * Preserves element shapes (objects or mixed) for chronic_defects / used_checklist.
+ * Does not filter or reshape items — callers keep existing render/SEO adapters.
+ */
+export function pickLocalizedArray<T = unknown>(
+  en: unknown,
+  ko: unknown
+): T[] {
+  const asArray = (v: unknown): T[] =>
+    Array.isArray(v) && v.length > 0 ? (v as T[]) : [];
+  const enArr = asArray(en);
+  if (enArr.length) return enArr;
+  return asArray(ko);
+}
