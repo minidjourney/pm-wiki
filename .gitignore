@@ -39,7 +39,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-# Expanded at prebuild from page.tsx.b64 (scripts/decode-model-pages.cjs)
-app/en/models/[slug]/page.generated.tsx
-app/models/[slug]/page.generated.tsx
