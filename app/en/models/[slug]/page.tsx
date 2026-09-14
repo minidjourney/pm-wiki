@@ -44,10 +44,12 @@ import {
 import { SITE_URL } from "@/lib/site";
 import {
   brandedModelTitle,
+  CATEGORY_LABELS,
   displayModelNameWithoutBrand,
   pickLocalizedStringArray,
   pickLocalizedText,
 } from "@/lib/locale";
+import { uiCopy } from "@/lib/ui-copy";
 
 export const revalidate = 3600;
 
@@ -57,13 +59,6 @@ const getSupabase = () => createStaticClient(
 );
 
 type Props = { params: Promise<{ slug: string }> };
-
-const CATEGORY_LABEL: Record<string, string> = {
-  kickboard: "전동킥보드",
-  ebike: "전기자전거",
-  scooter: "스쿠터",
-  unicycle: "전동 외발휠",
-};
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -114,6 +109,7 @@ export default async function ModelPage({ params }: Props) {
   const faqs = buildModelFaqs(model);
   const answerCapsule = buildAnswerCapsule(model);
   const displayName = displayModelNameWithoutBrand(model, "en");
+  const t = uiCopy("en");
   const oneLineSummary = pickLocalizedText(
     model.one_line_summary_en,
     model.one_line_summary
@@ -125,20 +121,21 @@ export default async function ModelPage({ params }: Props) {
   const cons = pickLocalizedStringArray(model.cons_en, model.cons);
 
   const specCards: { label: string; value: string | number; icon: ReactElement }[] = [];
-  if (model.release_year) specCards.push({ label: "출시 연도", value: `${model.release_year}년`, icon: <Calendar className="size-3.5" /> });
-  if (model.max_speed) specCards.push({ label: "최고 속도", value: `${model.max_speed}km/h`, icon: <Timer className="size-3.5" /> });
-  if (model.range_official) specCards.push({ label: "공식 주행거리", value: `${model.range_official}km`, icon: <Gauge className="size-3.5" /> });
-  if (model.motor_power_rated) specCards.push({ label: "정격 출력", value: `${model.motor_power_rated}W`, icon: <Activity className="size-3.5" /> });
-  if (model.motor_power_peak) specCards.push({ label: "최대 출력", value: `${model.motor_power_peak}W`, icon: <Zap className="size-3.5" /> });
-  if (model.battery_wh) specCards.push({ label: "배터리 전력량", value: `${model.battery_wh}Wh`, icon: <Battery className="size-3.5" /> });
-  if (model.nominal_voltage && model.battery_capacity) specCards.push({ label: "배터리 상세", value: `${model.nominal_voltage}V ${model.battery_capacity}Ah`, icon: <Plug className="size-3.5" /> });
-  if (model.charge_time) specCards.push({ label: "충전 소요시간", value: `약 ${model.charge_time}시간`, icon: <Clock className="size-3.5" /> });
-  if (model.max_load) specCards.push({ label: "최대 하중", value: `${model.max_load}kg`, icon: <User className="size-3.5" /> });
-  if (model.weight) specCards.push({ label: "기체 무게", value: `${model.weight}kg`, icon: <Weight className="size-3.5" /> });
-  if (model.tire_size) specCards.push({ label: "타이어 크기", value: `${model.tire_size}인치`, icon: <CircleDashed className="size-3.5" /> });
-  if (model.brake_type) specCards.push({ label: "브레이크", value: model.brake_type, icon: <Octagon className="size-3.5" /> });
-  if (model.suspension_type) specCards.push({ label: "서스펜션", value: model.suspension_type, icon: <Wrench className="size-3.5" /> });
-  if (model.dimensions) specCards.push({ label: "기체 크기", value: model.dimensions, icon: <Ruler className="size-3.5" /> });
+  if (model.release_year) specCards.push({ label: t.specs.releaseYear, value: t.yearSuffix(model.release_year), icon: <Calendar className="size-3.5" /> });
+  if (model.max_speed) specCards.push({ label: t.specs.maxSpeed, value: `${model.max_speed}km/h`, icon: <Timer className="size-3.5" /> });
+  if (model.range_official) specCards.push({ label: t.specs.rangeOfficial, value: `${model.range_official}km`, icon: <Gauge className="size-3.5" /> });
+  if (model.motor_power_rated) specCards.push({ label: t.specs.motorRated, value: `${model.motor_power_rated}W`, icon: <Activity className="size-3.5" /> });
+  if (model.motor_power_peak) specCards.push({ label: t.specs.motorPeak, value: `${model.motor_power_peak}W`, icon: <Zap className="size-3.5" /> });
+  if (model.battery_wh) specCards.push({ label: t.specs.batteryWh, value: `${model.battery_wh}Wh`, icon: <Battery className="size-3.5" /> });
+  if (model.nominal_voltage && model.battery_capacity) specCards.push({ label: t.specs.batteryDetail, value: `${model.nominal_voltage}V ${model.battery_capacity}Ah`, icon: <Plug className="size-3.5" /> });
+  if (model.charge_time) specCards.push({ label: t.specs.chargeTime, value: t.hoursApprox(model.charge_time), icon: <Clock className="size-3.5" /> });
+  if (model.max_load) specCards.push({ label: t.specs.maxLoad, value: `${model.max_load}kg`, icon: <User className="size-3.5" /> });
+  if (model.weight) specCards.push({ label: t.specs.weight, value: `${model.weight}kg`, icon: <Weight className="size-3.5" /> });
+  if (model.tire_size) specCards.push({ label: t.specs.tireSize, value: `${model.tire_size}″`, icon: <CircleDashed className="size-3.5" /> });
+  if (model.brake_type) specCards.push({ label: t.specs.brake, value: model.brake_type, icon: <Octagon className="size-3.5" /> });
+  if (model.suspension_type) specCards.push({ label: t.specs.suspension, value: model.suspension_type, icon: <Wrench className="size-3.5" /> });
+  if (model.dimensions) specCards.push({ label: t.specs.dimensions, value: model.dimensions, icon: <Ruler className="size-3.5" /> });
+
 
   return (
     <>
@@ -152,10 +149,10 @@ export default async function ModelPage({ params }: Props) {
           </h1>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-muted-foreground">
-              {CATEGORY_LABEL[model.category] || model.category}
+              {CATEGORY_LABELS.en[model.category] || model.category}
             </span>
             {model.is_discontinued && (
-              <span className="rounded-md bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">단종</span>
+              <span className="rounded-md bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">{t.discontinued}</span>
             )}
           </div>
           <nav aria-label="breadcrumb" className="mt-3 text-xs text-muted-foreground">
@@ -174,7 +171,7 @@ export default async function ModelPage({ params }: Props) {
             <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50/80 p-4">
               <div className="mb-2 flex items-center gap-1.5">
                 <Sparkles className="size-4 text-blue-600" />
-                <span className="text-sm font-bold text-blue-600">전문가 코멘트</span>
+                <span className="text-sm font-bold text-blue-600">{t.expertComment}</span>
               </div>
               <p className="text-base font-medium leading-relaxed text-foreground">{oneLineSummary}</p>
             </div>
@@ -207,17 +204,17 @@ export default async function ModelPage({ params }: Props) {
           <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
             <div className="mb-3 flex items-center gap-2">
               <DollarSign className="size-4 text-muted-foreground" />
-              <h2 className="text-base font-semibold text-foreground">시세 분석</h2>
+              <h2 className="text-base font-semibold text-foreground">{t.priceAnalysis}</h2>
             </div>
-            <PriceChart originalPrice={model.original_price ?? 0} usedPriceMin={model.used_price_min} usedPriceMax={model.used_price_max} />
+            <PriceChart originalPrice={model.original_price ?? 0} usedPriceMin={model.used_price_min} usedPriceMax={model.used_price_max} locale="en" />
           </section>
 
           <AdSlot slot="model-mid" className="min-h-[90px] w-full overflow-hidden rounded-xl" />
 
-          <UsedMarketSearch modelName={model.model_name} />
+          <UsedMarketSearch modelName={model.model_name} locale="en" />
 
           <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-            <h2 className="mb-4 text-base font-semibold text-foreground">핵심 스펙</h2>
+            <h2 className="mb-4 text-base font-semibold text-foreground">{t.keySpecs}</h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {specCards.map((s) => (
                 <div key={s.label} className="flex flex-col gap-1 rounded-xl border border-slate-100 bg-slate-50/50 p-3">
@@ -235,26 +232,26 @@ export default async function ModelPage({ params }: Props) {
             <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
               <div className="mb-4 flex items-center gap-2">
                 <Plug className="size-4 text-muted-foreground" />
-                <h2 className="text-base font-semibold text-foreground">기기 사용 및 관리 팁</h2>
+                <h2 className="text-base font-semibold text-foreground">{t.deviceTips}</h2>
               </div>
               <div className="space-y-3">
                 {model.app_integration_available != null && (
                   <div className="flex items-center gap-2">
                     <Smartphone className="size-4 text-muted-foreground" />
                     <span className={model.app_integration_available ? "rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-bold text-blue-800" : "rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-muted-foreground"}>
-                      {model.app_integration_available ? "정품 스마트폰 앱 연동 지원" : "전용 앱 미지원"}
+                      {model.app_integration_available ? t.appSupported : t.appUnsupported}
                     </span>
                   </div>
                 )}
                 {model.charger_spec && (
                   <div>
-                    <p className="text-xs font-medium text-muted-foreground">권장 충전기 스펙</p>
+                    <p className="text-xs font-medium text-muted-foreground">{t.chargerSpec}</p>
                     <p className="mt-0.5 text-sm font-medium text-foreground">{model.charger_spec}</p>
                   </div>
                 )}
                 {model.battery_check_method && (
                   <div>
-                    <p className="text-xs font-medium text-muted-foreground">배터리 상태 확인 방법</p>
+                    <p className="text-xs font-medium text-muted-foreground">{t.batteryCheck}</p>
                     <p className="mt-0.5 text-sm font-medium text-foreground">{model.battery_check_method}</p>
                   </div>
                 )}
@@ -264,17 +261,17 @@ export default async function ModelPage({ params }: Props) {
 
           {(pros.length > 0 || cons.length > 0) && (
             <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-              <h2 className="mb-4 text-base font-semibold text-foreground">장점 · 단점</h2>
+              <h2 className="mb-4 text-base font-semibold text-foreground">{t.prosCons}</h2>
               <div className="grid gap-4 sm:grid-cols-2">
                 {pros.length > 0 && (
                   <div className="rounded-xl border border-emerald-100 bg-emerald-50/60 p-4">
-                    <div className="mb-2 flex items-center gap-2"><ThumbsUp className="size-4 text-emerald-600" /><span className="text-sm font-semibold">장점</span></div>
+                    <div className="mb-2 flex items-center gap-2"><ThumbsUp className="size-4 text-emerald-600" /><span className="text-sm font-semibold">{t.pros}</span></div>
                     <ul className="space-y-1.5 text-sm text-emerald-800">{pros.map((p: string, i: number) => <li key={i}>· {p}</li>)}</ul>
                   </div>
                 )}
                 {cons.length > 0 && (
                   <div className="rounded-xl border border-red-100 bg-red-50/60 p-4">
-                    <div className="mb-2 flex items-center gap-2"><ThumbsDown className="size-4 text-red-600" /><span className="text-sm font-semibold">단점</span></div>
+                    <div className="mb-2 flex items-center gap-2"><ThumbsDown className="size-4 text-red-600" /><span className="text-sm font-semibold">{t.cons}</span></div>
                     <ul className="space-y-1.5 text-sm text-red-800">{cons.map((c: string, i: number) => <li key={i}>· {c}</li>)}</ul>
                   </div>
                 )}
@@ -284,14 +281,14 @@ export default async function ModelPage({ params }: Props) {
 
           {defects.length > 0 && (
             <section className="rounded-2xl border border-red-100 bg-white p-4 shadow-sm">
-              <div className="mb-4 flex items-center gap-2"><AlertTriangle className="size-4 text-red-600" /><h2 className="text-base font-semibold text-foreground">고질병 · 주의사항</h2></div>
+              <div className="mb-4 flex items-center gap-2"><AlertTriangle className="size-4 text-red-600" /><h2 className="text-base font-semibold text-foreground">{t.knownIssues}</h2></div>
               <ul className="space-y-3">
                 {defects.map((d: any, i: number) => {
                   const defectText = typeof d === 'object' && d !== null ? d.issue : d;
                   return (
                     <li key={i} className="rounded-xl border border-red-200/80 bg-red-50/80 p-4 shadow-sm">
                       <div className="flex items-start gap-2">
-                        <span className="mt-0.5 shrink-0 rounded-full bg-red-200 px-2 py-0.5 text-[10px] font-bold text-red-900">주의</span>
+                        <span className="mt-0.5 shrink-0 rounded-full bg-red-200 px-2 py-0.5 text-[10px] font-bold text-red-900">{t.caution}</span>
                         <p className="text-sm font-medium leading-relaxed text-red-950">{defectText}</p>
                       </div>
                     </li>
@@ -303,14 +300,14 @@ export default async function ModelPage({ params }: Props) {
 
           {checklist.length > 0 && (
             <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-              <div className="mb-4 flex items-center gap-2"><ListChecks className="size-4 text-muted-foreground" /><h2 className="text-base font-semibold text-foreground">현장 직거래 체크리스트</h2></div>
-              <ChecklistAccordion items={checklist} />
+              <div className="mb-4 flex items-center gap-2"><ListChecks className="size-4 text-muted-foreground" /><h2 className="text-base font-semibold text-foreground">{t.checklist}</h2></div>
+              <ChecklistAccordion items={checklist} locale="en" />
             </section>
           )}
 
           <AdSlot slot="model-bottom" className="min-h-[90px] w-full overflow-hidden rounded-xl" />
 
-          <ModelFaq items={faqs} />
+          <ModelFaq items={faqs} title={t.faq} />
         </div>
       </main>
     </>

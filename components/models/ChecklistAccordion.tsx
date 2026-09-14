@@ -5,6 +5,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { uiCopy } from "@/lib/ui-copy";
 
 interface ChecklistItem {
   title?: string;
@@ -14,14 +15,21 @@ interface ChecklistItem {
   content?: string; 
 }
 
-export function ChecklistAccordion({ items }: { items: ChecklistItem[] }) {
+
+export function ChecklistAccordion({
+  items,
+  locale = "ko",
+}: {
+  items: ChecklistItem[];
+  locale?: "ko" | "en";
+}) {
   if (!items || items.length === 0) return null;
+  const t = uiCopy(locale);
 
   return (
     <Accordion type="single" collapsible className="w-full">
       {items.map((item, index) => {
-        // 제목과 내용이 어떤 이름표로 들어오든 찰떡같이 찾아냅니다.
-        const title = item.title || item.issue || `체크리스트 항목 ${index + 1}`;
+        const title = item.title || item.issue || t.checklistItem(index + 1);
         const content = item.description || item.content || item;
 
         return (
@@ -35,7 +43,7 @@ export function ChecklistAccordion({ items }: { items: ChecklistItem[] }) {
               </div>
             </AccordionTrigger>
             <AccordionContent className="text-sm leading-relaxed text-muted-foreground pl-7">
-              {typeof content === 'string' ? content : "상세 내용을 확인해주세요."}
+              {typeof content === "string" ? content : t.checklistFallback}
             </AccordionContent>
           </AccordionItem>
         );
