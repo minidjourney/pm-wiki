@@ -9,6 +9,7 @@ import {
   LOCALES,
   getLocaleFromPath,
   hrefForLocale,
+  setLocaleCookie,
   withSearchParams,
   type LocaleCode,
 } from "@/lib/locale";
@@ -48,6 +49,7 @@ function LocaleLink({
       aria-label={`${meta.label}${selected ? " (selected)" : ""}`}
       title={code === "ja" ? `${meta.label} — Coming soon` : meta.label}
       className={className}
+      onClick={() => setLocaleCookie(code)}
     >
       {children}
     </Link>

@@ -15,10 +15,33 @@ import { Badge } from "@/components/ui/badge";
 import { calculateValueScore } from "@/lib/pm-score";
 import { useCompareStore, MAX_COMPARE_COUNT } from "@/store/useCompareStore";
 
-function formatPrice(value: number | null) {
+function formatPriceKrw(value: number | null) {
   if (value == null || value === 0) return "가격 정보 없음";
   if (value >= 10000) return `${(value / 10000).toFixed(0)}만 원`;
   return `${value.toLocaleString()}원`;
+}
+
+function formatUsd(n: number) {
+  return `$${Math.round(n).toLocaleString("en-US")}`;
+}
+
+/** EN: researched USD only — never KRW / never FX. */
+function enPriceBlock(model: PmModel): { label: string; value: string } {
+  const min = model.used_price_min_usd;
+  const max = model.used_price_max_usd;
+  const hasUsed =
+    min != null && max != null && Number(min) > 0 && Number(max) > 0;
+  if (hasUsed) {
+    return {
+      label: "Used fair price",
+      value: `${formatUsd(Number(min))}–${formatUsd(Number(max))}`,
+    };
+  }
+  const orig = model.original_price_usd;
+  if (orig != null && Number(orig) > 0) {
+    return { label: "MSRP", value: formatUsd(Number(orig)) };
+  }
+  return { label: "Price", value: "Price TBD" };
 }
 
 interface ModelCardProps {
@@ -131,12 +154,37 @@ export function ModelCard({ model }: ModelCardProps) {
         </h3>
       </div>
 
-      {/* 가격부: 신품가 */}
-      {hasPrice ? (
+      {/* 가격부: EN = researched USD (or Price TBD); KO = KRW 신품가 */}
+      {isEn ? (
+        (() => {
+          const en = enPriceBlock(model);
+          const isTbd = en.value === "Price TBD";
+          return (
+            <div
+              className={
+                isTbd
+                  ? "pointer-events-none relative z-10 mb-2.5 rounded-lg bg-slate-50 px-3 py-1.5 dark:bg-slate-800 sm:py-2"
+                  : "pointer-events-none relative z-10 mb-2.5 rounded-lg bg-blue-50 px-3 py-1.5 dark:bg-blue-950/30 sm:py-2"
+              }
+            >
+              <p className="text-[11px] text-muted-foreground">{en.label}</p>
+              <p
+                className={
+                  isTbd
+                    ? "text-base font-bold text-muted-foreground sm:text-lg"
+                    : "text-base font-bold text-blue-600 sm:text-lg dark:text-blue-400"
+                }
+              >
+                {en.value}
+              </p>
+            </div>
+          );
+        })()
+      ) : hasPrice ? (
         <div className="pointer-events-none relative z-10 mb-2.5 rounded-lg bg-blue-50 px-3 py-1.5 dark:bg-blue-950/30 sm:py-2">
-          <p className="text-[11px] text-muted-foreground">{isEn ? "MSRP" : "신품가"}</p>
+          <p className="text-[11px] text-muted-foreground">신품가</p>
           <p className="text-base font-bold text-blue-600 sm:text-lg dark:text-blue-400">
-            {formatPrice(model.original_price)}
+            {formatPriceKrw(model.original_price)}
           </p>
         </div>
       ) : (
