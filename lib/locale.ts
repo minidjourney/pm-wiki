@@ -99,6 +99,42 @@ export function displayModelName(
   return model.model_name;
 }
 
+type NamedModel = {
+  model_name: string;
+  model_name_en?: string | null;
+  manufacturer?: string | null;
+};
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/** Strip leading manufacturer when the display name already includes it. */
+export function displayModelNameWithoutBrand(
+  model: NamedModel,
+  locale: LocaleCode = "ko"
+): string {
+  const name = displayModelName(model, locale).trim();
+  const mfr = model.manufacturer?.trim();
+  if (!mfr) return name;
+  const stripped = name
+    .replace(new RegExp(`^${escapeRegExp(mfr)}\\s+`, "i"), "")
+    .trim();
+  return stripped || name;
+}
+
+/** Title / OG label: manufacturer once, even if model_name_en already includes it. */
+export function brandedModelTitle(
+  model: NamedModel,
+  locale: LocaleCode = "ko"
+): string {
+  const name = displayModelName(model, locale).trim();
+  const mfr = model.manufacturer?.trim();
+  if (!mfr) return name;
+  if (name.toLowerCase().startsWith(mfr.toLowerCase())) return name;
+  return `${mfr} ${name}`;
+}
+
 export const CATEGORY_LABELS: Record<LocaleCode, Record<string, string>> = {
   ko: {
     all: "전체",
