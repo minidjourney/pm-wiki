@@ -37,6 +37,11 @@ export type UiCopy = {
   searchGroupModels: string;
   searchAria: string;
   scoreSuffix: (n: string | number) => string;
+  valueScoreLabel: (n: string | number) => string;
+  compareAdd: string;
+  compareRemove: string;
+  compareAdded: string;
+  compareShort: string;
   yearSuffix: (y: string | number) => string;
   hoursApprox: (h: string | number) => string;
   specs: {
@@ -92,6 +97,11 @@ const ko: UiCopy = {
   searchGroupModels: "모델",
   searchAria: "검색",
   scoreSuffix: (n) => `${n}점`,
+  valueScoreLabel: (n) => `가성비 ${n}`,
+  compareAdd: "VS 비교함 담기",
+  compareRemove: "비교함에서 제거",
+  compareAdded: "담김",
+  compareShort: "VS",
   yearSuffix: (y) => `${y}년`,
   hoursApprox: (h) => `약 ${h}시간`,
   specs: {
@@ -147,6 +157,11 @@ const en: UiCopy = {
   searchGroupModels: "Models",
   searchAria: "Search",
   scoreSuffix: (n) => `${n}`,
+  valueScoreLabel: (n) => `Value ${n}`,
+  compareAdd: "Add to compare",
+  compareRemove: "Remove from compare",
+  compareAdded: "Added",
+  compareShort: "VS",
   yearSuffix: (y) => `${y}`,
   hoursApprox: (h) => `~${h} hrs`,
   specs: {
@@ -203,6 +218,11 @@ const ja: UiCopy = {
   searchGroupModels: "モデル",
   searchAria: "検索",
   scoreSuffix: (n) => `${n}`,
+  valueScoreLabel: (n) => `コスパ ${n}`,
+  compareAdd: "比較に追加",
+  compareRemove: "比較から削除",
+  compareAdded: "追加済み",
+  compareShort: "VS",
   yearSuffix: (y) => `${y}年`,
   hoursApprox: (h) => `約${h}時間`,
   specs: {
@@ -222,6 +242,7 @@ const ja: UiCopy = {
     dimensions: "サイズ",
   },
 };
+
 
 const BY_LOCALE: Record<LocaleCode, UiCopy> = { ko, en, ja };
 
