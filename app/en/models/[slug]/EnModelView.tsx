@@ -24,6 +24,8 @@ export type EnModelViewProps = {
   brakeType: string | null;
   suspensionType: string | null;
   batteryCheckMethod: string | null;
+  chargerSpec: string | null;
+  dimensions: string | null;
   specCards: { label: string; value: string | number; icon: ReactElement }[];
 };
 
@@ -41,6 +43,8 @@ export function EnModelView({
   brakeType,
   suspensionType,
   batteryCheckMethod,
+  chargerSpec,
+  dimensions,
   specCards,
 }: EnModelViewProps) {
   return (
@@ -55,6 +59,8 @@ export function EnModelView({
           chronic_defects: defects,
           used_checklist: checklist,
           battery_check_method: batteryCheckMethod,
+          charger_spec: chargerSpec,
+          dimensions,
         }}
         faqs={faqs}
       />
@@ -140,6 +146,7 @@ export function EnModelView({
             pros={pros}
             cons={cons}
             batteryCheckMethod={batteryCheckMethod}
+            chargerSpec={chargerSpec}
             specCards={specCards}
           />
         </div>

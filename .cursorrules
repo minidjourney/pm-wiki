@@ -3,20 +3,20 @@
 - Styling: Tailwind CSS, shadcn/ui
 - Database: Supabase (PostgreSQL)
 
-# Database Schema: pm_models (v3.4)
+# Database Schema: pm_models (v3.5)
 모든 컴포넌트와 타입 정의 시 아래 스키마를 엄수하세요.
 - [식별]: id(uuid), slug(unique), model_name(한국어 노출명), model_name_en(영문 원본), manufacturer, sub_model, category('kickboard'|'ebike'|'scooter'|'unicycle'), status
 - [가격/평점]: original_price, used_price_min, used_price_max, battery_replace_cost, pm_score
 - [전력/출력]: motor_power_rated(정격), motor_power_peak(최대), battery_wh(직접입력), nominal_voltage, battery_capacity
-- [주행/물리]: range_official(공식거리), max_speed, max_load(최대하중), charge_time(충전시간), weight, tire_size, dimensions, suspension_type, suspension_type_en, brake_type, brake_type_en
+- [주행/물리]: range_official(공식거리), max_speed, max_load(최대하중), charge_time(충전시간), weight, tire_size, dimensions, dimensions_en, suspension_type, suspension_type_en, brake_type, brake_type_en
 - [스마트/연동]: bluetooth_enabled, app_integration_available(앱연동), battery_check_method, battery_check_method_en
-- [기타/콘텐츠]: charger_spec, release_year, is_discontinued, image_url, one_line_summary, one_line_summary_en
+- [기타/콘텐츠]: charger_spec, charger_spec_en, release_year, is_discontinued, image_url, one_line_summary, one_line_summary_en
 - [JSONB 배열]: chronic_defects, chronic_defects_en, pros, cons, pros_en, cons_en, used_checklist, used_checklist_en, safety_rules, safety_rules_en, compatible_accessories, affiliate_links
 
 # Naming / i18n
 - KO UI·SEO·JSON-LD 노출명은 항상 `model_name`(한국어)을 사용한다.
 - `model_name_en`은 영문 원본·`/en` 노출용이다.
-- `/en`에서 `one_line_summary_en` / `pros_en` / `cons_en` / `chronic_defects_en` / `used_checklist_en` / `safety_rules_en` / `battery_check_method_en` / `suspension_type_en` / `brake_type_en`이 비어 있지 않으면 EN을 쓰고, 없으면 KO 필드로 fallback한다.
+- `/en`에서 `one_line_summary_en` / `pros_en` / `cons_en` / `chronic_defects_en` / `used_checklist_en` / `safety_rules_en` / `battery_check_method_en` / `suspension_type_en` / `brake_type_en` / `dimensions_en` / `charger_spec_en`이 비어 있지 않으면 EN을 쓰고, 없으면 KO 필드로 fallback한다.
 - KO 라우트는 항상 KO 필드만 사용한다.
 
 # SEO & Schema Guidelines

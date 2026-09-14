@@ -77,6 +77,8 @@ export interface PmModel {
   is_discontinued?: boolean | null;
   release_year?: number | null;
   dimensions?: string | null;
+  /** English dimensions (/en); fallback to dimensions */
+  dimensions_en?: string | null;
   // 장단점
   pros?: string[] | null;
   cons?: string[] | null;
@@ -86,6 +88,8 @@ export interface PmModel {
   cons_en?: string[] | null;
   // 하드웨어 팁
   charger_spec?: string | null;
+  /** English charger spec (/en); fallback to charger_spec */
+  charger_spec_en?: string | null;
   bluetooth_enabled?: boolean | null;
   battery_check_method?: string | null;
   /** English battery check method (/en); fallback to battery_check_method */
