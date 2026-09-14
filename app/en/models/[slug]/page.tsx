@@ -45,6 +45,8 @@ import { SITE_URL } from "@/lib/site";
 import {
   brandedModelTitle,
   displayModelNameWithoutBrand,
+  pickLocalizedStringArray,
+  pickLocalizedText,
 } from "@/lib/locale";
 
 export const revalidate = 3600;
@@ -69,7 +71,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { data } = await supabase
     .from("pm_models")
     .select(
-      "model_name, model_name_en, manufacturer, one_line_summary, used_price_min, used_price_max, range_official, weight, image_url, category"
+      "model_name, model_name_en, manufacturer, one_line_summary, one_line_summary_en, used_price_min, used_price_max, range_official, weight, image_url, category"
     )
     .eq("slug", slug)
     .single();
@@ -112,11 +114,15 @@ export default async function ModelPage({ params }: Props) {
   const faqs = buildModelFaqs(model);
   const answerCapsule = buildAnswerCapsule(model);
   const displayName = displayModelNameWithoutBrand(model, "en");
+  const oneLineSummary = pickLocalizedText(
+    model.one_line_summary_en,
+    model.one_line_summary
+  );
 
   const defects = (Array.isArray(model.chronic_defects) ? model.chronic_defects : []) as any[];
   const checklist = (Array.isArray(model.used_checklist) ? model.used_checklist : []) as any[];
-  const pros = (Array.isArray(model.pros) ? model.pros : []) as string[];
-  const cons = (Array.isArray(model.cons) ? model.cons : []) as string[];
+  const pros = pickLocalizedStringArray(model.pros_en, model.pros);
+  const cons = pickLocalizedStringArray(model.cons_en, model.cons);
 
   const specCards: { label: string; value: string | number; icon: ReactElement }[] = [];
   if (model.release_year) specCards.push({ label: "출시 연도", value: `${model.release_year}년`, icon: <Calendar className="size-3.5" /> });
@@ -164,13 +170,13 @@ export default async function ModelPage({ params }: Props) {
           <p className="mt-4 text-sm leading-relaxed text-foreground" data-speakable="true">
             {answerCapsule}
           </p>
-          {model.one_line_summary && (
+          {oneLineSummary && (
             <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50/80 p-4">
               <div className="mb-2 flex items-center gap-1.5">
                 <Sparkles className="size-4 text-blue-600" />
                 <span className="text-sm font-bold text-blue-600">전문가 코멘트</span>
               </div>
-              <p className="text-base font-medium leading-relaxed text-foreground">{model.one_line_summary}</p>
+              <p className="text-base font-medium leading-relaxed text-foreground">{oneLineSummary}</p>
             </div>
           )}
         </section>

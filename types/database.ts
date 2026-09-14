@@ -42,6 +42,8 @@ export interface PmModel {
   sub_model?: string | null;
   /** 한 줄 총평 (Hero 강조용) */
   one_line_summary?: string | null;
+  /** English one-line summary (/en); fallback to one_line_summary */
+  one_line_summary_en?: string | null;
   original_price: number;
   used_price_s: number;
   used_price_a: number;
@@ -70,6 +72,10 @@ export interface PmModel {
   // 장단점
   pros?: string[] | null;
   cons?: string[] | null;
+  /** English pros (/en); same shape as pros; fallback to pros */
+  pros_en?: string[] | null;
+  /** English cons (/en); same shape as cons; fallback to cons */
+  cons_en?: string[] | null;
   // 하드웨어 팁
   charger_spec?: string | null;
   bluetooth_enabled?: boolean | null;

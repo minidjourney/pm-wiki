@@ -158,3 +158,28 @@ export const CATEGORY_LABELS: Record<LocaleCode, Record<string, string>> = {
     unicycle: "電動一輪車",
   },
 };
+
+/** Prefer EN text when non-empty; otherwise KO. */
+export function pickLocalizedText(
+  en: string | null | undefined,
+  ko: string | null | undefined
+): string | null {
+  const e = en?.trim();
+  if (e) return e;
+  const k = ko?.trim();
+  return k || null;
+}
+
+/** Prefer EN string[] when non-empty; otherwise KO. Same jsonb shape. */
+export function pickLocalizedStringArray(
+  en: unknown,
+  ko: unknown
+): string[] {
+  const asStrings = (v: unknown): string[] => {
+    if (!Array.isArray(v)) return [];
+    return v.filter((x): x is string => typeof x === "string" && x.trim().length > 0);
+  };
+  const enArr = asStrings(en);
+  if (enArr.length) return enArr;
+  return asStrings(ko);
+}
