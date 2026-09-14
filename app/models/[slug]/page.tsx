@@ -8,10 +8,13 @@ import {
   Gauge,
   Weight,
   Wrench,
+  CircleAlert,
   ListChecks,
   DollarSign,
   Zap,
   Plug,
+  Bluetooth,
+  ShieldAlert,
   ThumbsUp,
   ThumbsDown,
   AlertTriangle,
@@ -39,7 +42,7 @@ import {
   buildModelFaqs,
 } from "@/lib/seo";
 import { SITE_URL } from "@/lib/site";
-import { displayModelName, hreflangLanguages } from "@/lib/locale";
+import { displayModelName } from "@/lib/locale";
 
 export const revalidate = 3600;
 
@@ -77,10 +80,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
-    alternates: {
-      canonical: url,
-      languages: hreflangLanguages(url, absoluteUrl(`/en/models/${slug}`)),
-    },
+    alternates: { canonical: url },
     openGraph: {
       type: "website",
       locale: "ko_KR",
@@ -175,7 +175,7 @@ export default async function ModelPage({ params }: Props) {
         {model.image_url && !model.image_url.includes('placeholder') && (
           <div className="px-4 pt-6">
             <div className="relative flex w-full items-center justify-center overflow-hidden rounded-3xl bg-gradient-to-b from-slate-100 to-slate-200/50 p-8 shadow-inner dark:from-slate-800/50 dark:to-slate-900/50">
-              {/* 뒤배경 은은한 빛 효과 */}
+              {/* 뒷배경 은은한 빛 효과 */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="h-4/5 w-4/5 rounded-full bg-white/60 blur-3xl dark:bg-blue-900/20"></div>
               </div>
