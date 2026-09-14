@@ -1,5 +1,5 @@
 /**
- * UI chrome strings (labels/headings). Content copy lives in DB *_en fields.
+ * UI chrome strings (labels/headings). Content copy lives in DB locale fields (*_en / *_ja).
  */
 import type { LocaleCode } from "@/lib/locale";
 
@@ -167,11 +167,66 @@ const en: UiCopy = {
   },
 };
 
-const BY_LOCALE: Record<"ko" | "en", UiCopy> = { ko, en };
+
+const ja: UiCopy = {
+  home: "ホーム",
+  discontinued: "販売終了",
+  expertComment: "専門家コメント",
+  priceAnalysis: "相場分析",
+  keySpecs: "主要スペック",
+  deviceTips: "使い方・メンテナンス",
+  appSupported: "純正アプリ対応",
+  appUnsupported: "専用アプリ非対応",
+  chargerSpec: "推奨充電器",
+  batteryCheck: "バッテリー状態の確認方法",
+  prosCons: "メリット · デメリット",
+  pros: "メリット",
+  cons: "デメリット",
+  knownIssues: "注意点・既知の不具合",
+  caution: "注意",
+  checklist: "対面取引チェックリスト",
+  faq: "よくある質問",
+  findListings: "🔍 中古出品を探す",
+  findListingsHint: (modelName) =>
+    `各韓国マーケットで「${modelName}」の検索結果を開きます。`,
+  checklistItem: (n) => `チェック項目 ${n}`,
+  checklistFallback: "詳細を確認してください。",
+  loadMore: (remaining) => `もっと見る（残り ${remaining}）`,
+  showing: (visible, total) => `${total}件中 ${visible}件表示`,
+  emptyCategory: "このカテゴリのモデルはまだありません。",
+  searchTitle: "モデル検索",
+  searchDescription: "モデル名・メーカー・注意点キーワードで検索できます。",
+  searchPlaceholder: "モデル、メーカー、注意点…",
+  searchLoading: "読み込み中…",
+  searchEmpty: "結果がありません",
+  searchEmptyHint: "別のキーワードで試してください。",
+  searchGroupModels: "モデル",
+  searchAria: "検索",
+  scoreSuffix: (n) => `${n}`,
+  yearSuffix: (y) => `${y}年`,
+  hoursApprox: (h) => `約${h}時間`,
+  specs: {
+    releaseYear: "発売年",
+    maxSpeed: "最高速度",
+    rangeOfficial: "公称走行距離",
+    motorRated: "定格出力",
+    motorPeak: "最大出力",
+    batteryWh: "バッテリー容量",
+    batteryDetail: "バッテリー詳細",
+    chargeTime: "充電時間",
+    maxLoad: "最大積載",
+    weight: "車両重量",
+    tireSize: "タイヤサイズ",
+    brake: "ブレーキ",
+    suspension: "サスペンション",
+    dimensions: "サイズ",
+  },
+};
+
+const BY_LOCALE: Record<LocaleCode, UiCopy> = { ko, en, ja };
 
 export function uiCopy(locale: LocaleCode = "ko"): UiCopy {
-  if (locale === "en") return en;
-  return ko;
+  return BY_LOCALE[locale] ?? ko;
 }
 
 /** Soft-localize Korean duration fragments in free-text fields (e.g. charger_spec). */
@@ -182,8 +237,17 @@ export function localizeKoDuration(
   if (text == null) return null;
   const value = text.trim();
   if (!value) return null;
-  if (locale !== "en") return value;
-  return value
-    .replace(/약\s*(\d+(?:\.\d+)?)\s*시간/g, "~$1 hrs")
-    .replace(/(\d+(?:\.\d+)?)\s*시간/g, "$1 hrs");
+  if (locale === "en") {
+    return value
+      .replace(/약\s*(\d+(?:\.\d+)?)\s*시간/g, "~$1 hrs")
+      .replace(/(\d+(?:\.\d+)?)\s*시간/g, "$1 hrs");
+  }
+  if (locale === "ja") {
+    return value
+      .replace(/약\s*(\d+(?:\.\d+)?)\s*시간/g, "約$1時間")
+      .replace(/(\d+(?:\.\d+)?)\s*시간/g, "$1時間")
+      .replace(/~\s*(\d+(?:\.\d+)?)\s*hrs?/gi, "約$1時間")
+      .replace(/(\d+(?:\.\d+)?)\s*hrs?/gi, "$1時間");
+  }
+  return value;
 }

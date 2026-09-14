@@ -146,7 +146,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                       "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
                     )}
                   >
-                    {(CATEGORY_LABELS[locale === "en" ? "en" : "ko"][m.category ?? ""] ?? m.category ?? "—")}
+                    {(CATEGORY_LABELS[locale][m.category ?? ""] ?? m.category ?? "—")}
                   </span>
                 </div>
               </div>

@@ -46,7 +46,7 @@ function LocaleLink({
       lang={code}
       aria-current={selected ? "page" : undefined}
       aria-label={`${meta.label}${selected ? " (selected)" : ""}`}
-      title={code === "ja" ? `${meta.label} — Coming soon` : meta.label}
+      title={meta.label}
       className={className}
     >
       {children}
