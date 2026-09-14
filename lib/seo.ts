@@ -1,4 +1,5 @@
 import { SITE_URL } from "@/lib/site";
+import { pickLocalizedArray } from "@/lib/locale";
 
 export function absoluteUrl(path = ""): string {
   if (!path) return SITE_URL;
@@ -179,7 +180,7 @@ export function buildModelFaqsEn(model: any, displayName: string): FaqItem[] {
     });
   }
 
-  const defects = Array.isArray(model.chronic_defects) ? model.chronic_defects : [];
+  const defects = pickLocalizedArray(model.chronic_defects_en, model.chronic_defects);
   const defectJoined = defects.map(defectText).filter(Boolean).slice(0, 5).join("; ");
   if (defectJoined) {
     faqs.push({
@@ -188,7 +189,7 @@ export function buildModelFaqsEn(model: any, displayName: string): FaqItem[] {
     });
   }
 
-  const checklist = Array.isArray(model.used_checklist) ? model.used_checklist : [];
+  const checklist = pickLocalizedArray(model.used_checklist_en, model.used_checklist);
   const checkJoined = checklist.map(checklistText).filter(Boolean).slice(0, 4).join(" ");
   if (checkJoined) {
     faqs.push({
