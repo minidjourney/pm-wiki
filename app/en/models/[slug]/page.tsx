@@ -37,9 +37,9 @@ import { ModelFaq } from "@/components/models/ModelFaq";
 import { AdSlot } from "@/components/ads/AdSlot";
 import {
   absoluteUrl,
-  buildAnswerCapsule,
-  buildModelDescription,
-  buildModelFaqs,
+  buildAnswerCapsuleEn,
+  buildModelDescriptionEn,
+  buildModelFaqsEn,
 } from "@/lib/seo";
 import { SITE_URL } from "@/lib/site";
 import {
@@ -49,7 +49,7 @@ import {
   pickLocalizedText,
 } from "@/lib/locale";
 
-export const revalidate = 3600;
+export const revalidate = 300;
 
 const getSupabase = () => createStaticClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -78,7 +78,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!data) return { title: "Model not found - PM Wiki" };
 
   const title = `${brandedModelTitle(data, "en")} used price, specs & issues | PM Wiki`;
-  const description = buildModelDescription(data);
+  const description = buildModelDescriptionEn(data);
   const url = absoluteUrl(`/en/models/${slug}`);
   const images = data.image_url ? [{ url: data.image_url }] : undefined;
 
@@ -111,13 +111,18 @@ export default async function ModelPage({ params }: Props) {
 
   if (error || !model) notFound();
 
-  const faqs = buildModelFaqs(model);
-  const answerCapsule = buildAnswerCapsule(model);
   const displayName = displayModelNameWithoutBrand(model, "en");
   const oneLineSummary = pickLocalizedText(
     model.one_line_summary_en,
     model.one_line_summary
   );
+  const modelForSeo = {
+    ...model,
+    one_line_summary: oneLineSummary,
+    model_name: displayName,
+  };
+  const faqs = buildModelFaqsEn(modelForSeo, displayName);
+  const answerCapsule = buildAnswerCapsuleEn(modelForSeo, displayName);
 
   const defects = (Array.isArray(model.chronic_defects) ? model.chronic_defects : []) as any[];
   const checklist = (Array.isArray(model.used_checklist) ? model.used_checklist : []) as any[];
@@ -142,7 +147,7 @@ export default async function ModelPage({ params }: Props) {
 
   return (
     <>
-      <JsonLd model={model} faqs={faqs} />
+      <JsonLd model={{ ...model, model_name: displayName, one_line_summary: oneLineSummary }} faqs={faqs} />
       <main className="min-h-screen bg-slate-50/80 pb-12 md:max-w-2xl md:mx-auto">
         <section className="border-b border-slate-100 bg-white px-4 pt-5 pb-5">
           <p className="text-sm font-medium text-muted-foreground">{model.manufacturer}</p>
@@ -209,12 +214,12 @@ export default async function ModelPage({ params }: Props) {
               <DollarSign className="size-4 text-muted-foreground" />
               <h2 className="text-base font-semibold text-foreground">시세 분석</h2>
             </div>
-            <PriceChart originalPrice={model.original_price ?? 0} usedPriceMin={model.used_price_min} usedPriceMax={model.used_price_max} />
+            <PriceChart originalPrice={model.original_price ?? 0} usedPriceMin={model.used_price_min} usedPriceMax={model.used_price_max} locale="en" />
           </section>
 
           <AdSlot slot="model-mid" className="min-h-[90px] w-full overflow-hidden rounded-xl" />
 
-          <UsedMarketSearch modelName={model.model_name} />
+          <UsedMarketSearch modelName={displayName} locale="en" />
 
           <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
             <h2 className="mb-4 text-base font-semibold text-foreground">핵심 스펙</h2>
@@ -310,7 +315,7 @@ export default async function ModelPage({ params }: Props) {
 
           <AdSlot slot="model-bottom" className="min-h-[90px] w-full overflow-hidden rounded-xl" />
 
-          <ModelFaq items={faqs} />
+          <ModelFaq items={faqs} title="FAQ" />
         </div>
       </main>
     </>
