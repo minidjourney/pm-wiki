@@ -109,6 +109,8 @@ export default async function ModelPage({ params }: Props) {
     model.battery_check_method_en,
     model.battery_check_method
   );
+  const dimensions = pickLocalizedText(model.dimensions_en, model.dimensions);
+  const chargerSpec = pickLocalizedText(model.charger_spec_en, model.charger_spec);
 
   const specCards: { label: string; value: string | number; icon: ReactElement }[] = [];
   if (model.release_year) specCards.push({ label: t.specs.releaseYear, value: t.yearSuffix(model.release_year), icon: <Calendar className="size-3.5" /> });
@@ -124,7 +126,7 @@ export default async function ModelPage({ params }: Props) {
   if (model.tire_size) specCards.push({ label: t.specs.tireSize, value: `${model.tire_size}″`, icon: <CircleDashed className="size-3.5" /> });
   if (brakeType) specCards.push({ label: t.specs.brake, value: brakeType, icon: <Octagon className="size-3.5" /> });
   if (suspensionType) specCards.push({ label: t.specs.suspension, value: suspensionType, icon: <Wrench className="size-3.5" /> });
-  if (model.dimensions) specCards.push({ label: t.specs.dimensions, value: model.dimensions, icon: <Ruler className="size-3.5" /> });
+  if (dimensions) specCards.push({ label: t.specs.dimensions, value: dimensions, icon: <Ruler className="size-3.5" /> });
 
   return (
     <EnModelView
@@ -141,6 +143,8 @@ export default async function ModelPage({ params }: Props) {
       brakeType={brakeType}
       suspensionType={suspensionType}
       batteryCheckMethod={batteryCheckMethod}
+      chargerSpec={chargerSpec}
+      dimensions={dimensions}
       specCards={specCards}
     />
   );

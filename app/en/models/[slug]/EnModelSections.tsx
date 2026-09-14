@@ -21,6 +21,7 @@ export type EnModelSectionsProps = {
   pros: string[];
   cons: string[];
   batteryCheckMethod: string | null;
+  chargerSpec: string | null;
   specCards: { label: string; value: string | number; icon: ReactElement }[];
 };
 
@@ -33,6 +34,7 @@ export function EnModelSections({
   pros,
   cons,
   batteryCheckMethod,
+  chargerSpec,
   specCards,
 }: EnModelSectionsProps) {
   return (
@@ -52,7 +54,7 @@ export function EnModelSections({
             </div>
           </section>
 
-          {(model.charger_spec || model.app_integration_available != null || batteryCheckMethod) && (
+          {(chargerSpec || model.app_integration_available != null || batteryCheckMethod) && (
             <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
               <div className="mb-4 flex items-center gap-2">
                 <Plug className="size-4 text-muted-foreground" />
@@ -67,10 +69,10 @@ export function EnModelSections({
                     </span>
                   </div>
                 )}
-                {model.charger_spec && (
+                {chargerSpec && (
                   <div>
                     <p className="text-xs font-medium text-muted-foreground">{t.chargerSpec}</p>
-                    <p className="mt-0.5 text-sm font-medium text-foreground">{model.charger_spec}</p>
+                    <p className="mt-0.5 text-sm font-medium text-foreground">{chargerSpec}</p>
                   </div>
                 )}
                 {batteryCheckMethod && (
