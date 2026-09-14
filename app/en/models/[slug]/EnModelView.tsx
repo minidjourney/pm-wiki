@@ -63,6 +63,7 @@ export function EnModelView({
           dimensions,
         }}
         faqs={faqs}
+        locale="en"
       />
       <main className="min-h-screen bg-slate-50/80 pb-12 md:max-w-2xl md:mx-auto">
         <section className="border-b border-slate-100 bg-white px-4 pt-5 pb-5">
@@ -130,7 +131,15 @@ export function EnModelView({
               <DollarSign className="size-4 text-muted-foreground" />
               <h2 className="text-base font-semibold text-foreground">{t.priceAnalysis}</h2>
             </div>
-            <PriceChart originalPrice={model.original_price ?? 0} usedPriceMin={model.used_price_min} usedPriceMax={model.used_price_max} locale="en" />
+            <PriceChart
+              originalPrice={model.original_price ?? 0}
+              usedPriceMin={model.used_price_min}
+              usedPriceMax={model.used_price_max}
+              locale="en"
+              originalPriceUsd={model.original_price_usd}
+              usedPriceMinUsd={model.used_price_min_usd}
+              usedPriceMaxUsd={model.used_price_max_usd}
+            />
           </section>
 
           <AdSlot slot="model-mid" className="min-h-[90px] w-full overflow-hidden rounded-xl" />

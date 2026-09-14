@@ -11,6 +11,11 @@ export function formatKrw(n: number | null | undefined): string | null {
   return `${Math.round(Number(n)).toLocaleString("ko-KR")}원`;
 }
 
+export function formatUsd(n: number | null | undefined): string | null {
+  if (n == null || Number.isNaN(Number(n)) || Number(n) <= 0) return null;
+  return `$${Math.round(Number(n)).toLocaleString("en-US")}`;
+}
+
 export function buildModelDescription(model: {
   manufacturer?: string | null;
   model_name?: string | null;
@@ -121,15 +126,15 @@ export function buildAnswerCapsule(model: any): string {
   return text;
 }
 
-/** English SEO description — structural EN chrome; reuses KO summary when present. */
+/** English SEO description — researched USD only; never KRW / never FX. */
 export function buildModelDescriptionEn(model: {
   manufacturer?: string | null;
   model_name?: string | null;
   model_name_en?: string | null;
   one_line_summary?: string | null;
   one_line_summary_en?: string | null;
-  used_price_min?: number | null;
-  used_price_max?: number | null;
+  used_price_min_usd?: number | null;
+  used_price_max_usd?: number | null;
   range_official?: number | null;
   weight?: number | null;
 }): string {
@@ -137,9 +142,10 @@ export function buildModelDescriptionEn(model: {
     (model.model_name_en?.trim() || model.model_name || "").trim();
   const name = `${model.manufacturer ?? ""} ${display}`.trim();
   const parts: string[] = [`${name} used price, specs, and known issues.`];
-  const min = formatKrw(model.used_price_min);
-  const max = formatKrw(model.used_price_max);
-  if (min && max) parts.push(`Used market ~${min}–${max}.`);
+  const min = formatUsd(model.used_price_min_usd);
+  const max = formatUsd(model.used_price_max_usd);
+  if (min && max) parts.push(`Used fair price ~${min}–${max}.`);
+  else parts.push("Price TBD.");
   if (model.range_official) parts.push(`Official range ${model.range_official}km.`);
   if (model.weight) parts.push(`Weight ${model.weight}kg.`);
   const summary =
@@ -150,10 +156,11 @@ export function buildModelDescriptionEn(model: {
 
 export function buildAnswerCapsuleEn(model: any, displayName: string): string {
   const name = `${model.manufacturer ?? ""} ${displayName}`.trim();
-  const min = formatKrw(model.used_price_min);
-  const max = formatKrw(model.used_price_max);
+  const min = formatUsd(model.used_price_min_usd);
+  const max = formatUsd(model.used_price_max_usd);
   const chunks: string[] = [`${name} on Pumo Wiki:`];
-  if (min && max) chunks.push(`used price ~${min}–${max}`);
+  if (min && max) chunks.push(`used fair price ~${min}–${max}`);
+  else chunks.push("Price TBD");
   if (model.range_official) chunks.push(`official range ${model.range_official}km`);
   if (model.weight) chunks.push(`weight ${model.weight}kg`);
   let text = `${chunks.join(", ")}.`;
@@ -169,14 +176,19 @@ export function buildAnswerCapsuleEn(model: any, displayName: string): string {
 export function buildModelFaqsEn(model: any, displayName: string): FaqItem[] {
   const faqs: FaqItem[] = [];
   const name = displayName || "this model";
-  const min = formatKrw(model.used_price_min);
-  const max = formatKrw(model.used_price_max);
-  const orig = formatKrw(model.original_price);
+  const min = formatUsd(model.used_price_min_usd);
+  const max = formatUsd(model.used_price_max_usd);
+  const orig = formatUsd(model.original_price_usd);
 
   if (min && max) {
     faqs.push({
       question: `What is the used price range for ${name}?`,
-      answer: `The Korean used-market range for ${name} is about ${min}–${max}.${orig ? ` New price is about ${orig}.` : ""} Condition, battery health, and accident history affect price — check voltage and wear items before buying.`,
+      answer: `The researched used fair price for ${name} is about ${min}–${max}.${orig ? ` MSRP is about ${orig}.` : ""} Condition, battery health, and accident history affect price — check voltage and wear items before buying.`,
+    });
+  } else {
+    faqs.push({
+      question: `What is the used price range for ${name}?`,
+      answer: `Price TBD for ${name} in USD. Condition, battery health, and accident history affect price — check voltage and wear items before buying.`,
     });
   }
 
