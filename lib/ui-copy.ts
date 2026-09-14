@@ -223,11 +223,6 @@ const ja: UiCopy = {
   compareRemove: "比較から削除",
   compareAdded: "追加済み",
   compareShort: "VS",
-  valueScoreLabel: (n) => `Value ${n}`,
-  compareAdd: "Add to compare",
-  compareRemove: "Remove from compare",
-  compareAdded: "Added",
-  compareShort: "VS",
   yearSuffix: (y) => `${y}年`,
   hoursApprox: (h) => `約${h}時間`,
   specs: {
@@ -247,6 +242,7 @@ const ja: UiCopy = {
     dimensions: "サイズ",
   },
 };
+
 
 const BY_LOCALE: Record<LocaleCode, UiCopy> = { ko, en, ja };
 
