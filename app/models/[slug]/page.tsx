@@ -42,7 +42,7 @@ import {
   buildModelFaqs,
 } from "@/lib/seo";
 import { SITE_URL } from "@/lib/site";
-import { displayModelName } from "@/lib/locale";
+import { displayModelName, shouldShowSubModel } from "@/lib/locale";
 
 export const revalidate = 3600;
 
@@ -139,7 +139,9 @@ export default async function ModelPage({ params }: Props) {
           <p className="text-sm font-medium text-muted-foreground">{model.manufacturer}</p>
           <h1 className="mt-0.5 text-[1.65rem] font-bold leading-tight tracking-tight text-foreground md:text-3xl">
             {displayName}
-            {model.sub_model && <span className="ml-1.5 text-xl font-normal text-muted-foreground">{model.sub_model}</span>}
+            {shouldShowSubModel(displayName, model.sub_model) && (
+              <span className="ml-1.5 text-xl font-normal text-muted-foreground">{model.sub_model}</span>
+            )}
           </h1>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-muted-foreground">
