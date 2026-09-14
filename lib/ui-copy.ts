@@ -173,3 +173,17 @@ export function uiCopy(locale: LocaleCode = "ko"): UiCopy {
   if (locale === "en") return en;
   return ko;
 }
+
+/** Soft-localize Korean duration fragments in free-text fields (e.g. charger_spec). */
+export function localizeKoDuration(
+  text: string | null | undefined,
+  locale: LocaleCode = "ko"
+): string | null {
+  if (text == null) return null;
+  const value = text.trim();
+  if (!value) return null;
+  if (locale !== "en") return value;
+  return value
+    .replace(/약\s*(\d+(?:\.\d+)?)\s*시간/g, "~$1 hrs")
+    .replace(/(\d+(?:\.\d+)?)\s*시간/g, "$1 hrs");
+}
