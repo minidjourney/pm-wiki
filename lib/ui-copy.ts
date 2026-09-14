@@ -28,6 +28,15 @@ export type UiCopy = {
   loadMore: (remaining: number) => string;
   showing: (visible: number, total: number) => string;
   emptyCategory: string;
+  searchTitle: string;
+  searchDescription: string;
+  searchPlaceholder: string;
+  searchLoading: string;
+  searchEmpty: string;
+  searchEmptyHint: string;
+  searchGroupModels: string;
+  searchAria: string;
+  scoreSuffix: (n: string | number) => string;
   yearSuffix: (y: string | number) => string;
   hoursApprox: (h: string | number) => string;
   specs: {
@@ -74,6 +83,15 @@ const ko: UiCopy = {
   loadMore: (remaining) => `더 보기 (${remaining}개 남음)`,
   showing: (visible, total) => `${total}개 중 ${visible}개 표시 중`,
   emptyCategory: "선택한 카테고리에 해당하는 기기가 없습니다.",
+  searchTitle: "기기 검색",
+  searchDescription: "모델명, 제조사, 고질병 키워드로 검색하세요.",
+  searchPlaceholder: "모델명, 제조사, 고질병 검색...",
+  searchLoading: "목록 불러오는 중...",
+  searchEmpty: "검색 결과가 없습니다",
+  searchEmptyHint: "다른 키워드로 시도해 보세요.",
+  searchGroupModels: "모델",
+  searchAria: "검색",
+  scoreSuffix: (n) => `${n}점`,
   yearSuffix: (y) => `${y}년`,
   hoursApprox: (h) => `약 ${h}시간`,
   specs: {
@@ -120,6 +138,15 @@ const en: UiCopy = {
   loadMore: (remaining) => `Load more (${remaining} left)`,
   showing: (visible, total) => `Showing ${visible} of ${total}`,
   emptyCategory: "No models in this category yet.",
+  searchTitle: "Search models",
+  searchDescription: "Search by model, brand, or known-issue keywords.",
+  searchPlaceholder: "Model, brand, or known issues...",
+  searchLoading: "Loading models...",
+  searchEmpty: "No results",
+  searchEmptyHint: "Try a different keyword.",
+  searchGroupModels: "Models",
+  searchAria: "Search",
+  scoreSuffix: (n) => `${n}`,
   yearSuffix: (y) => `${y}`,
   hoursApprox: (h) => `~${h} hrs`,
   specs: {

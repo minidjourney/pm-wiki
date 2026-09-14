@@ -15,19 +15,19 @@ import {
 import type { PmModel } from "@/types/database";
 import type { ChronicDefect } from "@/types/database";
 import { cn } from "@/lib/utils";
-import { displayModelName, getLocaleFromPath } from "@/lib/locale";
+import {
+  CATEGORY_LABELS,
+  displayModelName,
+  getLocaleFromPath,
+  localePath,
+  shouldShowSubModel,
+} from "@/lib/locale";
+import { uiCopy } from "@/lib/ui-copy";
 
 interface SearchModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-const CATEGORY_LABEL: Record<string, string> = {
-  kickboard: "전동킥보드",
-  ebike: "전기자전거",
-  scooter: "스쿠터",
-  unicycle: "전동 외발휠",
-};
 
 function getCategoryIcon(category: string) {
   switch (category) {
@@ -61,6 +61,7 @@ function getSearchableText(model: PmModel): string {
 export function SearchModal({ open, onOpenChange }: SearchModalProps) {
   const router = useRouter();
   const locale = getLocaleFromPath(usePathname() ?? "/");
+  const t = uiCopy(locale);
   const [models, setModels] = useState<PmModel[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -81,35 +82,35 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
 
   const handleSelect = (slug: string) => {
     onOpenChange(false);
-    router.push(`/models/${slug}`);
+    router.push(localePath(`/models/${slug}`, locale));
   };
 
   return (
     <CommandDialog
       open={open}
       onOpenChange={onOpenChange}
-      title="기기 검색"
-      description="모델명, 제조사, 고질병 키워드로 검색하세요."
+      title={t.searchTitle}
+      description={t.searchDescription}
       className="max-w-2xl"
     >
-      <CommandInput placeholder="모델명, 제조사, 고질병 검색..." />
+      <CommandInput placeholder={t.searchPlaceholder} />
       <CommandList>
         <CommandEmpty>
           {loading ? (
             <div className="flex flex-col items-center justify-center gap-2 py-12">
               <div className="size-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-              <p className="text-sm text-muted-foreground">목록 불러오는 중...</p>
+              <p className="text-sm text-muted-foreground">{t.searchLoading}</p>
             </div>
           ) : (
             <div className="py-12 text-center">
-              <p className="text-sm font-medium text-foreground">검색 결과가 없습니다</p>
+              <p className="text-sm font-medium text-foreground">{t.searchEmpty}</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                다른 키워드로 시도해 보세요.
+                {t.searchEmptyHint}
               </p>
             </div>
           )}
         </CommandEmpty>
-        <CommandGroup heading="모델">
+        <CommandGroup heading={t.searchGroupModels}>
           {models.slice(0, 30).map((m) => (
             <CommandItem
               key={m.id}
@@ -123,7 +124,9 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                   <div className="flex min-w-0 flex-col">
                     <span className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">
                       {displayModelName(m, locale)}
-                      {m.sub_model ? ` ${m.sub_model}` : ""}
+                      {shouldShowSubModel(displayModelName(m, locale), m.sub_model)
+                        ? ` ${m.sub_model}`
+                        : ""}
                     </span>
                     <span className="text-[10px] text-slate-500 dark:text-slate-400">
                       {m.manufacturer}
@@ -134,7 +137,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                   {(m as { pm_score?: number }).pm_score != null && (
                     <span className="flex items-center gap-1 rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-bold text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
                       <Trophy className="size-3" />
-                      {(m as { pm_score?: number }).pm_score}점
+                      {t.scoreSuffix((m as { pm_score?: number }).pm_score!)}
                     </span>
                   )}
                   <span
@@ -143,7 +146,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                       "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
                     )}
                   >
-                    {CATEGORY_LABEL[m.category ?? ""] ?? m.category ?? "—"}
+                    {(CATEGORY_LABELS[locale === "en" ? "en" : "ko"][m.category ?? ""] ?? m.category ?? "—")}
                   </span>
                 </div>
               </div>

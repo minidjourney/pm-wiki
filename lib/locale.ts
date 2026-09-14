@@ -183,3 +183,13 @@ export function pickLocalizedStringArray(
   if (enArr.length) return enArr;
   return asStrings(ko);
 }
+
+/** Hide sub_model in H1/search when the display name already includes it. */
+export function shouldShowSubModel(
+  displayName: string,
+  subModel?: string | null
+): boolean {
+  const sub = subModel?.trim();
+  if (!sub) return false;
+  return !displayName.toLowerCase().includes(sub.toLowerCase());
+}

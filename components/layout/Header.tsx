@@ -10,14 +10,18 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { usePathname } from "next/navigation";
 import { SearchModal } from "./SearchModal";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useCompareStore, MAX_COMPARE_COUNT } from "@/store/useCompareStore";
+import { getLocaleFromPath } from "@/lib/locale";
+import { uiCopy } from "@/lib/ui-copy";
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const compareCount = useCompareStore((s) => s.items.length);
+  const t = uiCopy(getLocaleFromPath(usePathname() ?? "/"));
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -67,7 +71,7 @@ export function Header() {
               type="button"
               onClick={() => setSearchOpen(true)}
               className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-slate-100 hover:text-foreground dark:hover:bg-slate-800"
-              aria-label="검색"
+              aria-label={t.searchAria}
             >
               <Search className="size-5" />
             </button>
