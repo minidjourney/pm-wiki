@@ -42,7 +42,10 @@ import {
   buildModelFaqs,
 } from "@/lib/seo";
 import { SITE_URL } from "@/lib/site";
-import { displayModelName } from "@/lib/locale";
+import {
+  brandedModelTitle,
+  displayModelNameWithoutBrand,
+} from "@/lib/locale";
 
 export const revalidate = 3600;
 
@@ -72,7 +75,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .single();
   if (!data) return { title: "Model not found - PM Wiki" };
 
-  const title = `${data.manufacturer} ${displayModelName(data as any, "en")} used price, specs & issues | PM Wiki`;
+  const title = `${brandedModelTitle(data, "en")} used price, specs & issues | PM Wiki`;
   const description = buildModelDescription(data);
   const url = absoluteUrl(`/en/models/${slug}`);
   const images = data.image_url ? [{ url: data.image_url }] : undefined;
@@ -85,7 +88,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: "website",
       locale: "en_US",
       url,
-      siteName: "퍼모위키",
+      siteName: "Pumo Wiki",
       title,
       description,
       images,
@@ -108,7 +111,7 @@ export default async function ModelPage({ params }: Props) {
 
   const faqs = buildModelFaqs(model);
   const answerCapsule = buildAnswerCapsule(model);
-  const displayName = displayModelName(model, "en");
+  const displayName = displayModelNameWithoutBrand(model, "en");
 
   const defects = (Array.isArray(model.chronic_defects) ? model.chronic_defects : []) as any[];
   const checklist = (Array.isArray(model.used_checklist) ? model.used_checklist : []) as any[];
