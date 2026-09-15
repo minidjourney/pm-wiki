@@ -13,6 +13,11 @@
 - [기타/콘텐츠]: charger_spec, charger_spec_en, release_year, is_discontinued, image_url, one_line_summary, one_line_summary_en
 - [JSONB 배열]: chronic_defects, chronic_defects_en, pros, cons, pros_en, cons_en, used_checklist, used_checklist_en, safety_rules, safety_rules_en, compatible_accessories, affiliate_links
 
+# Database Schema: ranking_signals + model_events
+- `ranking_signals`: per `(model_id, locale)` interest inputs — marketplace_score(중고매물/eBay-FB), demand_score(네이버/Trends), pv_score, ctr_score, as_bonus(KR AS), review_score(EN). unique(model_id, locale).
+- `lib/retention.ts` `interestScore` MUST prefer ranking_signals when any score field is present (COO weights: KO marketplace 0.35 / demand 0.25 / pv 0.15 / ctr 0.10 / as_bonus 0.15; EN marketplace 0.30 / demand 0.25 / pv 0.15 / ctr 0.10 / review_score 0.20; renormalize over present fields). Else fall back to pm_score + price/Wh/summary proxy. Never label as sales rate — use 관심·거래 지수 / Popular.
+- `model_events` (optional, no PII): id, model_id, locale, event_type('page_view'|'cta_click'), path, created_at — for later PV/CTR pipelines.
+
 # Naming / i18n
 - KO UI·SEO·JSON-LD 노출명은 항상 `model_name`(한국어)을 사용한다.
 - `model_name_en`은 영문 원본·`/en` 노출용이다.
