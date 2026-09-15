@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { ModelGrid } from "@/components/home/ModelGrid";
+import { CategoryTop10 } from "@/components/home/CategoryTop10";
 import { AdSlot } from "@/components/ads/AdSlot";
 import type { Metadata } from "next";
 import type { PmModel } from "@/types/database";

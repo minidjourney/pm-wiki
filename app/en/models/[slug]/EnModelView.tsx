@@ -9,6 +9,7 @@ import { SITE_URL } from "@/lib/site";
 import { CATEGORY_LABELS, shouldShowSubModel } from "@/lib/locale";
 import type { FaqItem } from "@/lib/seo";
 import { EnModelSections } from "./EnModelSections";
+import { SimilarModelsRail } from "@/components/models/SimilarModelsRail";
 
 export type EnModelViewProps = {
   model: any;
@@ -27,6 +28,7 @@ export type EnModelViewProps = {
   chargerSpec: string | null;
   dimensions: string | null;
   specCards: { label: string; value: string | number; icon: ReactElement }[];
+  similarModels: any[];
 };
 
 export function EnModelView({
@@ -46,6 +48,7 @@ export function EnModelView({
   chargerSpec,
   dimensions,
   specCards,
+  similarModels,
 }: EnModelViewProps) {
   return (
     <>
@@ -158,6 +161,7 @@ export function EnModelView({
             chargerSpec={chargerSpec}
             specCards={specCards}
           />
+          <SimilarModelsRail models={similarModels} locale="en" />
         </div>
       </main>
     </>

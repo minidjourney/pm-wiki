@@ -34,6 +34,8 @@ import { UsedMarketSearch } from "@/components/models/UsedMarketSearch";
 import { ChecklistAccordion } from "@/components/models/ChecklistAccordion";
 import { JsonLd } from "@/components/models/JsonLd";
 import { ModelFaq } from "@/components/models/ModelFaq";
+import { SimilarModelsRail } from "@/components/models/SimilarModelsRail";
+import { pickSimilarModels } from "@/lib/retention";
 import { AdSlot } from "@/components/ads/AdSlot";
 import {
   absoluteUrl,
@@ -105,6 +107,16 @@ export default async function ModelPage({ params }: Props) {
   const { data: model, error } = await supabase.from("pm_models").select("*").eq("slug", slug).single();
 
   if (error || !model) notFound();
+
+  const { data: peerRows } = await supabase
+    .from("pm_models")
+    .select("*")
+    .eq("status", "published")
+    .eq("category", model.category);
+  const similarModels = pickSimilarModels(model, (peerRows ?? []) as any[], {
+    locale: "ko",
+    limit: 5,
+  });
 
   const faqs = buildModelFaqs(model);
   const answerCapsule = buildAnswerCapsule(model);
@@ -304,6 +316,7 @@ export default async function ModelPage({ params }: Props) {
           <AdSlot slot="model-bottom" className="min-h-[90px] w-full overflow-hidden rounded-xl" />
 
           <ModelFaq items={faqs} />
+          <SimilarModelsRail models={similarModels} locale="ko" />
         </div>
       </main>
     </>
