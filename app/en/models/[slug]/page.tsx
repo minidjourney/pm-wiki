@@ -33,6 +33,7 @@ import {
 } from "@/lib/locale";
 import { uiCopy } from "@/lib/ui-copy";
 import { EnModelView } from "./EnModelView";
+import { pickSimilarModels } from "@/lib/retention";
 
 export const revalidate = 300;
 
@@ -88,6 +89,16 @@ export default async function ModelPage({ params }: Props) {
   const { data: model, error } = await supabase.from("pm_models").select("*").eq("slug", slug).single();
 
   if (error || !model) notFound();
+
+  const { data: peerRows } = await supabase
+    .from("pm_models")
+    .select("*")
+    .eq("status", "published")
+    .eq("category", model.category);
+  const similarModels = pickSimilarModels(model, (peerRows ?? []) as any[], {
+    locale: "en",
+    limit: 5,
+  });
 
   const displayName = displayModelNameWithoutBrand(model, "en");
   const t = uiCopy("en");
@@ -146,6 +157,7 @@ export default async function ModelPage({ params }: Props) {
       chargerSpec={chargerSpec}
       dimensions={dimensions}
       specCards={specCards}
+      similarModels={similarModels}
     />
   );
 }

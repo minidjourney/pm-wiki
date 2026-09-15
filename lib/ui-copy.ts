@@ -42,6 +42,10 @@ export type UiCopy = {
   compareRemove: string;
   compareAdded: string;
   compareShort: string;
+  similarModels: string;
+  top10Heading: string;
+  interestIndex: string;
+  interestIndexHint: string;
   yearSuffix: (y: string | number) => string;
   hoursApprox: (h: string | number) => string;
   specs: {
@@ -102,6 +106,10 @@ const ko: UiCopy = {
   compareRemove: "비교함에서 제거",
   compareAdded: "담김",
   compareShort: "VS",
+  similarModels: "비슷한 모델",
+  top10Heading: "카테고리 TOP 10",
+  interestIndex: "관심·거래 지수",
+  interestIndexHint: "판매율이 아니라 시세·스펙 완비·점수를 합친 임시 순위예요.",
   yearSuffix: (y) => `${y}년`,
   hoursApprox: (h) => `약 ${h}시간`,
   specs: {
@@ -162,6 +170,10 @@ const en: UiCopy = {
   compareRemove: "Remove from compare",
   compareAdded: "Added",
   compareShort: "VS",
+  similarModels: "Similar models",
+  top10Heading: "Top 10 by category",
+  interestIndex: "Popular",
+  interestIndexHint: "Proxy ranking from scores and complete price data — not a sales rate.",
   yearSuffix: (y) => `${y}`,
   hoursApprox: (h) => `~${h} hrs`,
   specs: {
@@ -223,6 +235,10 @@ const ja: UiCopy = {
   compareRemove: "比較から削除",
   compareAdded: "追加済み",
   compareShort: "VS",
+  similarModels: "似ているモデル",
+  top10Heading: "カテゴリ TOP 10",
+  interestIndex: "人気指数",
+  interestIndexHint: "販売率ではなく、スコアと価格データの仮ランキングです。",
   yearSuffix: (y) => `${y}年`,
   hoursApprox: (h) => `約${h}時間`,
   specs: {

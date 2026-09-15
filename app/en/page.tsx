@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { ModelGrid } from "@/components/home/ModelGrid";
+import { CategoryTop10 } from "@/components/home/CategoryTop10";
 import { AdSlot } from "@/components/ads/AdSlot";
 import type { Metadata } from "next";
 import type { PmModel } from "@/types/database";
@@ -86,6 +87,12 @@ export default async function EnglishHome() {
       <div className="mx-auto max-w-6xl px-4 pt-6">
         <AdSlot slot="home-mid" className="min-h-[90px] w-full overflow-hidden rounded-xl" />
       </div>
+
+      <section className="mx-auto max-w-6xl px-4 pt-10 pb-4">
+        {!error && publishedModels.length > 0 ? (
+          <CategoryTop10 models={publishedModels} locale="en" />
+        ) : null}
+      </section>
 
       <section className="mx-auto max-w-6xl px-4 py-12">
         {error ? (
