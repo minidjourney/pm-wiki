@@ -4,7 +4,7 @@ import { ModelGrid } from "@/components/home/ModelGrid";
 import { CategoryTop10 } from "@/components/home/CategoryTop10";
 import { AdSlot } from "@/components/ads/AdSlot";
 import type { Metadata } from "next";
-import type { PmModel } from "@/types/database";
+import type { PmModel, RankingSignalScores } from "@/types/database";
 import { SITE_URL } from "@/lib/site";
 import { hreflangLanguages } from "@/lib/locale";
 
@@ -43,6 +43,33 @@ function ModelGridFallback() {
   );
 }
 
+function buildSignalsByModelId(
+  rows: Array<
+    {
+      model_id: string;
+      marketplace_score: number | null;
+      demand_score: number | null;
+      pv_score: number | null;
+      ctr_score: number | null;
+      as_bonus: number | null;
+      review_score: number | null;
+    }
+  > | null
+): Record<string, RankingSignalScores> {
+  const map: Record<string, RankingSignalScores> = {};
+  for (const row of rows ?? []) {
+    map[row.model_id] = {
+      marketplace_score: row.marketplace_score,
+      demand_score: row.demand_score,
+      pv_score: row.pv_score,
+      ctr_score: row.ctr_score,
+      as_bonus: row.as_bonus,
+      review_score: row.review_score,
+    };
+  }
+  return map;
+}
+
 export default async function Home() {
   const supabase = await createClient();
   const { data: models, error } = await supabase
@@ -53,6 +80,15 @@ export default async function Home() {
     .order("used_price_min", { ascending: true, nullsFirst: false });
 
   const publishedModels = (models ?? []) as PmModel[];
+
+  const { data: signalRows } = await supabase
+    .from("ranking_signals")
+    .select(
+      "model_id, marketplace_score, demand_score, pv_score, ctr_score, as_bonus, review_score"
+    )
+    .eq("locale", "ko");
+
+  const signalsByModelId = buildSignalsByModelId(signalRows);
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -82,7 +118,11 @@ export default async function Home() {
 
       <section className="mx-auto max-w-6xl px-4 pt-10 pb-4">
         {!error && publishedModels.length > 0 ? (
-          <CategoryTop10 models={publishedModels} locale="ko" />
+          <CategoryTop10
+            models={publishedModels}
+            locale="ko"
+            signalsByModelId={signalsByModelId}
+          />
         ) : null}
       </section>
 

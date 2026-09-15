@@ -36,6 +36,7 @@ import { JsonLd } from "@/components/models/JsonLd";
 import { ModelFaq } from "@/components/models/ModelFaq";
 import { SimilarModelsRail } from "@/components/models/SimilarModelsRail";
 import { pickSimilarModels } from "@/lib/retention";
+import type { RankingSignalScores } from "@/types/database";
 import { AdSlot } from "@/components/ads/AdSlot";
 import {
   absoluteUrl,
@@ -113,9 +114,32 @@ export default async function ModelPage({ params }: Props) {
     .select("*")
     .eq("status", "published")
     .eq("category", model.category);
-  const similarModels = pickSimilarModels(model, (peerRows ?? []) as any[], {
+  const peers = (peerRows ?? []) as any[];
+  const peerIds = peers.map((p) => p.id as string);
+  const signalsByModelId: Record<string, RankingSignalScores> = {};
+  if (peerIds.length > 0) {
+    const { data: signalRows } = await supabase
+      .from("ranking_signals")
+      .select(
+        "model_id, marketplace_score, demand_score, pv_score, ctr_score, as_bonus, review_score"
+      )
+      .eq("locale", "ko")
+      .in("model_id", peerIds);
+    for (const row of signalRows ?? []) {
+      signalsByModelId[row.model_id] = {
+        marketplace_score: row.marketplace_score,
+        demand_score: row.demand_score,
+        pv_score: row.pv_score,
+        ctr_score: row.ctr_score,
+        as_bonus: row.as_bonus,
+        review_score: row.review_score,
+      };
+    }
+  }
+  const similarModels = pickSimilarModels(model, peers, {
     locale: "ko",
     limit: 5,
+    signalsByModelId,
   });
 
   const faqs = buildModelFaqs(model);
