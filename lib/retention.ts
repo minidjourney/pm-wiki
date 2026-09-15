@@ -143,7 +143,8 @@ export function interestScore(
 ): number {
   if (opts?.signal) {
     const fromSignals = scoreFromRankingSignals(opts.signal, locale);
-    if (fromSignals != null) return fromSignals;
+    // Signaled models outrank proxy until scores are calibrated.
+    if (fromSignals != null) return 1000 + fromSignals;
   }
   return interestScoreProxy(m, locale);
 }
