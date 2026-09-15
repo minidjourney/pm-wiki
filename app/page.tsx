@@ -80,6 +80,12 @@ export default async function Home() {
         className="mx-auto mt-6 max-w-6xl min-h-[90px] overflow-hidden rounded-xl px-4"
       />
 
+      <section className="mx-auto max-w-6xl px-4 pt-10 pb-4">
+        {!error && publishedModels.length > 0 ? (
+          <CategoryTop10 models={publishedModels} locale="ko" />
+        ) : null}
+      </section>
+
       <section className="mx-auto max-w-6xl px-4 py-8 sm:py-12">
         {error ? (
           <div className="rounded-xl border border-red-100 bg-red-50 p-8 text-center dark:border-red-900/30 dark:bg-red-950/20">
