@@ -127,3 +127,44 @@ export interface BlogPost {
   related_models: string[];
   created_at?: string | null;
 }
+
+/** Per-locale ranking inputs (Supabase `ranking_signals`). Scores are 0–100 proxies. */
+export interface RankingSignal {
+  id: string;
+  model_id: string;
+  locale: "ko" | "en";
+  /** 중고매물량 / eBay-FB proxy */
+  marketplace_score: number | null;
+  /** 네이버/Trends */
+  demand_score: number | null;
+  pv_score: number | null;
+  ctr_score: number | null;
+  /** KR AS bonus */
+  as_bonus: number | null;
+  /** EN review quality/volume */
+  review_score: number | null;
+  updated_at?: string | null;
+}
+
+/** Score fields only — enough for interestScore weighting */
+export type RankingSignalScores = Pick<
+  RankingSignal,
+  | "marketplace_score"
+  | "demand_score"
+  | "pv_score"
+  | "ctr_score"
+  | "as_bonus"
+  | "review_score"
+>;
+
+export type ModelEventType = "page_view" | "cta_click";
+
+/** Anonymous engagement events (no PII). Supabase `model_events`. */
+export interface ModelEvent {
+  id: string;
+  model_id: string;
+  locale: "ko" | "en";
+  event_type: ModelEventType;
+  path: string | null;
+  created_at?: string | null;
+}

@@ -1,9 +1,15 @@
 /**
  * Retention helpers: similar models + category TOP ranking (proxy scores).
  * Label as interest/popularity — never "sales rate".
+ *
+ * Prefer `ranking_signals` (COO-weighted) when present; else pm_score proxy.
  */
 import type { LocaleCode } from "@/lib/locale";
-import type { PmCategory, PmModel } from "@/types/database";
+import type {
+  PmCategory,
+  PmModel,
+  RankingSignalScores,
+} from "@/types/database";
 
 function num(v: unknown): number | null {
   if (v == null || v === "") return null;
@@ -48,8 +54,69 @@ function hasPriceBand(m: PmModel, locale: LocaleCode): boolean {
   return priceAnchor(m, locale) != null;
 }
 
-/** Temporary popularity proxy until ranking_signals / events exist. */
-export function interestScore(m: PmModel, locale: LocaleCode): number {
+/** COO brief weights — KO leans marketplace/demand/AS; EN leans marketplace/demand/reviews. */
+const KO_WEIGHTS: Record<
+  keyof Omit<RankingSignalScores, "review_score">,
+  number
+> = {
+  marketplace_score: 0.35,
+  demand_score: 0.25,
+  pv_score: 0.15,
+  ctr_score: 0.1,
+  as_bonus: 0.15,
+};
+
+const EN_WEIGHTS: Record<
+  keyof Omit<RankingSignalScores, "as_bonus">,
+  number
+> = {
+  marketplace_score: 0.3,
+  demand_score: 0.25,
+  pv_score: 0.15,
+  ctr_score: 0.1,
+  review_score: 0.2,
+};
+
+function hasAnyRankingSignal(signal: RankingSignalScores): boolean {
+  return (
+    num(signal.marketplace_score) != null ||
+    num(signal.demand_score) != null ||
+    num(signal.pv_score) != null ||
+    num(signal.ctr_score) != null ||
+    num(signal.as_bonus) != null ||
+    num(signal.review_score) != null
+  );
+}
+
+/**
+ * Weighted average over present signal fields (renormalized).
+ * Returns null when no usable signal values exist.
+ */
+export function scoreFromRankingSignals(
+  signal: RankingSignalScores,
+  locale: LocaleCode
+): number | null {
+  if (!hasAnyRankingSignal(signal)) return null;
+
+  const weights =
+    locale === "en"
+      ? (EN_WEIGHTS as Record<string, number>)
+      : (KO_WEIGHTS as Record<string, number>);
+
+  let weighted = 0;
+  let weightSum = 0;
+  for (const [key, w] of Object.entries(weights)) {
+    const v = num(signal[key as keyof RankingSignalScores]);
+    if (v == null) continue;
+    weighted += v * w;
+    weightSum += w;
+  }
+  if (weightSum <= 0) return null;
+  return weighted / weightSum;
+}
+
+/** pm_score + content completeness proxy (pre-signals fallback). */
+function interestScoreProxy(m: PmModel, locale: LocaleCode): number {
   const pm = num((m as { pm_score?: number | null }).pm_score) ?? 0;
   let score = pm;
   if (hasPriceBand(m, locale)) score += 8;
@@ -59,7 +126,36 @@ export function interestScore(m: PmModel, locale: LocaleCode): number {
   return score;
 }
 
+export type InterestScoreOpts = {
+  /** ranking_signals row for this model+locale when available */
+  signal?: RankingSignalScores | null;
+};
+
+/**
+ * Interest / popularity score for TOP10 + similar ranking.
+ * Prefers COO-weighted `ranking_signals` when any field is present;
+ * otherwise falls back to pm_score proxy.
+ */
+export function interestScore(
+  m: PmModel,
+  locale: LocaleCode,
+  opts?: InterestScoreOpts
+): number {
+  if (opts?.signal) {
+    const fromSignals = scoreFromRankingSignals(opts.signal, locale);
+    if (fromSignals != null) return fromSignals;
+  }
+  return interestScoreProxy(m, locale);
+}
+
 type Scored = { model: PmModel; score: number };
+
+export type RetentionPickOpts = {
+  locale?: LocaleCode;
+  limit?: number;
+  /** Optional map of model_id → ranking_signals scores for the active locale */
+  signalsByModelId?: Record<string, RankingSignalScores | null | undefined>;
+};
 
 /**
  * Same category → Wh±25% → price±25% → voltage band → same brand max 2.
@@ -67,10 +163,11 @@ type Scored = { model: PmModel; score: number };
 export function pickSimilarModels(
   current: PmModel,
   pool: PmModel[],
-  opts?: { locale?: LocaleCode; limit?: number }
+  opts?: RetentionPickOpts
 ): PmModel[] {
   const locale = opts?.locale ?? "ko";
   const limit = opts?.limit ?? 5;
+  const signals = opts?.signalsByModelId;
   const curWh = batteryWh(current);
   const curPrice = priceAnchor(current, locale);
   const curV = voltage(current);
@@ -104,7 +201,8 @@ export function pickSimilarModels(
       else if (dv <= 12) score += 10;
     }
     if (model.manufacturer === current.manufacturer) score += 5;
-    score += interestScore(model, locale) * 0.15;
+    score +=
+      interestScore(model, locale, { signal: signals?.[model.id] }) * 0.15;
     return { model, score };
   });
 
@@ -125,13 +223,18 @@ export function pickSimilarModels(
 export function pickTopByCategory(
   pool: PmModel[],
   category: PmCategory | "all",
-  opts?: { locale?: LocaleCode; limit?: number }
+  opts?: RetentionPickOpts
 ): PmModel[] {
   const locale = opts?.locale ?? "ko";
   const limit = opts?.limit ?? 10;
+  const signals = opts?.signalsByModelId;
   const filtered =
     category === "all" ? pool : pool.filter((m) => m.category === category);
   return [...filtered]
-    .sort((a, b) => interestScore(b, locale) - interestScore(a, locale))
+    .sort(
+      (a, b) =>
+        interestScore(b, locale, { signal: signals?.[b.id] }) -
+        interestScore(a, locale, { signal: signals?.[a.id] })
+    )
     .slice(0, limit);
 }
