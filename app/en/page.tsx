@@ -9,7 +9,11 @@ import { SITE_URL } from "@/lib/site";
 import { hreflangLanguages } from "@/lib/locale";
 
 export const metadata: Metadata = {
-  title: "Personal Mobility Used Prices & Specs",
+  // Same-segment page ignores `app/en/layout.tsx` title.template and would
+  // otherwise inherit root `%s | 퍼모위키` — absolute keeps EN home on Pumo Wiki.
+  title: {
+    absolute: "Personal Mobility Used Prices & Specs | Pumo Wiki",
+  },
   description:
     "Compare e-kickboards, e-bikes, scooters, and unicycles — Korean used-market prices, specs, and known issues. Pumo Wiki.",
   alternates: {
