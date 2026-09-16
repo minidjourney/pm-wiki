@@ -124,7 +124,10 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                   <div className="flex min-w-0 flex-col">
                     <span className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">
                       {displayModelName(m, locale)}
-                      {shouldShowSubModel(displayModelName(m, locale), m.sub_model)
+                      {shouldShowSubModel(displayModelName(m, locale), m.sub_model, [
+                        m.model_name,
+                        m.model_name_en,
+                      ])
                         ? ` ${m.sub_model}`
                         : ""}
                     </span>
