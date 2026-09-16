@@ -55,9 +55,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     )
     .eq("slug", slug)
     .single();
-  if (!data) return { title: "Model not found - PM Wiki" };
+  if (!data) return { title: "Model not found" };
 
-  const title = `${brandedModelTitle(data, "en")} used price, specs & issues | PM Wiki`;
+  const title = `${brandedModelTitle(data, "en")} used price, specs & issues`;
   const description = buildModelDescriptionEn(data);
   const url = absoluteUrl(`/en/models/${slug}`);
   const images = data.image_url ? [{ url: data.image_url }] : undefined;
