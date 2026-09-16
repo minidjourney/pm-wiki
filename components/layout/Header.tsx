@@ -14,22 +14,18 @@ import { usePathname } from "next/navigation";
 import { SearchModal } from "./SearchModal";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useCompareStore, MAX_COMPARE_COUNT } from "@/store/useCompareStore";
-import { CATEGORY_LABELS, getLocaleFromPath, localePath, resolveClientLocale, type LocaleCode } from "@/lib/locale";
+import { CATEGORY_LABELS, getLocaleFromPath, localePath } from "@/lib/locale";
 import { uiCopy } from "@/lib/ui-copy";
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const pathname = usePathname() ?? "/";
-  const [locale, setLocale] = useState<LocaleCode>(() => getLocaleFromPath(pathname));
+  const locale = getLocaleFromPath(pathname);
   const compareCount = useCompareStore((s) => s.items.length);
   const t = uiCopy(locale);
   const homeHref = localePath("/", locale);
   const labels = CATEGORY_LABELS[locale === "ja" ? "ko" : locale];
-
-  useEffect(() => {
-    setLocale(resolveClientLocale(pathname));
-  }, [pathname]);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
