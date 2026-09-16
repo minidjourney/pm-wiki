@@ -57,15 +57,23 @@ function redirectPath(
   return null;
 }
 
+function withPathname(request: NextRequest): NextResponse {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", request.nextUrl.pathname);
+  return NextResponse.next({
+    request: { headers: requestHeaders },
+  });
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  if (shouldSkip(pathname)) return NextResponse.next();
+  if (shouldSkip(pathname)) return withPathname(request);
 
   const preferred = resolvePreferredLocale(request);
-  if (preferred === "skip") return NextResponse.next();
+  if (preferred === "skip") return withPathname(request);
 
   const target = redirectPath(preferred, pathname);
-  if (!target) return NextResponse.next();
+  if (!target) return withPathname(request);
 
   const url = request.nextUrl.clone();
   url.pathname = target;
