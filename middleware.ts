@@ -57,6 +57,7 @@ function redirectPath(
   return null;
 }
 
+/** Forward pathname to the root layout for SSR html lang. */
 function withPathname(request: NextRequest): NextResponse {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-pathname", request.nextUrl.pathname);
