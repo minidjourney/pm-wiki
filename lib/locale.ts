@@ -184,14 +184,73 @@ export function pickLocalizedStringArray(
   return asStrings(ko);
 }
 
-/** Hide sub_model in H1/search when the display name already includes it. */
+/**
+ * Hide sub_model in H1/cards/search when the display name (or related EN/KO
+ * names) already covers it — including Hangul display + Latin sub_model.
+ */
 export function shouldShowSubModel(
   displayName: string,
-  subModel?: string | null
+  subModel?: string | null,
+  relatedNames: Array<string | null | undefined> = []
 ): boolean {
   const sub = subModel?.trim();
   if (!sub) return false;
-  return !displayName.toLowerCase().includes(sub.toLowerCase());
+
+  const haystacks = [displayName, ...relatedNames]
+    .map((s) => s?.trim())
+    .filter((s): s is string => Boolean(s));
+
+  const subLower = sub.toLowerCase();
+  for (const h of haystacks) {
+    if (h.toLowerCase().includes(subLower)) return false;
+  }
+
+  const compact = (s: string) =>
+    s.toLowerCase().replace(/[^a-z0-9가-힣]+/g, "");
+  const subCompact = compact(sub);
+  if (subCompact) {
+    for (const h of haystacks) {
+      if (compact(h).includes(subCompact)) return false;
+    }
+  }
+
+  // Latin/digit tokens (e.g. "Max G2", "X7 Pro") against KO display + related EN names.
+  // Soft style words (Max/Pro/Plus) are ignored when a harder model-code token matches.
+  const significant =
+    sub.match(/[A-Za-z0-9]+/g)?.map((t) => t.toLowerCase()).filter((t) => t.length >= 2) ??
+    [];
+  if (significant.length > 0) {
+    const soft = new Set([
+      "pro",
+      "max",
+      "plus",
+      "lite",
+      "mini",
+      "se",
+      "ev",
+      "s",
+      "r",
+    ]);
+    const hard = significant.filter((t) => !soft.has(t) || /\d/.test(t));
+    const tokensToCheck = hard.length > 0 ? hard : significant;
+    const combinedTokens = new Set(
+      haystacks.flatMap((h) =>
+        (h.match(/[A-Za-z0-9]+/g) ?? []).map((t) => t.toLowerCase())
+      )
+    );
+    const combinedLatin = haystacks
+      .map((h) => h.toLowerCase().replace(/[^a-z0-9]+/g, ""))
+      .join("");
+    if (
+      tokensToCheck.every(
+        (t) => combinedTokens.has(t) || combinedLatin.includes(t)
+      )
+    ) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 /**
