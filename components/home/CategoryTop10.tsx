@@ -80,12 +80,7 @@ export function CategoryTop10({
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
           {top.map((model, i) => (
-            <div key={model.id} className="relative">
-              <span className="absolute left-2 top-2 z-20 flex h-7 min-w-7 items-center justify-center rounded-full bg-slate-900/90 px-2 text-xs font-bold text-white">
-                {i + 1}
-              </span>
-              <ModelCard model={model} />
-            </div>
+            <ModelCard key={model.id} model={model} rank={i + 1} />
           ))}
         </div>
       )}
