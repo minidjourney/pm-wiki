@@ -3,9 +3,15 @@ import { SetHtmlLang } from "@/components/layout/SetHtmlLang";
 import { SITE_URL } from "@/lib/site";
 import { hreflangLanguages } from "@/lib/locale";
 
+/**
+ * Nested title.template overrides the root Korean "%s | 퍼모위키" for deeper
+ * `/en/*` segments (e.g. model pages). Same-level `app/en/page.tsx` cannot use
+ * this template (Next.js applies the parent layout's template there) — that
+ * page sets `title.absolute` instead.
+ */
 export const metadata: Metadata = {
   title: {
-    default: "Pumo Wiki | Personal Mobility Used Prices & Specs",
+    default: "Personal Mobility Used Prices & Specs | Pumo Wiki",
     template: "%s | Pumo Wiki",
   },
   description:
