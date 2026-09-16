@@ -16,8 +16,9 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { displayModelName, getLocaleFromPath } from "@/lib/locale";
+import { brandedModelTitle, getLocaleFromPath, localePath } from "@/lib/locale";
 import { usePathname } from "next/navigation";
+import { uiCopy } from "@/lib/ui-copy";
 
 function formatPrice(value: number | null) {
   if (value == null || value === 0) return "—";
@@ -27,6 +28,8 @@ function formatPrice(value: number | null) {
 
 export default function ComparePage() {
   const locale = getLocaleFromPath(usePathname() ?? "/");
+  const t = uiCopy(locale);
+  const homeHref = localePath("/", locale);
   const items = useCompareStore((s) => s.items);
   const slugs = items.map((i) => i.slug);
   const clear = useCompareStore((s) => s.clear);
@@ -63,14 +66,14 @@ export default function ComparePage() {
     return (
       <main className="mx-auto max-w-6xl px-4 py-12">
         <div className="rounded-xl border border-slate-200 bg-white p-8 text-center dark:border-slate-800 dark:bg-slate-900">
-          <h1 className="text-xl font-bold text-foreground">모델 비교</h1>
+          <h1 className="text-xl font-bold text-foreground">{t.compareTitle}</h1>
           <p className="mt-2 text-muted-foreground">
-            비교하려면 홈에서 기기 카드의 &quot;VS 담기&quot;로 2개 이상 담아주세요.
+            {t.compareEmptyHint}
           </p>
           <Button asChild className="mt-4">
-            <Link href="/">
+            <Link href={homeHref}>
               <ArrowLeft className="mr-2 size-4" />
-              홈으로
+              {t.backHome}
             </Link>
           </Button>
         </div>
@@ -94,7 +97,7 @@ export default function ComparePage() {
   }
 
   const rows: Array<{ label: string; key: string; get: (m: PmModel) => string | number }> = [
-    { label: "모델명", key: "name", get: (m) => `${m.manufacturer} ${displayModelName(m, locale)}` },
+    { label: "모델명", key: "name", get: (m) => brandedModelTitle(m, locale) },
     { label: "신품가", key: "op", get: (m) => formatPrice(m.original_price ?? null) },
     { label: "중고 적정 시세", key: "used_range", get: formatUsedRange },
     { label: "배터리 용량 (Wh)", key: "cap", get: (m) => m.battery_capacity ?? "—" },
@@ -116,17 +119,17 @@ export default function ComparePage() {
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm" asChild>
-            <Link href="/">
+            <Link href={homeHref}>
               <ArrowLeft className="mr-1 size-4" />
-              홈
+              {t.home}
             </Link>
           </Button>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            스펙 비교
+            {t.compareTitle}
           </h1>
         </div>
         <Button variant="outline" size="sm" onClick={() => clear()}>
-          비교함 비우기
+          {t.compareClear}
         </Button>
       </div>
 
@@ -140,10 +143,10 @@ export default function ComparePage() {
               {models.map((m) => (
                 <TableHead key={m.id} className="min-w-[148px] font-semibold">
                   <Link
-                    href={`/models/${m.slug}`}
+                    href={localePath(`/models/${m.slug}`, locale)}
                     className="text-primary hover:underline"
                   >
-                    {m.manufacturer} {displayModelName(m, locale)}
+                    {brandedModelTitle(m, locale)}
                   </Link>
                 </TableHead>
               ))}

@@ -1,5 +1,5 @@
 import { SITE_URL } from "@/lib/site";
-import { pickLocalizedArray } from "@/lib/locale";
+import { brandedModelTitle, pickLocalizedArray } from "@/lib/locale";
 
 export function absoluteUrl(path = ""): string {
   if (!path) return SITE_URL;
@@ -25,7 +25,13 @@ export function buildModelDescription(model: {
   range_official?: number | null;
   weight?: number | null;
 }): string {
-  const name = `${model.manufacturer ?? ""} ${model.model_name ?? ""}`.trim();
+  const name = brandedModelTitle(
+    {
+      model_name: model.model_name ?? "",
+      manufacturer: model.manufacturer,
+    },
+    "ko"
+  );
   const parts: string[] = [`${name} 중고 시세·스펙·고질병 가이드.`];
   const min = formatKrw(model.used_price_min);
   const max = formatKrw(model.used_price_max);
@@ -114,7 +120,13 @@ export function buildModelFaqs(model: any): FaqItem[] {
 
 /** BLUF: 첫 화면에 바로 인용 가능한 수치 요약 */
 export function buildAnswerCapsule(model: any): string {
-  const name = `${model.manufacturer ?? ""} ${model.model_name ?? ""}`.trim();
+  const name = brandedModelTitle(
+    {
+      model_name: String(model.model_name ?? ""),
+      manufacturer: model.manufacturer,
+    },
+    "ko"
+  );
   const min = formatKrw(model.used_price_min);
   const max = formatKrw(model.used_price_max);
   const chunks: string[] = [`${name}은(는) 퍼모위키 기준`];
@@ -138,9 +150,14 @@ export function buildModelDescriptionEn(model: {
   range_official?: number | null;
   weight?: number | null;
 }): string {
-  const display =
-    (model.model_name_en?.trim() || model.model_name || "").trim();
-  const name = `${model.manufacturer ?? ""} ${display}`.trim();
+  const name = brandedModelTitle(
+    {
+      model_name: model.model_name ?? "",
+      model_name_en: model.model_name_en,
+      manufacturer: model.manufacturer,
+    },
+    "en"
+  );
   const parts: string[] = [`${name} used price, specs, and known issues.`];
   const min = formatUsd(model.used_price_min_usd);
   const max = formatUsd(model.used_price_max_usd);
@@ -155,7 +172,14 @@ export function buildModelDescriptionEn(model: {
 }
 
 export function buildAnswerCapsuleEn(model: any, displayName: string): string {
-  const name = `${model.manufacturer ?? ""} ${displayName}`.trim();
+  const name = brandedModelTitle(
+    {
+      model_name: displayName || String(model.model_name ?? ""),
+      model_name_en: model.model_name_en ?? displayName,
+      manufacturer: model.manufacturer,
+    },
+    "en"
+  );
   const min = formatUsd(model.used_price_min_usd);
   const max = formatUsd(model.used_price_max_usd);
   const chunks: string[] = [`${name} on Pumo Wiki:`];

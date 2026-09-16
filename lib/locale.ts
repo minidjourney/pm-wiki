@@ -109,7 +109,43 @@ function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-/** Strip leading manufacturer when the display name already includes it. */
+function brandTokens(value: string): string[] {
+  return value
+    .trim()
+    .split(/\s+/)
+    .map((t) => t.trim())
+    .filter(Boolean);
+}
+
+/** KO↔EN brand aliases for overlap / prefix stripping (Hangul + Latin). */
+const BRAND_TOKEN_ALIASES: Record<string, string[]> = {
+  ninebot: ["ninebot", "나인봇"],
+  "나인봇": ["ninebot", "나인봇"],
+  segway: ["segway", "세그웨이"],
+  "세그웨이": ["segway", "세그웨이"],
+  xiaomi: ["xiaomi", "샤오미"],
+  "샤오미": ["xiaomi", "샤오미"],
+  dualtron: ["dualtron", "듀얼트론"],
+  "듀얼트론": ["dualtron", "듀얼트론"],
+};
+
+function brandTokenKeys(token: string): string[] {
+  const raw = token.toLowerCase();
+  return BRAND_TOKEN_ALIASES[raw] ?? BRAND_TOKEN_ALIASES[token] ?? [raw];
+}
+
+function brandTokensOverlap(
+  left: string[],
+  right: string[]
+): boolean {
+  if (left.length !== right.length) return false;
+  return left.every((lt, i) => {
+    const a = new Set(brandTokenKeys(lt));
+    return brandTokenKeys(right[i]).some((k) => a.has(k));
+  });
+}
+
+/** Strip leading manufacturer (full or token/alias overlap) from a display name. */
 export function displayModelNameWithoutBrand(
   model: NamedModel,
   locale: LocaleCode = "ko"
@@ -117,13 +153,33 @@ export function displayModelNameWithoutBrand(
   const name = displayModelName(model, locale).trim();
   const mfr = model.manufacturer?.trim();
   if (!mfr) return name;
-  const stripped = name
+
+  const fullStrip = name
     .replace(new RegExp(`^${escapeRegExp(mfr)}\\s+`, "i"), "")
     .trim();
-  return stripped || name;
+  if (fullStrip !== name) return fullStrip || name;
+
+  const mfrAliasSet = new Set(brandTokens(mfr).flatMap(brandTokenKeys));
+  const parts = brandTokens(name);
+  let i = 0;
+  while (i < parts.length) {
+    if (brandTokenKeys(parts[i]).some((k) => mfrAliasSet.has(k))) {
+      i += 1;
+      continue;
+    }
+    break;
+  }
+  if (i > 0) {
+    const stripped = parts.slice(i).join(" ").trim();
+    return stripped || name;
+  }
+  return name;
 }
 
-/** Title / OG label: manufacturer once, even if model_name_en already includes it. */
+/**
+ * Title / OG label: manufacturer once — including partial overlaps like
+ * manufacturer "세그웨이 나인봇" + name "나인봇 맥스 G2".
+ */
 export function brandedModelTitle(
   model: NamedModel,
   locale: LocaleCode = "ko"
@@ -132,6 +188,31 @@ export function brandedModelTitle(
   const mfr = model.manufacturer?.trim();
   if (!mfr) return name;
   if (name.toLowerCase().startsWith(mfr.toLowerCase())) return name;
+
+  const mfrParts = brandTokens(mfr);
+  const nameParts = brandTokens(name);
+
+  // Full brand already leading the name (token/alias match) → keep name.
+  if (
+    nameParts.length >= mfrParts.length &&
+    brandTokensOverlap(mfrParts, nameParts.slice(0, mfrParts.length))
+  ) {
+    return name;
+  }
+
+  // Partial overlap: manufacturer "세그웨이 나인봇" + name "나인봇 맥스 G2"
+  let overlap = 0;
+  const max = Math.min(mfrParts.length, nameParts.length);
+  for (let k = 1; k <= max; k += 1) {
+    if (brandTokensOverlap(mfrParts.slice(-k), nameParts.slice(0, k))) {
+      overlap = k;
+    }
+  }
+  if (overlap > 0) {
+    const mfrHead = mfrParts.slice(0, -overlap).join(" ");
+    return mfrHead ? `${mfrHead} ${name}` : name;
+  }
+
   return `${mfr} ${name}`;
 }
 
@@ -216,6 +297,7 @@ export function shouldShowSubModel(
 
   // Latin/digit tokens (e.g. "Max G2", "X7 Pro") against KO display + related EN names.
   // Soft style words (Max/Pro/Plus) are ignored when a harder model-code token matches.
+  // Hangul style words (맥스/프로/…) count as covering Latin soft tokens.
   const significant =
     sub.match(/[A-Za-z0-9]+/g)?.map((t) => t.toLowerCase()).filter((t) => t.length >= 2) ??
     [];
@@ -231,6 +313,13 @@ export function shouldShowSubModel(
       "s",
       "r",
     ]);
+    const softHangul: Record<string, string[]> = {
+      max: ["맥스"],
+      pro: ["프로"],
+      plus: ["플러스"],
+      lite: ["라이트"],
+      mini: ["미니"],
+    };
     const hard = significant.filter((t) => !soft.has(t) || /\d/.test(t));
     const tokensToCheck = hard.length > 0 ? hard : significant;
     const combinedTokens = new Set(
@@ -241,11 +330,13 @@ export function shouldShowSubModel(
     const combinedLatin = haystacks
       .map((h) => h.toLowerCase().replace(/[^a-z0-9]+/g, ""))
       .join("");
-    if (
-      tokensToCheck.every(
-        (t) => combinedTokens.has(t) || combinedLatin.includes(t)
-      )
-    ) {
+    const combinedHangul = haystacks.join("");
+    const tokenCovered = (t: string) => {
+      if (combinedTokens.has(t) || combinedLatin.includes(t)) return true;
+      const hangul = softHangul[t];
+      return Boolean(hangul?.some((h) => combinedHangul.includes(h)));
+    };
+    if (tokensToCheck.every(tokenCovered)) {
       return false;
     }
   }
@@ -340,4 +431,29 @@ export function detectPreferredAutoLocale(opts: {
 export function setLocaleCookie(code: LocaleCode) {
   if (typeof document === "undefined") return;
   document.cookie = `${LOCALE_COOKIE_NAME}=${code};path=/;max-age=${LOCALE_COOKIE_MAX_AGE};samesite=lax`;
+}
+
+/** Read LanguageSwitcher preference (client only). */
+export function getLocaleCookie(): LocaleCode | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(
+    new RegExp(`(?:^|; )${LOCALE_COOKIE_NAME}=([^;]*)`)
+  );
+  const value = match?.[1];
+  if (value === "ko" || value === "en" || value === "ja") return value;
+  return null;
+}
+
+/**
+ * UI locale for client chrome.
+ * Prefixed `/en` / `/ja` win; shared routes like `/compare` honor the cookie.
+ */
+export function resolveClientLocale(pathname: string): LocaleCode {
+  const fromPath = getLocaleFromPath(pathname);
+  if (pathname === "/en" || pathname.startsWith("/en/")) return "en";
+  if (pathname === "/ja" || pathname.startsWith("/ja/")) return "ja";
+  if (pathname === "/compare" || pathname.startsWith("/compare/")) {
+    return getLocaleCookie() ?? fromPath;
+  }
+  return fromPath;
 }
