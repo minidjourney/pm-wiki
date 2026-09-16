@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { ImageOff } from "lucide-react";
 import type { PmModel } from "@/types/database";
 import type { LocaleCode } from "@/lib/locale";
 import { displayModelName, localePath } from "@/lib/locale";
@@ -49,13 +50,19 @@ export function SimilarModelsRail({
             <Link
               key={model.id}
               href={href}
-              className="snap-start shrink-0 w-[9.5rem] rounded-2xl border border-slate-100 bg-slate-50/80 p-2.5 shadow-sm transition hover:border-blue-200 hover:bg-white"
+              className="snap-start shrink-0 w-[10rem] rounded-2xl border border-slate-100 bg-slate-50/80 p-2.5 shadow-sm transition hover:border-blue-200 hover:bg-white dark:border-slate-800 dark:bg-slate-900/60"
             >
-              <div className="relative mb-2 flex h-24 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-b from-slate-100 to-slate-200/60">
+              <div className="relative mb-2 flex h-24 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-b from-slate-100 to-slate-200/60 dark:from-slate-800 dark:to-slate-900/80">
                 {img ? (
                   <Image src={img} alt={name} width={160} height={160} className="h-full w-full object-contain p-2" />
                 ) : (
-                  <span className="text-xs text-muted-foreground">No image</span>
+                  <span
+                    className="flex items-center justify-center text-muted-foreground"
+                    aria-hidden="true"
+                    title={locale === "en" ? "No photo" : locale === "ja" ? "画像なし" : "이미지 없음"}
+                  >
+                    <ImageOff className="size-6 opacity-40" strokeWidth={1.5} />
+                  </span>
                 )}
               </div>
               <p className="line-clamp-2 text-xs font-semibold leading-snug text-foreground">{name}</p>
