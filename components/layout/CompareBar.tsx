@@ -4,9 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Scale, X } from "lucide-react";
 import { useCompareStore, MAX_COMPARE_COUNT } from "@/store/useCompareStore";
+import { getLocaleFromPath } from "@/lib/locale";
+import { uiCopy } from "@/lib/ui-copy";
 
 export function CompareBar() {
   const pathname = usePathname() ?? "/";
+  const locale = getLocaleFromPath(pathname);
+  const t = uiCopy(locale);
   const items = useCompareStore((s) => s.items);
   const remove = useCompareStore((s) => s.remove);
   const clear = useCompareStore((s) => s.clear);
@@ -26,7 +30,7 @@ export function CompareBar() {
         <div className="mx-auto flex max-w-6xl items-center gap-2 px-3 py-2.5 sm:gap-3 sm:px-4">
           <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <span className="hidden shrink-0 text-xs font-medium text-muted-foreground sm:inline">
-              비교함 {items.length}/{MAX_COMPARE_COUNT}
+              {t.compareTray(items.length, MAX_COMPARE_COUNT)}
             </span>
             {items.map((item) => (
               <span
@@ -38,7 +42,7 @@ export function CompareBar() {
                   type="button"
                   onClick={() => remove(item.slug)}
                   className="inline-flex size-7 items-center justify-center rounded-full text-muted-foreground hover:bg-slate-200 hover:text-foreground dark:hover:bg-slate-700"
-                  aria-label={`${item.model_name} 제거`}
+                  aria-label={t.compareRemoveAria(item.model_name)}
                 >
                   <X className="size-3.5" />
                 </button>
@@ -50,7 +54,7 @@ export function CompareBar() {
             onClick={() => clear()}
             className="hidden min-h-11 shrink-0 px-2 text-xs text-muted-foreground hover:text-foreground sm:inline"
           >
-            비우기
+            {t.compareClear}
           </button>
           {ready ? (
             <Link
@@ -58,11 +62,11 @@ export function CompareBar() {
               className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700"
             >
               <Scale className="size-4" aria-hidden />
-              비교하기
+              {t.compareGo}
             </Link>
           ) : (
             <span className="inline-flex min-h-11 shrink-0 items-center rounded-full bg-slate-100 px-3 text-xs font-medium text-muted-foreground dark:bg-slate-800">
-              1개 더 담기
+              {t.compareNeedMore}
             </span>
           )}
         </div>
