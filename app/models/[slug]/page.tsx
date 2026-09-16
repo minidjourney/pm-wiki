@@ -45,7 +45,7 @@ import {
   buildModelFaqs,
 } from "@/lib/seo";
 import { SITE_URL } from "@/lib/site";
-import { displayModelName, shouldShowSubModel } from "@/lib/locale";
+import { brandedModelTitle, displayModelName, shouldShowSubModel } from "@/lib/locale";
 
 export const revalidate = 3600;
 
@@ -73,9 +73,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     )
     .eq("slug", slug)
     .single();
-  if (!data) return { title: "모델 없음 - 퍼모위키" };
+  if (!data) return { title: "모델 없음" };
 
-  const title = `${data.manufacturer} ${data.model_name} 중고가·스펙·고질병 | 퍼모위키`;
+  const title = `${brandedModelTitle(data, "ko")} 중고가·스펙·고질병`;
   const description = buildModelDescription(data);
   const url = absoluteUrl(`/models/${slug}`);
   const images = data.image_url ? [{ url: data.image_url }] : undefined;
@@ -175,7 +175,7 @@ export default async function ModelPage({ params }: Props) {
           <p className="text-sm font-medium text-muted-foreground">{model.manufacturer}</p>
           <h1 className="mt-0.5 text-[1.65rem] font-bold leading-tight tracking-tight text-foreground md:text-3xl">
             {displayName}
-            {shouldShowSubModel(displayName, model.sub_model) && (
+            {shouldShowSubModel(displayName, model.sub_model, [model.model_name_en]) && (
               <span className="ml-1.5 text-xl font-normal text-muted-foreground">{model.sub_model}</span>
             )}
           </h1>
