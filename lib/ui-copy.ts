@@ -48,6 +48,21 @@ export type UiCopy = {
   interestIndexHint: string;
   yearSuffix: (y: string | number) => string;
   hoursApprox: (h: string | number) => string;
+  siteName: string;
+  footerTagline: string;
+  privacy: string;
+  terms: string;
+  blog: string;
+  compareTitle: string;
+  compareTray: (count: number, max: number) => string;
+  compareClear: string;
+  compareGo: string;
+  compareNeedMore: string;
+  compareRemoveAria: (name: string) => string;
+  compareEmptyHint: string;
+  backHome: string;
+  menu: string;
+  openMenu: string;
   specs: {
     releaseYear: string;
     maxSpeed: string;
@@ -110,6 +125,21 @@ const ko: UiCopy = {
   top10Heading: "카테고리 TOP 10",
   interestIndex: "관심·거래 지수",
   interestIndexHint: "판매율이 아니라 시세·스펙 완비·점수를 합친 임시 순위예요.",
+  siteName: "퍼모위키",
+  footerTagline: "퍼스널 모빌리티 중고 시세·스펙 정보.",
+  privacy: "개인정보처리방침",
+  terms: "이용약관",
+  blog: "블로그",
+  compareTitle: "모델 비교",
+  compareTray: (count, max) => `모델 비교 (${count} / ${max})`,
+  compareClear: "비우기",
+  compareGo: "비교하기",
+  compareNeedMore: "1개 더 담기",
+  compareRemoveAria: (name) => `${name} 제거`,
+  compareEmptyHint: "비교하려면 홈에서 기기 카드의 \"VS 담기\"로 2개 이상 담아주세요.",
+  backHome: "홈으로",
+  menu: "메뉴",
+  openMenu: "메뉴 열기",
   yearSuffix: (y) => `${y}년`,
   hoursApprox: (h) => `약 ${h}시간`,
   specs: {
@@ -174,6 +204,21 @@ const en: UiCopy = {
   top10Heading: "Top 10 by category",
   interestIndex: "Popular",
   interestIndexHint: "Proxy ranking from scores and complete price data — not a sales rate.",
+  siteName: "Pumo Wiki",
+  footerTagline: "Personal mobility used prices & specs.",
+  privacy: "Privacy Policy",
+  terms: "Terms of Use",
+  blog: "Blog",
+  compareTitle: "Compare models",
+  compareTray: (count, max) => `Compare (${count} / ${max})`,
+  compareClear: "Clear",
+  compareGo: "Compare",
+  compareNeedMore: "Add 1 more",
+  compareRemoveAria: (name) => `Remove ${name}`,
+  compareEmptyHint: "Add 2+ models from the home cards (VS) to compare.",
+  backHome: "Back to home",
+  menu: "Menu",
+  openMenu: "Open menu",
   yearSuffix: (y) => `${y}`,
   hoursApprox: (h) => `~${h} hrs`,
   specs: {
@@ -239,6 +284,21 @@ const ja: UiCopy = {
   top10Heading: "カテゴリ TOP 10",
   interestIndex: "人気指数",
   interestIndexHint: "販売率ではなく、スコアと価格データの仮ランキングです。",
+  siteName: "プモウィキ",
+  footerTagline: "パーソナルモビリティの中古相場・スペック情報。",
+  privacy: "プライバシー",
+  terms: "利用規約",
+  blog: "ブログ",
+  compareTitle: "モデル比較",
+  compareTray: (count, max) => `比較 (${count} / ${max})`,
+  compareClear: "クリア",
+  compareGo: "比較する",
+  compareNeedMore: "あと1台追加",
+  compareRemoveAria: (name) => `${name}を削除`,
+  compareEmptyHint: "ホームのカードから「VS」で2台以上追加してください。",
+  backHome: "ホームへ",
+  menu: "メニュー",
+  openMenu: "メニューを開く",
   yearSuffix: (y) => `${y}年`,
   hoursApprox: (h) => `約${h}時間`,
   specs: {
