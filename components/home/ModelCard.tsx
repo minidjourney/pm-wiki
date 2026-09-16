@@ -162,7 +162,7 @@ export function ModelCard({ model, rank }: ModelCardProps) {
         </p>
         <h3 className="mt-0.5 line-clamp-2 text-[15px] font-bold leading-snug text-foreground group-hover:text-primary sm:text-base">
           {displayName}
-          {shouldShowSubModel(displayName, model.sub_model) && (
+          {shouldShowSubModel(displayName, model.sub_model, [model.model_name_en]) && (
             <span className="ml-1 text-sm font-normal text-muted-foreground">
               {model.sub_model}
             </span>
