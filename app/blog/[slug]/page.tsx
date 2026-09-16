@@ -18,9 +18,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .eq("slug", slug)
     .single();
 
-  if (!data) return { title: "글 없음 - 퍼모위키" };
+  if (!data) return { title: "글 없음" };
   return {
-    title: `${data.title} - 퍼모위키`,
+    title: data.title,
     description: (data as { title: string }).title,
   };
 }
