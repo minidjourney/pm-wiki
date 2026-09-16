@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { brandedModelTitle, getLocaleFromPath, localePath, resolveClientLocale, type LocaleCode } from "@/lib/locale";
+import { brandedModelTitle, getLocaleFromPath, localePath } from "@/lib/locale";
 import { usePathname } from "next/navigation";
 import { uiCopy } from "@/lib/ui-copy";
 
@@ -27,8 +27,7 @@ function formatPrice(value: number | null) {
 }
 
 export default function ComparePage() {
-  const pathname = usePathname() ?? "/";
-  const [locale, setLocale] = useState<LocaleCode>(() => getLocaleFromPath(pathname));
+  const locale = getLocaleFromPath(usePathname() ?? "/");
   const t = uiCopy(locale);
   const homeHref = localePath("/", locale);
   const items = useCompareStore((s) => s.items);
@@ -36,10 +35,6 @@ export default function ComparePage() {
   const clear = useCompareStore((s) => s.clear);
   const [models, setModels] = useState<PmModel[]>([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setLocale(resolveClientLocale(pathname));
-  }, [pathname]);
 
   useEffect(() => {
     if (slugs.length === 0) {
