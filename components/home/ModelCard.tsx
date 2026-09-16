@@ -10,6 +10,7 @@ import {
   displayModelName,
   getLocaleFromPath,
   localePath,
+  shouldShowSubModel,
 } from "@/lib/locale";
 import { Badge } from "@/components/ui/badge";
 import { calculateValueScore } from "@/lib/pm-score";
@@ -47,9 +48,11 @@ function enPriceBlock(model: PmModel): { label: string; value: string } {
 
 interface ModelCardProps {
   model: PmModel;
+  /** 1-based rank when shown inside category TOP 10 */
+  rank?: number;
 }
 
-export function ModelCard({ model }: ModelCardProps) {
+export function ModelCard({ model, rank }: ModelCardProps) {
   const locale = getLocaleFromPath(usePathname() ?? "/");
   const displayName = displayModelName(model, locale);
   const isEn = locale === "en";
@@ -104,38 +107,49 @@ export function ModelCard({ model }: ModelCardProps) {
         aria-label={isEn ? `${model.manufacturer} ${displayName} details` : `${model.manufacturer} ${displayName} 상세 보기`}
       />
 
-      {/* 상단: 카테고리 뱃지 + 비교함 담기 + 가성비 + 단종 */}
+      {/* 상단: 순위·카테고리 + 비교/가성비/단종 (모바일에서 덜 붐비게) */}
       <div className="relative z-10 mb-2.5 flex items-start justify-between gap-2">
-        <span className="pointer-events-none rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-muted-foreground dark:bg-slate-800">
-          {categoryLabel}
-        </span>
-        <div className="flex flex-wrap items-center justify-end gap-1.5">
+        <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+          {rank != null && (
+            <span
+              className="pointer-events-none flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full bg-slate-900/90 px-2 text-xs font-bold text-white"
+              aria-label={isEn ? `Rank ${rank}` : `${rank}위`}
+            >
+              {rank}
+            </span>
+          )}
+          <span className="pointer-events-none rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-muted-foreground dark:bg-slate-800">
+            {categoryLabel}
+          </span>
+        </div>
+        <div className="flex max-w-[58%] flex-wrap items-center justify-end gap-1 sm:max-w-none sm:gap-1.5">
           <button
             type="button"
             onClick={handleCompareClick}
             title={inCompare ? t.compareRemove : t.compareAdd}
+            aria-label={inCompare ? t.compareRemove : t.compareAdd}
             aria-pressed={inCompare}
             className={cn(
-              "relative z-10 inline-flex min-h-11 items-center justify-center gap-1 rounded-md px-2.5 text-xs font-medium transition-colors",
+              "relative z-10 inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-md px-2 text-xs font-medium transition-colors sm:px-2.5",
               inCompare
                 ? "bg-primary text-primary-foreground"
                 : "bg-slate-100 text-muted-foreground hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700"
             )}
           >
-            <Scale className="size-3.5" />
-            <span>{inCompare ? t.compareAdded : t.compareShort}</span>
+            <Scale className="size-3.5 shrink-0" />
+            <span className="hidden sm:inline">{inCompare ? t.compareAdded : t.compareShort}</span>
           </button>
           {valueScore != null && (
             <Badge
               variant="default"
-              className="pointer-events-none bg-gradient-to-r from-amber-500 to-orange-500 px-1.5 text-[11px] text-white shadow-sm"
+              className="pointer-events-none max-w-full truncate bg-gradient-to-r from-amber-500 to-orange-500 px-1.5 text-[10px] text-white shadow-sm sm:text-[11px]"
             >
               {t.valueScoreLabel(valueScore)}
             </Badge>
           )}
           {model.is_discontinued && (
-            <span className="pointer-events-none rounded-md bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900/50 dark:text-red-200">
-              {isEn ? "Discontinued" : "단종"}
+            <span className="pointer-events-none rounded-md bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-800 dark:bg-red-900/50 dark:text-red-200 sm:px-2 sm:text-xs">
+              {t.discontinued}
             </span>
           )}
         </div>
@@ -148,7 +162,7 @@ export function ModelCard({ model }: ModelCardProps) {
         </p>
         <h3 className="mt-0.5 line-clamp-2 text-[15px] font-bold leading-snug text-foreground group-hover:text-primary sm:text-base">
           {displayName}
-          {model.sub_model && (
+          {shouldShowSubModel(displayName, model.sub_model) && (
             <span className="ml-1 text-sm font-normal text-muted-foreground">
               {model.sub_model}
             </span>
