@@ -6,7 +6,7 @@ import type { BlogPost } from "@/types/database";
 export const revalidate = 3600;
 
 export const metadata = {
-  title: "블로그 - 퍼모위키",
+  title: "블로그",
   description: "퍼스널 모빌리티 구매 가이드, 비교 후기, 시세 정보",
 };
 
