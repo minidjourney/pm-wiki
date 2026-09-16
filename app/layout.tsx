@@ -7,6 +7,8 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { CompareBar } from "@/components/layout/CompareBar";
 import { AdSenseScript } from "@/components/ads/AdSenseScript";
 import { SITE_URL } from "@/lib/site";
+import { headers } from "next/headers";
+import { getLocaleFromPath } from "@/lib/locale";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -84,13 +86,15 @@ const organizationJsonLd = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = (await headers()).get("x-pathname") ?? "/";
+  const lang = getLocaleFromPath(pathname);
   return (
-    <html lang="ko">
+    <html lang={lang}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
