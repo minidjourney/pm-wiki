@@ -19,11 +19,41 @@ function shouldSkip(pathname: string): boolean {
   return false;
 }
 
+/** Search crawlers must keep the URL they request (no KO↔EN bounce). */
+function isSearchCrawler(userAgent: string | null): boolean {
+  if (!userAgent) return false;
+  const ua = userAgent.toLowerCase();
+  return (
+    ua.includes("googlebot") ||
+    ua.includes("google-inspectiontool") ||
+    ua.includes("bingbot") ||
+    ua.includes("slurp") ||
+    ua.includes("duckduckbot") ||
+    ua.includes("baiduspider") ||
+    ua.includes("yandex") ||
+    ua.includes("applebot") ||
+    ua.includes("naver") ||
+    ua.includes("yeti") ||
+    ua.includes("facebookexternalhit") ||
+    ua.includes("twitterbot") ||
+    ua.includes("linkedinbot") ||
+    ua.includes("bytespider") ||
+    ua.includes("petalbot") ||
+    ua.includes("semrushbot") ||
+    ua.includes("ahrefsbot") ||
+    ua.includes("gptbot") ||
+    ua.includes("claudebot")
+  );
+}
+
 function resolvePreferredLocale(request: NextRequest): AutoLocaleCode | "skip" {
   const raw = request.cookies.get(LOCALE_COOKIE_NAME)?.value?.trim().toLowerCase();
   // Manual LanguageSwitcher preference ALWAYS wins — never override with Accept-Language/geo.
   if (raw === "ko" || raw === "en") return raw;
   if (raw === "ja") return "skip";
+
+  // No cookie: crawlers stay on the URL they hit (critical for KO Google indexing).
+  if (isSearchCrawler(request.headers.get("user-agent"))) return "skip";
 
   return detectPreferredAutoLocale({
     acceptLanguage: request.headers.get("accept-language"),
