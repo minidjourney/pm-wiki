@@ -26,9 +26,19 @@ export function stripLocalePrefix(pathname: string): string {
   return pathname || "/";
 }
 
+function isEnMappedPath(rest: string): boolean {
+  return (
+    rest === "/guides" ||
+    rest.startsWith("/guides/") ||
+    rest === "/blog" ||
+    rest.startsWith("/blog/") ||
+    rest.startsWith("/models/")
+  );
+}
+
 /**
  * Map path between locales.
- * EN is live for `/` and `/models/*` → `/en`, `/en/models/*`.
+ * EN is live for `/`, `/models/*`, `/guides`, `/blog` → `/en…`.
  * JA remains stub-only (`/ja`).
  */
 export function hrefForLocale(code: LocaleCode, pathname: string): string {
@@ -38,9 +48,9 @@ export function hrefForLocale(code: LocaleCode, pathname: string): string {
 
   if (code === "ja") return "/ja";
 
-  // code === "en" — real catalog + model routes
+  // code === "en"
   if (rest === "/") return "/en";
-  if (rest.startsWith("/models/")) return `/en${rest}`;
+  if (isEnMappedPath(rest)) return `/en${rest}`;
   return "/en";
 }
 
@@ -134,10 +144,7 @@ function brandTokenKeys(token: string): string[] {
   return BRAND_TOKEN_ALIASES[raw] ?? BRAND_TOKEN_ALIASES[token] ?? [raw];
 }
 
-function brandTokensOverlap(
-  left: string[],
-  right: string[]
-): boolean {
+function brandTokensOverlap(left: string[], right: string[]): boolean {
   if (left.length !== right.length) return false;
   return left.every((lt, i) => {
     const a = new Set(brandTokenKeys(lt));
@@ -192,7 +199,6 @@ export function brandedModelTitle(
   const mfrParts = brandTokens(mfr);
   const nameParts = brandTokens(name);
 
-  // Full brand already leading the name (token/alias match) → keep name.
   if (
     nameParts.length >= mfrParts.length &&
     brandTokensOverlap(mfrParts, nameParts.slice(0, mfrParts.length))
@@ -200,7 +206,6 @@ export function brandedModelTitle(
     return name;
   }
 
-  // Partial overlap: manufacturer "세그웨이 나인봇" + name "나인봇 맥스 G2"
   let overlap = 0;
   const max = Math.min(mfrParts.length, nameParts.length);
   for (let k = 1; k <= max; k += 1) {
@@ -252,13 +257,12 @@ export function pickLocalizedText(
 }
 
 /** Prefer EN string[] when non-empty; otherwise KO. Same jsonb shape. */
-export function pickLocalizedStringArray(
-  en: unknown,
-  ko: unknown
-): string[] {
+export function pickLocalizedStringArray(en: unknown, ko: unknown): string[] {
   const asStrings = (v: unknown): string[] => {
     if (!Array.isArray(v)) return [];
-    return v.filter((x): x is string => typeof x === "string" && x.trim().length > 0);
+    return v.filter(
+      (x): x is string => typeof x === "string" && x.trim().length > 0
+    );
   };
   const enArr = asStrings(en);
   if (enArr.length) return enArr;
@@ -295,12 +299,11 @@ export function shouldShowSubModel(
     }
   }
 
-  // Latin/digit tokens (e.g. "Max G2", "X7 Pro") against KO display + related EN names.
-  // Soft style words (Max/Pro/Plus) are ignored when a harder model-code token matches.
-  // Hangul style words (맥스/프로/…) count as covering Latin soft tokens.
   const significant =
-    sub.match(/[A-Za-z0-9]+/g)?.map((t) => t.toLowerCase()).filter((t) => t.length >= 2) ??
-    [];
+    sub
+      .match(/[A-Za-z0-9]+/g)
+      ?.map((t) => t.toLowerCase())
+      .filter((t) => t.length >= 2) ?? [];
   if (significant.length > 0) {
     const soft = new Set([
       "pro",
@@ -347,12 +350,8 @@ export function shouldShowSubModel(
 /**
  * Prefer EN array when non-empty; otherwise KO.
  * Preserves element shapes (objects or mixed) for chronic_defects / used_checklist.
- * Does not filter or reshape items — callers keep existing render/SEO adapters.
  */
-export function pickLocalizedArray<T = unknown>(
-  en: unknown,
-  ko: unknown
-): T[] {
+export function pickLocalizedArray<T = unknown>(en: unknown, ko: unknown): T[] {
   const asArray = (v: unknown): T[] =>
     Array.isArray(v) && v.length > 0 ? (v as T[]) : [];
   const enArr = asArray(en);
@@ -396,7 +395,9 @@ export function detectLocaleFromAcceptLanguage(
       const [rawTag, ...params] = part.trim().split(";");
       const tag = rawTag.trim();
       const qParam = params.find((p) => p.trim().startsWith("q="));
-      const quality = qParam ? Number.parseFloat(qParam.split("=")[1] ?? "1") : 1;
+      const quality = qParam
+        ? Number.parseFloat(qParam.split("=")[1] ?? "1")
+        : 1;
       return { tag, quality: Number.isFinite(quality) ? quality : 0 };
     })
     .sort((a, b) => b.quality - a.quality);
