@@ -63,8 +63,16 @@ function resolvePreferredLocale(request: NextRequest): AutoLocaleCode | "skip" {
   });
 }
 
+function isLocalizedContentPath(pathname: string): boolean {
+  return (
+    pathname.startsWith("/models/") ||
+    pathname.startsWith("/guides") ||
+    pathname.startsWith("/blog")
+  );
+}
+
 /**
- * Map KO ↔ EN for home + model detail only (no loops).
+ * Map KO ↔ EN for home + model detail + guides/blog (no loops).
  * Returns null when already on the correct locale path.
  */
 function redirectPath(
@@ -76,7 +84,7 @@ function redirectPath(
   if (preferred === "en") {
     if (isEn) return null;
     if (pathname === "/" || pathname === "") return "/en";
-    if (pathname.startsWith("/models/")) return `/en${pathname}`;
+    if (isLocalizedContentPath(pathname)) return `/en${pathname}`;
     return null;
   }
 
@@ -84,6 +92,8 @@ function redirectPath(
   if (!isEn) return null;
   if (pathname === "/en" || pathname === "/en/") return "/";
   if (pathname.startsWith("/en/models/")) return pathname.slice(3) || "/";
+  if (pathname.startsWith("/en/guides")) return pathname.slice(3) || "/";
+  if (pathname.startsWith("/en/blog")) return pathname.slice(3) || "/";
   return null;
 }
 
