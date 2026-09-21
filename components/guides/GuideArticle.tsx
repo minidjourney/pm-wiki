@@ -41,7 +41,6 @@ export function GuideArticle({ guide, locale }: Props) {
         </p>
         <p className="mt-2 text-xs text-muted-foreground">{guide.publishedAt}</p>
 
-        {/* TOC — Design: collapse on mobile */}
         <details className="mt-8 rounded-xl border border-slate-200 bg-slate-50 p-4 open:pb-3 dark:border-slate-800 dark:bg-slate-900/50 md:open">
           <summary className="cursor-pointer text-sm font-semibold text-foreground">
             {tocLabel}
@@ -98,7 +97,6 @@ export function GuideArticle({ guide, locale }: Props) {
           ))}
         </div>
 
-        {/* Related model rail slot — Design wires ModelCard */}
         <section className="mt-14 rounded-xl border border-dashed border-slate-300 p-4 dark:border-slate-700">
           <h2 className="text-sm font-semibold text-foreground">{relatedLabel}</h2>
           <p className="mt-1 text-xs text-muted-foreground">
