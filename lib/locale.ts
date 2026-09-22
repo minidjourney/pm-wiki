@@ -1,6 +1,5 @@
 /**
  * Shared locale helpers: path mapping, display names, hreflang, category labels.
- * Guides/blog/models keep their path when switching KO → EN.
  */
 
 import { SITE_URL } from "@/lib/site";
