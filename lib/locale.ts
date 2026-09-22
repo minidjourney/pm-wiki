@@ -228,7 +228,7 @@ export function brandedModelTitle(
 export const CATEGORY_LABELS: Record<LocaleCode, Record<string, string>> = {
   ko: {
     all: "전체",
-    kickboard: "전동킵보드",
+    kickboard: "전동킥보드",
     ebike: "전기자전거",
     scooter: "전동스쿠터",
     unicycle: "전동 외발휠",
