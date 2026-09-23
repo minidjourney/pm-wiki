@@ -21,7 +21,7 @@ const geistMono = Geist_Mono({
 });
 
 const siteDescription =
-  "킵보드·전기자전거·외발휠 중고 적정가, 스펙, 고질병, 직거래 체크리스트를 한곳에서. 퍼모위키.";
+  "킥보드·전기자전거·외발휠 중고 적정가, 스펙, 고질병, 직거래 체크리스트를 한곳에서. 퍼모위키.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   applicationName: "퍼모위키",
   keywords: [
     "퍼스널 모빌리티",
-    "전동킵보드 중고",
+    "전동킥보드 중고",
     "전기자전거 중고",
     "중고 시세",
     "고질병",
