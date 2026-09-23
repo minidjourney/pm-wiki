@@ -76,7 +76,15 @@ function redirectPath(
   if (preferred === "en") {
     if (isEn) return null;
     if (pathname === "/" || pathname === "") return "/en";
-    if (pathname.startsWith("/models/")) return `/en${pathname}`;
+    if (
+      pathname.startsWith("/models/") ||
+      pathname === "/guides" ||
+      pathname.startsWith("/guides/") ||
+      pathname === "/blog" ||
+      pathname.startsWith("/blog/")
+    ) {
+      return `/en${pathname}`;
+    }
     return null;
   }
 
@@ -84,6 +92,12 @@ function redirectPath(
   if (!isEn) return null;
   if (pathname === "/en" || pathname === "/en/") return "/";
   if (pathname.startsWith("/en/models/")) return pathname.slice(3) || "/";
+  if (pathname === "/en/guides" || pathname.startsWith("/en/guides/")) {
+    return pathname.slice(3) || "/";
+  }
+  if (pathname === "/en/blog" || pathname.startsWith("/en/blog/")) {
+    return pathname.slice(3) || "/";
+  }
   return null;
 }
 

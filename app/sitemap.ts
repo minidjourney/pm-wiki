@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { createClient } from "@supabase/supabase-js";
+import { listGuides } from "@/lib/guides";
 import { SITE_URL } from "@/lib/site";
 
 const getSupabase = () =>
@@ -10,6 +11,21 @@ const getSupabase = () =>
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = SITE_URL;
+
+  const guideEntries: MetadataRoute.Sitemap = listGuides().flatMap((g) => [
+    {
+      url: `${baseUrl}/guides/${g.slug}`,
+      lastModified: new Date(g.publishedAt),
+      changeFrequency: "monthly" as const,
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/en/guides/${g.slug}`,
+      lastModified: new Date(g.publishedAt),
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    },
+  ]);
 
   const staticUrls: MetadataRoute.Sitemap = [
     {
@@ -23,6 +39,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.95,
+    },
+    {
+      url: `${baseUrl}/guides`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/en/guides`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.85,
     },
     {
       url: `${baseUrl}/blog`,
@@ -42,6 +70,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "yearly",
       priority: 0.3,
     },
+    ...guideEntries,
   ];
 
   try {

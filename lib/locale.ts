@@ -38,9 +38,17 @@ export function hrefForLocale(code: LocaleCode, pathname: string): string {
 
   if (code === "ja") return "/ja";
 
-  // code === "en" — real catalog + model routes
+  // code === "en" — catalog, models, guides, blog
   if (rest === "/") return "/en";
-  if (rest.startsWith("/models/")) return `/en${rest}`;
+  if (
+    rest.startsWith("/models/") ||
+    rest === "/guides" ||
+    rest.startsWith("/guides/") ||
+    rest === "/blog" ||
+    rest.startsWith("/blog/")
+  ) {
+    return `/en${rest}`;
+  }
   return "/en";
 }
 
