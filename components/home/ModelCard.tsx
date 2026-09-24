@@ -7,6 +7,7 @@ import { Gauge, Weight, Zap, GaugeCircle, Scale } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   CATEGORY_LABELS,
+  displayManufacturer,
   displayModelNameWithoutBrand,
   getLocaleFromPath,
   localePath,
@@ -55,6 +56,7 @@ interface ModelCardProps {
 export function ModelCard({ model, rank }: ModelCardProps) {
   const locale = getLocaleFromPath(usePathname() ?? "/");
   const displayName = displayModelNameWithoutBrand(model, locale);
+  const manufacturerLabel = displayManufacturer(model.manufacturer, locale);
   const isEn = locale === "en";
   const t = uiCopy(locale);
   const add = useCompareStore((s) => s.add);
@@ -86,7 +88,7 @@ export function ModelCard({ model, rank }: ModelCardProps) {
       add({
         slug: model.slug,
         model_name: displayName,
-        manufacturer: model.manufacturer,
+        manufacturer: manufacturerLabel,
       });
     }
   };
@@ -104,7 +106,7 @@ export function ModelCard({ model, rank }: ModelCardProps) {
         href={modelHref}
         prefetch={true}
         className="absolute inset-0 z-0 rounded-xl"
-        aria-label={isEn ? `${model.manufacturer} ${displayName} details` : `${model.manufacturer} ${displayName} 상세 보기`}
+        aria-label={isEn ? `${manufacturerLabel} ${displayName} details` : `${manufacturerLabel} ${displayName} 상세 보기`}
       />
 
       {/* 상단: 순위·카테고리 + 비교/가성비/단종 (모바일에서 덜 붐비게) */}
@@ -158,7 +160,7 @@ export function ModelCard({ model, rank }: ModelCardProps) {
       {/* 제목부 */}
       <div className="pointer-events-none relative z-10 mb-2.5">
         <p className="text-[11px] font-medium tracking-wide text-muted-foreground">
-          {model.manufacturer}
+          {manufacturerLabel}
         </p>
         <h3 className="mt-0.5 line-clamp-2 text-[15px] font-bold leading-snug text-foreground group-hover:text-primary sm:text-base">
           {displayName}

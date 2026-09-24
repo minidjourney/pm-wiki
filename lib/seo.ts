@@ -143,6 +143,7 @@ export function buildModelDescriptionEn(model: {
   manufacturer?: string | null;
   model_name?: string | null;
   model_name_en?: string | null;
+  slug?: string | null;
   one_line_summary?: string | null;
   one_line_summary_en?: string | null;
   used_price_min_usd?: number | null;
@@ -155,6 +156,7 @@ export function buildModelDescriptionEn(model: {
       model_name: model.model_name ?? "",
       model_name_en: model.model_name_en,
       manufacturer: model.manufacturer,
+      slug: model.slug,
     },
     "en"
   );
@@ -177,6 +179,7 @@ export function buildAnswerCapsuleEn(model: any, displayName: string): string {
       model_name: displayName || String(model.model_name ?? ""),
       model_name_en: model.model_name_en ?? displayName,
       manufacturer: model.manufacturer,
+      slug: model.slug,
     },
     "en"
   );

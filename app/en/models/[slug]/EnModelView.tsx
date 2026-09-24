@@ -6,7 +6,7 @@ import { UsedMarketSearch } from "@/components/models/UsedMarketSearch";
 import { JsonLd } from "@/components/models/JsonLd";
 import { AdSlot } from "@/components/ads/AdSlot";
 import { SITE_URL } from "@/lib/site";
-import { CATEGORY_LABELS, shouldShowSubModel } from "@/lib/locale";
+import { CATEGORY_LABELS, displayManufacturer, shouldShowSubModel } from "@/lib/locale";
 import type { FaqItem } from "@/lib/seo";
 import { EnModelSections } from "./EnModelSections";
 import { SimilarModelsRail } from "@/components/models/SimilarModelsRail";
@@ -70,7 +70,7 @@ export function EnModelView({
       />
       <main className="min-h-screen bg-slate-50/80 pb-12 md:max-w-2xl md:mx-auto">
         <section className="border-b border-slate-100 bg-white px-4 pt-5 pb-5">
-          <p className="text-sm font-medium text-muted-foreground">{model.manufacturer}</p>
+          <p className="text-sm font-medium text-muted-foreground">{displayManufacturer(model.manufacturer, "en")}</p>
           <h1 className="mt-0.5 text-[1.65rem] font-bold leading-tight tracking-tight text-foreground md:text-3xl">
             {displayName}
             {shouldShowSubModel(displayName, model.sub_model, [model.model_name, model.model_name_en]) && (
