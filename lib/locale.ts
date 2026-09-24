@@ -3,6 +3,20 @@
  */
 
 import { SITE_URL } from "@/lib/site";
+import {
+  displayManufacturer,
+  displayNameFromSlug,
+  isUsableEnDisplayName,
+  latinTokensFromMixed,
+} from "@/lib/en-brand";
+
+export {
+  displayManufacturer,
+  displayNameFromSlug,
+  hasLatin,
+  isHangulHeavy,
+  MANUFACTURER_EN_ALIASES,
+} from "@/lib/en-brand";
 
 export const LOCALES = [
   { code: "ko", label: "한국어", shortLabel: "한" },
@@ -95,14 +109,30 @@ export function hreflangLanguages(
   };
 }
 
-/** Korean UI uses model_name; English routes prefer model_name_en. */
+/** Korean UI uses model_name; English routes prefer real Latin model_name_en. */
 export function displayModelName(
-  model: { model_name: string; model_name_en?: string | null },
+  model: {
+    model_name: string;
+    model_name_en?: string | null;
+    slug?: string | null;
+  },
   locale: LocaleCode = "ko"
 ): string {
   if (locale === "en") {
-    const en = model.model_name_en?.trim();
-    if (en) return en;
+    if (isUsableEnDisplayName(model.model_name_en)) {
+      return model.model_name_en.trim();
+    }
+    if (isUsableEnDisplayName(model.model_name)) {
+      return model.model_name.trim();
+    }
+    const slug = model.slug?.trim();
+    if (slug) return displayNameFromSlug(slug);
+    const fromEn = model.model_name_en
+      ? latinTokensFromMixed(model.model_name_en)
+      : null;
+    if (fromEn) return fromEn;
+    const fromKo = latinTokensFromMixed(model.model_name);
+    if (fromKo) return fromKo;
   }
   return model.model_name;
 }
@@ -111,6 +141,7 @@ type NamedModel = {
   model_name: string;
   model_name_en?: string | null;
   manufacturer?: string | null;
+  slug?: string | null;
 };
 
 function escapeRegExp(value: string) {
@@ -135,6 +166,24 @@ const BRAND_TOKEN_ALIASES: Record<string, string[]> = {
   "샤오미": ["xiaomi", "샤오미"],
   dualtron: ["dualtron", "듀얼트론"],
   "듀얼트론": ["dualtron", "듀얼트론"],
+  minimotors: ["minimotors", "미니모터스"],
+  "미니모터스": ["minimotors", "미니모터스"],
+  inmotion: ["inmotion", "인모션"],
+  "인모션": ["inmotion", "인모션"],
+  kingsong: ["kingsong", "킹송"],
+  "킹송": ["kingsong", "킹송"],
+  begode: ["begode", "비고드"],
+  "비고드": ["begode", "비고드"],
+  niu: ["niu", "니우"],
+  "니우": ["niu", "니우"],
+  kaabo: ["kaabo", "카보"],
+  "카보": ["kaabo", "카보"],
+  apollo: ["apollo", "아폴로"],
+  "아폴로": ["apollo", "아폴로"],
+  fiido: ["fiido", "피도"],
+  "피도": ["fiido", "피도"],
+  yadea: ["yadea", "야디", "야디아"],
+  "야디": ["yadea", "야디"],
 };
 
 function brandTokenKeys(token: string): string[] {
@@ -159,7 +208,7 @@ export function displayModelNameWithoutBrand(
   locale: LocaleCode = "ko"
 ): string {
   const name = displayModelName(model, locale).trim();
-  const mfr = model.manufacturer?.trim();
+  const mfr = displayManufacturer(model.manufacturer, locale).trim();
   if (!mfr) return name;
 
   const fullStrip = name
@@ -193,7 +242,7 @@ export function brandedModelTitle(
   locale: LocaleCode = "ko"
 ): string {
   const name = displayModelName(model, locale).trim();
-  const mfr = model.manufacturer?.trim();
+  const mfr = displayManufacturer(model.manufacturer, locale).trim();
   if (!mfr) return name;
   if (name.toLowerCase().startsWith(mfr.toLowerCase())) return name;
 
