@@ -5,7 +5,10 @@ import Script from "next/script";
 import { usePathname, useSearchParams } from "next/navigation";
 
 const GA_MEASUREMENT_ID = "G-DT72L2RRJS";
-const TITLE_WAIT_MS = 1500;
+/** Soft-nav: wait for Next metadata title to settle. */
+const SOFT_NAV_TITLE_WAIT_MS = 1500;
+/** Hard landing: keep first hit fast so session source/medium can attach. */
+const FIRST_HIT_TITLE_WAIT_MS = 300;
 
 declare global {
   interface Window {
@@ -95,10 +98,28 @@ function GoogleAnalyticsPageViews() {
     const sendPageView = async () => {
       if (lastSentKeyRef.current === navKey) return;
 
-      const pageTitle = await waitForDocumentTitle(
-        TITLE_WAIT_MS,
-        titleAtNavStart
-      );
+      const isFirstHit = lastSentKeyRef.current === null;
+      let pageTitle: string | null;
+
+      if (isFirstHit) {
+        // First hit: fire ASAP so GA can attach session source/medium.
+        // Long title waits here are a common cause of Session source `(not set)`.
+        const immediate = document.title?.trim() ?? "";
+        if (immediate) {
+          pageTitle = immediate;
+        } else {
+          pageTitle = await waitForDocumentTitle(
+            FIRST_HIT_TITLE_WAIT_MS,
+            titleAtNavStart
+          );
+        }
+      } else {
+        pageTitle = await waitForDocumentTitle(
+          SOFT_NAV_TITLE_WAIT_MS,
+          titleAtNavStart
+        );
+      }
+
       if (cancelled) return;
       if (lastSentKeyRef.current === navKey) return;
 
