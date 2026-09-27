@@ -1,9 +1,23 @@
 /** Minimal Markdown → HTML for guide bodies (no extra deps). */
+
 export function stripFrontmatter(src: string): string {
   if (!src.startsWith("---")) return src;
   const end = src.indexOf("\n---", 3);
   if (end === -1) return src;
   return src.slice(end + 4).replace(/^\s+/, "");
+}
+
+/** Same slugify used for heading ids — exported for TOC extraction. */
+export function slugifyHeading(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/[^\w가-힣\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-");
+}
+
+function isTintHeading(raw: string): boolean {
+  return /레드플래그|체크리스트/.test(raw);
 }
 
 export function markdownToHtml(src: string): string {
@@ -22,6 +36,8 @@ export function markdownToHtml(src: string): string {
   let inOl = false;
   let inTable = false;
   let tableRows: string[][] = [];
+  let tintOpen = false;
+  let tintLevel = 0;
 
   const closeLists = () => {
     if (inUl) {
@@ -34,18 +50,43 @@ export function markdownToHtml(src: string): string {
     }
   };
 
+  const closeTint = () => {
+    if (!tintOpen) return;
+    closeLists();
+    out.push("</div>");
+    tintOpen = false;
+    tintLevel = 0;
+  };
+
   const flushTable = () => {
     if (!inTable) return;
     if (tableRows.length) {
       const [head, ...body] = tableRows;
-      out.push('<div class="overflow-x-auto"><table class="w-full text-sm">');
-      out.push("<thead><tr>");
-      for (const c of head) out.push(`<th class="border-b px-3 py-2 text-left font-semibold">${inline(c)}</th>`);
+      out.push(
+        '<div class="my-4 -mx-1 overflow-x-auto rounded-xl border border-slate-200 shadow-sm dark:border-slate-700 sm:mx-0">'
+      );
+      out.push(
+        '<table class="w-full min-w-[20rem] border-collapse text-sm">'
+      );
+      out.push(
+        '<thead class="bg-slate-100 dark:bg-slate-800/80"><tr>'
+      );
+      for (const c of head) {
+        out.push(
+          `<th class="border-b border-slate-200 px-3 py-2.5 text-left text-xs font-bold uppercase tracking-wide text-slate-700 dark:border-slate-700 dark:text-slate-200">${inline(c)}</th>`
+        );
+      }
       out.push("</tr></thead><tbody>");
       for (const row of body) {
         if (row.every((c) => /^:?-+:?$/.test(c.trim()))) continue;
-        out.push("<tr>");
-        for (const c of row) out.push(`<td class="border-b border-slate-100 px-3 py-2 align-top dark:border-slate-800">${inline(c)}</td>`);
+        out.push(
+          '<tr class="odd:bg-white even:bg-slate-50/80 dark:odd:bg-transparent dark:even:bg-slate-900/40">'
+        );
+        for (const c of row) {
+          out.push(
+            `<td class="border-b border-slate-100 px-3 py-2.5 align-top dark:border-slate-800">${inline(c)}</td>`
+          );
+        }
         out.push("</tr>");
       }
       out.push("</tbody></table></div>");
@@ -53,6 +94,11 @@ export function markdownToHtml(src: string): string {
     inTable = false;
     tableRows = [];
   };
+
+  const listUlClass = () =>
+    tintOpen
+      ? "list-disc space-y-0.5 pl-5"
+      : "list-disc space-y-1 pl-5";
 
   while (i < lines.length) {
     const line = lines[i];
@@ -78,8 +124,25 @@ export function markdownToHtml(src: string): string {
       closeLists();
       const level = h[1].length;
       const raw = h[2].replace(/\s*\{#[^}]+\}\s*$/, "").trim();
-      const id = slugify(raw);
-      out.push(`<h${level} id="${id}" class="scroll-mt-24">${inline(raw)}</h${level}>`);
+      const id = slugifyHeading(raw);
+
+      if (tintOpen && level <= tintLevel) {
+        closeTint();
+      }
+
+      out.push(
+        `<h${level} id="${id}" class="scroll-mt-24">${inline(raw)}</h${level}>`
+      );
+
+      // Tint section bodies only for H2+ (skip H1 page title matching 체크리스트)
+      if (level >= 2 && isTintHeading(raw) && !tintOpen) {
+        tintOpen = true;
+        tintLevel = level;
+        out.push(
+          '<div class="my-4 rounded-xl border border-amber-200/70 bg-amber-50/60 px-4 py-3 dark:border-amber-900/50 dark:bg-amber-950/30">'
+        );
+      }
+
       i += 1;
       continue;
     }
@@ -91,7 +154,9 @@ export function markdownToHtml(src: string): string {
         quote.push(lines[i].replace(/^>\s?/, ""));
         i += 1;
       }
-      out.push(`<blockquote class="border-l-4 border-slate-300 pl-4 text-muted-foreground dark:border-slate-600">${inline(quote.join(" "))}</blockquote>`);
+      out.push(
+        `<blockquote class="my-4 rounded-r-lg border-l-4 border-blue-300 bg-blue-50/60 py-3 pl-4 pr-3 text-muted-foreground dark:border-blue-700 dark:bg-blue-950/30">${inline(quote.join(" "))}</blockquote>`
+      );
       continue;
     }
 
@@ -101,7 +166,7 @@ export function markdownToHtml(src: string): string {
         inOl = false;
       }
       if (!inUl) {
-        out.push('<ul class="list-disc space-y-1 pl-5">');
+        out.push(`<ul class="${listUlClass()}">`);
         inUl = true;
       }
       out.push(`<li>${inline(line.replace(/^[-*]\s+/, ""))}</li>`);
@@ -115,7 +180,9 @@ export function markdownToHtml(src: string): string {
         inUl = false;
       }
       if (!inOl) {
-        out.push('<ol class="list-decimal space-y-1 pl-5">');
+        out.push(
+          `<ol class="${tintOpen ? "list-decimal space-y-0.5 pl-5" : "list-decimal space-y-1 pl-5"}">`
+        );
         inOl = true;
       }
       out.push(`<li>${inline(line.replace(/^\d+\.\s+/, ""))}</li>`);
@@ -135,15 +202,8 @@ export function markdownToHtml(src: string): string {
   }
   closeLists();
   flushTable();
+  closeTint();
   return out.join("\n");
-}
-
-function slugify(s: string): string {
-  return s
-    .toLowerCase()
-    .replace(/[^\w가-힣\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, "-");
 }
 
 function escapeHtml(s: string): string {
@@ -156,8 +216,14 @@ function escapeHtml(s: string): string {
 
 function inline(s: string): string {
   let t = escapeHtml(s);
-  t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-primary underline-offset-2 hover:underline">$1</a>');
+  t = t.replace(
+    /\[([^\]]+)\]\(([^)]+)\)/g,
+    '<a href="$2" class="text-primary underline-offset-2 hover:underline">$1</a>'
+  );
   t = t.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
-  t = t.replace(/`([^`]+)`/g, '<code class="rounded bg-slate-100 px-1 py-0.5 text-[0.9em] dark:bg-slate-800">$1</code>');
+  t = t.replace(
+    /`([^`]+)`/g,
+    '<code class="rounded bg-slate-100 px-1 py-0.5 text-[0.9em] dark:bg-slate-800">$1</code>'
+  );
   return t;
 }

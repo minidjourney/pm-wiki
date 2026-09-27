@@ -34,6 +34,18 @@ export default function EnGuidesIndexPage() {
               href={guidePath(g.slug, "en")}
               className="block rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
             >
+              {g.tags && g.tags.length > 0 ? (
+                <div className="mb-2 flex flex-wrap gap-1.5">
+                  {g.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
               <h2 className="text-lg font-semibold text-foreground">
                 {g.title.en}
               </h2>
