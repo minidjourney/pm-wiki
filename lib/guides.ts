@@ -16,6 +16,8 @@ export type Guide = {
   markdownPath?: string;
   /** Model slugs for RelatedModels rail. */
   relatedModelSlugs: string[];
+  /** Optional topic chips on guides index cards. */
+  tags?: string[];
   sections: GuideSection[];
 };
 
@@ -39,6 +41,7 @@ export const GUIDES: Guide[] = [
       "dualtron-togo-pro-48v-15ah",
       "xiaomi-electric-scooter-4-ultra-46-8v-12ah",
     ],
+    tags: ["중고", "킥보드", "체크리스트"],
     sections: [],
   },
 ];
