@@ -2,15 +2,32 @@ import { readFile } from "fs/promises";
 import path from "path";
 import Link from "next/link";
 import { RelatedModels } from "@/components/blog/RelatedModels";
+import { GuideToc, type TocItem } from "@/components/guides/GuideToc";
 import type { Guide } from "@/lib/guides";
 import { guidesIndexPath } from "@/lib/guides";
 import type { LocaleCode } from "@/lib/locale";
-import { markdownToHtml } from "@/lib/markdown";
+import { markdownToHtml, slugifyHeading, stripFrontmatter } from "@/lib/markdown";
 
 type Props = {
   guide: Guide;
   locale: LocaleCode;
 };
+
+/** Extract H2 headings for TOC; skip the "목차" section itself. */
+function extractToc(markdown: string): TocItem[] {
+  const text = stripFrontmatter(markdown).replace(/\r\n/g, "\n");
+  const items: TocItem[] = [];
+  for (const line of text.split("\n")) {
+    const m = /^##\s+(.+)$/.exec(line);
+    if (!m) continue;
+    const label = m[1].replace(/\s*\{#[^}]+\}\s*$/, "").trim();
+    if (!label || /^목차$/.test(label) || /^table of contents$/i.test(label)) {
+      continue;
+    }
+    items.push({ id: slugifyHeading(label), label });
+  }
+  return items;
+}
 
 /**
  * Guide article shell for Design to refine:
@@ -24,15 +41,19 @@ export async function GuideArticle({ guide, locale }: Props) {
   const homeHref = locale === "en" ? "/en" : "/";
   const ctaModels = lang === "en" ? "Browse models" : "모델 둘러보기";
   const ctaGuides = lang === "en" ? "All guides" : "가이드 목록";
+  const tocTitle = lang === "en" ? "Contents" : "목차";
 
   let bodyHtml = "";
+  let toc: TocItem[] = [];
   if (guide.markdownPath && lang === "ko") {
     try {
       const full = path.join(process.cwd(), guide.markdownPath);
       const raw = await readFile(full, "utf8");
+      toc = extractToc(raw);
       bodyHtml = markdownToHtml(raw);
     } catch {
       bodyHtml = "";
+      toc = [];
     }
   }
 
@@ -54,6 +75,8 @@ export async function GuideArticle({ guide, locale }: Props) {
           </p>
           <p className="mt-2 text-xs text-muted-foreground">{guide.publishedAt}</p>
         </header>
+
+        {toc.length > 0 ? <GuideToc items={toc} title={tocTitle} /> : null}
 
         {bodyHtml ? (
           <div
