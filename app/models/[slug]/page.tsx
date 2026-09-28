@@ -38,6 +38,7 @@ import { SimilarModelsRail } from "@/components/models/SimilarModelsRail";
 import { pickSimilarModels } from "@/lib/retention";
 import type { RankingSignalScores } from "@/types/database";
 import { AdSlot } from "@/components/ads/AdSlot";
+import { CoupangPartnersSlot } from "@/components/ads/CoupangPartnersSlot";
 import {
   absoluteUrl,
   buildAnswerCapsule,
@@ -240,6 +241,8 @@ export default async function ModelPage({ params }: Props) {
             </div>
             <PriceChart originalPrice={model.original_price ?? 0} usedPriceMin={model.used_price_min} usedPriceMax={model.used_price_max} />
           </section>
+
+          <CoupangPartnersSlot seed={slug} />
 
           <AdSlot slot="model-mid" className="min-h-[90px] w-full overflow-hidden rounded-xl" />
 
