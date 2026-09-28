@@ -39,6 +39,7 @@ import { pickSimilarModels } from "@/lib/retention";
 import type { RankingSignalScores } from "@/types/database";
 import { AdSlot } from "@/components/ads/AdSlot";
 import { CoupangPartnersSlot } from "@/components/ads/CoupangPartnersSlot";
+import { CoupangRails } from "@/components/ads/CoupangRails";
 import {
   absoluteUrl,
   buildAnswerCapsule,
@@ -171,7 +172,8 @@ export default async function ModelPage({ params }: Props) {
   return (
     <>
       <JsonLd model={model} faqs={faqs} />
-      <main className="min-h-screen bg-slate-50/80 pb-12 md:max-w-2xl md:mx-auto">
+      <main className="min-h-screen bg-slate-50/80 pb-12">
+        <CoupangRails seed={slug} contentMaxClassName="max-w-2xl">
         <section className="border-b border-slate-100 bg-white px-4 pt-5 pb-5">
           <p className="text-sm font-medium text-muted-foreground">{model.manufacturer}</p>
           <h1 className="mt-0.5 text-[1.65rem] font-bold leading-tight tracking-tight text-foreground md:text-3xl">
@@ -241,7 +243,7 @@ export default async function ModelPage({ params }: Props) {
             </div>
             <PriceChart originalPrice={model.original_price ?? 0} usedPriceMin={model.used_price_min} usedPriceMax={model.used_price_max} />
             <div className="mt-4 border-t border-slate-100 pt-4 dark:border-slate-800">
-              <CoupangPartnersSlot seed={slug} variant="embedded" />
+              <CoupangPartnersSlot seed={slug} placement="inline" variant="embedded" />
             </div>
           </section>
 
@@ -345,7 +347,10 @@ export default async function ModelPage({ params }: Props) {
 
           <ModelFaq items={faqs} />
           <SimilarModelsRail models={similarModels} locale="ko" />
+          {/* Bottom Coupang — after Related; mobile + desktop (no forced rails on mobile) */}
+          <CoupangPartnersSlot seed={slug} placement="bottom" />
         </div>
+        </CoupangRails>
       </main>
     </>
   );
