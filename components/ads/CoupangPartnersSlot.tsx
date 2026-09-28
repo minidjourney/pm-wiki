@@ -52,8 +52,6 @@ export function CoupangPartnersSlot({
   variant = "card",
   placement = "inline",
 }: Props) {
-  if (!isCoupangPartnersEnabled()) return null;
-
   // SSR / first paint: seed-weighted pick (not user-sticky). Hydrate to cookie on mount.
   const initial = useMemo(() => {
     const picked = pickCoupangVariant({ seed });
@@ -66,6 +64,7 @@ export function CoupangPartnersSlot({
   const [resolved, setResolved] = useState<Resolved>(initial);
 
   useEffect(() => {
+    if (!isCoupangPartnersEnabled()) return;
     const cookie = readCoupangAbCookie();
     const picked = pickCoupangVariant({ cookie, seed });
     if (picked.shouldSetCookie) {
@@ -76,6 +75,8 @@ export function CoupangPartnersSlot({
       offer: offerWithSubId(picked.offer, picked.variant.subId),
     });
   }, [seed]);
+
+  if (!isCoupangPartnersEnabled()) return null;
 
   const { offer, variant: abVariant } = resolved;
   const tracking =
