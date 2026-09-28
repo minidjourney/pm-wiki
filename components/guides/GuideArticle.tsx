@@ -3,6 +3,7 @@ import path from "path";
 import Link from "next/link";
 import { RelatedModels } from "@/components/blog/RelatedModels";
 import { CoupangPartnersSlot } from "@/components/ads/CoupangPartnersSlot";
+import { CoupangRails } from "@/components/ads/CoupangRails";
 import { GuideToc, type TocItem } from "@/components/guides/GuideToc";
 import type { Guide } from "@/lib/guides";
 import { guidesIndexPath } from "@/lib/guides";
@@ -59,7 +60,14 @@ export async function GuideArticle({ guide, locale }: Props) {
   }
 
   return (
-    <main className="mx-auto min-h-screen max-w-3xl px-4 py-10">
+    <main className="min-h-screen py-10">
+      <CoupangRails
+        seed={guide.slug}
+        contentMaxClassName="max-w-3xl"
+        showRails={lang === "ko"}
+        className="px-2 sm:px-0"
+      >
+      <div className="px-4">
       <p className="mb-4 text-sm text-muted-foreground">
         <Link href={guidesIndexPath(locale)} className="hover:text-primary">
           {ctaGuides}
@@ -93,11 +101,19 @@ export async function GuideArticle({ guide, locale }: Props) {
         )}
 
         {lang === "ko" ? (
-          <CoupangPartnersSlot seed={guide.slug} variant="section" />
+          <CoupangPartnersSlot
+            seed={guide.slug}
+            placement="inline"
+            variant="section"
+          />
         ) : null}
 
         {guide.relatedModelSlugs.length > 0 ? (
           <RelatedModels slugs={guide.relatedModelSlugs} />
+        ) : null}
+
+        {lang === "ko" ? (
+          <CoupangPartnersSlot seed={guide.slug} placement="bottom" />
         ) : null}
 
         <div className="mt-10 flex flex-wrap gap-3">
@@ -115,6 +131,8 @@ export async function GuideArticle({ guide, locale }: Props) {
           </Link>
         </div>
       </article>
+      </div>
+      </CoupangRails>
     </main>
   );
 }
