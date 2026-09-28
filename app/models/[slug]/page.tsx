@@ -1,1 +1,1 @@
-PLACEHOLDER
+@/tmp/page_only_content.tsx
