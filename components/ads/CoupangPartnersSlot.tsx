@@ -1,14 +1,23 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
 import {
   COUPANG_DISCLOSURE,
   isCoupangPartnersEnabled,
-  pickCoupangOffer,
+  offerWithSubId,
+  pickCoupangVariant,
+  readCoupangAbCookie,
+  writeCoupangAbCookie,
+  type CoupangPlacement,
+  type CoupangVariant,
+  type CoupangOffer,
 } from "@/lib/coupang";
 
 type Props = {
   className?: string;
   /** Show Coupang-provided product image (helps channel-approval screenshots). */
   showBanner?: boolean;
-  /** Stable rotation seed (model slug / guide id). */
+  /** Stable rotation seed (model slug / guide id) — first-assign / SSR fallback only. */
   seed?: string;
   /**
    * Layout chrome:
@@ -17,24 +26,69 @@ type Props = {
    * - card — standalone rounded card (default)
    */
   variant?: "embedded" | "section" | "card";
+  /**
+   * Placement hint for future rail/bottom chrome (design follow-up).
+   * Today only sets `data-coupang-placement` — no layout change.
+   */
+  placement?: CoupangPlacement | (string & {});
+};
+
+type Resolved = {
+  variant: CoupangVariant;
+  offer: CoupangOffer;
 };
 
 /**
  * KO-only Coupang Partners unit: section-toned product row + required disclosure.
  * Mount only under Korean routes (`app/models`, `app/guides`) — never `/en` or `/ja`.
+ *
+ * A/B: sticky cookie `pmwiki_coupang_ab` picks a weighted offer-set variant;
+ * outbound links get that variant's `subId`. Tracking AF0520396 unchanged.
  */
 export function CoupangPartnersSlot({
   className,
   showBanner = true,
   seed,
   variant = "card",
+  placement = "inline",
 }: Props) {
   if (!isCoupangPartnersEnabled()) return null;
 
-  const offer = pickCoupangOffer(seed);
+  // SSR / first paint: seed-weighted pick (not user-sticky). Hydrate to cookie on mount.
+  const initial = useMemo(() => {
+    const picked = pickCoupangVariant({ seed });
+    return {
+      variant: picked.variant,
+      offer: offerWithSubId(picked.offer, picked.variant.subId),
+    } satisfies Resolved;
+  }, [seed]);
+
+  const [resolved, setResolved] = useState<Resolved>(initial);
+
+  useEffect(() => {
+    const cookie = readCoupangAbCookie();
+    const picked = pickCoupangVariant({ cookie, seed });
+    if (picked.shouldSetCookie) {
+      writeCoupangAbCookie(picked.variant.id);
+    }
+    setResolved({
+      variant: picked.variant,
+      offer: offerWithSubId(picked.offer, picked.variant.subId),
+    });
+  }, [seed]);
+
+  const { offer, variant: abVariant } = resolved;
   const tracking =
     process.env.NEXT_PUBLIC_COUPANG_TRACKING_CODE || "AF0520396";
   const headingId = "coupang-partners-heading";
+
+  const slotAttrs = {
+    "data-coupang-slot": true,
+    "data-coupang-tracking": tracking,
+    "data-coupang-variant": abVariant.id,
+    "data-coupang-placement": placement,
+    "data-coupang-subid": abVariant.subId,
+  } as const;
 
   const productRow = (
     <a
@@ -105,8 +159,7 @@ export function CoupangPartnersSlot({
     return (
       <div
         className={className}
-        data-coupang-slot
-        data-coupang-tracking={tracking}
+        {...slotAttrs}
         aria-labelledby={headingId}
       >
         {body}
@@ -120,8 +173,7 @@ export function CoupangPartnersSlot({
         className={`mt-12 border-t border-slate-100 pt-6 dark:border-slate-800 ${
           className ?? ""
         }`}
-        data-coupang-slot
-        data-coupang-tracking={tracking}
+        {...slotAttrs}
         aria-labelledby={headingId}
       >
         {body}
@@ -134,8 +186,7 @@ export function CoupangPartnersSlot({
       className={`rounded-2xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950 ${
         className ?? ""
       }`}
-      data-coupang-slot
-      data-coupang-tracking={tracking}
+      {...slotAttrs}
       aria-labelledby={headingId}
     >
       {body}
