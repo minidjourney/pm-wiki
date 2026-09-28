@@ -93,9 +93,7 @@ export async function GuideArticle({ guide, locale }: Props) {
         )}
 
         {lang === "ko" ? (
-          <div className="mt-8">
-            <CoupangPartnersSlot seed={guide.slug} />
-          </div>
+          <CoupangPartnersSlot seed={guide.slug} variant="section" />
         ) : null}
 
         {guide.relatedModelSlugs.length > 0 ? (
