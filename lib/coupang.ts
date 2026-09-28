@@ -92,36 +92,58 @@ function hashString(seed: string): number {
   return h;
 }
 
-export function getCoupangVariantById(id: string): CoupangVariant | undefined {
-  return COUPANG_VARIANTS.find((v) => v.id === id);
-}
-
-/** Weighted pick. Optional seed → deterministic bucket (SSR / tests); else Math.random. */
-export function pickWeightedCoupangVariant(seed?: string): CoupangVariant {
+function positiveWeightVariants(): CoupangVariant[] {
   const list = COUPANG_VARIANTS.filter((v) => v.weight > 0);
   if (list.length === 0) {
     throw new Error("COUPANG_VARIANTS has no positive-weight entries");
   }
+  return list;
+}
+
+function pickByTicket(list: CoupangVariant[], ticket: number): CoupangVariant {
   const total = list.reduce((sum, v) => sum + v.weight, 0);
-  let ticket: number;
-  if (seed && seed.length > 0) {
-    ticket = hashString(seed) % total;
-  } else {
-    ticket = Math.floor(Math.random() * total);
-  }
+  let t = ((ticket % total) + total) % total;
   let cursor = 0;
   for (const v of list) {
     cursor += v.weight;
-    if (ticket < cursor) return v;
+    if (t < cursor) return v;
   }
   return list[list.length - 1]!;
+}
+
+export function getCoupangVariantById(id: string): CoupangVariant | undefined {
+  return COUPANG_VARIANTS.find((v) => v.id === id);
+}
+
+/**
+ * Weighted pick.
+ * - `random: true` → Math.random (client first-assign only)
+ * - else seed hash, or UTC-day bucket (SSR-safe, no hydration flicker)
+ */
+export function pickWeightedCoupangVariant(
+  seed?: string,
+  opts?: { random?: boolean },
+): CoupangVariant {
+  const list = positiveWeightVariants();
+  const total = list.reduce((sum, v) => sum + v.weight, 0);
+
+  if (opts?.random) {
+    return pickByTicket(list, Math.floor(Math.random() * total));
+  }
+  if (seed && seed.length > 0) {
+    return pickByTicket(list, hashString(seed));
+  }
+  const day = Math.floor(Date.now() / 86_400_000);
+  return pickByTicket(list, day);
 }
 
 export type PickCoupangVariantInput = {
   /** Raw value of `pmwiki_coupang_ab` when present. */
   cookie?: string | null;
-  /** Optional seed for first-assign / SSR fallback (slug alone is NOT user-sticky). */
+  /** Optional seed for SSR / first-paint fallback (slug alone is NOT user-sticky). */
   seed?: string;
+  /** When true and cookie misses, use Math.random for a fresh sticky assign. */
+  random?: boolean;
 };
 
 export type PickCoupangVariantResult = {
@@ -134,11 +156,12 @@ export type PickCoupangVariantResult = {
 
 /**
  * Sticky per-user variant: cookie wins if it matches a known id;
- * otherwise weighted random (or seed hash), and caller should set the cookie.
+ * otherwise weighted pick (random on client first-assign, else seed/day).
  */
 export function pickCoupangVariant({
   cookie,
   seed,
+  random = false,
 }: PickCoupangVariantInput = {}): PickCoupangVariantResult {
   const trimmed = cookie?.trim();
   if (trimmed) {
@@ -154,7 +177,7 @@ export function pickCoupangVariant({
     }
   }
 
-  const variant = pickWeightedCoupangVariant(seed);
+  const variant = pickWeightedCoupangVariant(seed, { random });
   const offer = variant.offers[0] ?? pickCoupangOffer(seed);
   return {
     variant,
