@@ -240,9 +240,10 @@ export default async function ModelPage({ params }: Props) {
               <h2 className="text-base font-semibold text-foreground">시세 분석</h2>
             </div>
             <PriceChart originalPrice={model.original_price ?? 0} usedPriceMin={model.used_price_min} usedPriceMax={model.used_price_max} />
+            <div className="mt-4 border-t border-slate-100 pt-4 dark:border-slate-800">
+              <CoupangPartnersSlot seed={slug} variant="embedded" />
+            </div>
           </section>
-
-          <CoupangPartnersSlot seed={slug} />
 
           <AdSlot slot="model-mid" className="min-h-[90px] w-full overflow-hidden rounded-xl" />
 
@@ -296,7 +297,7 @@ export default async function ModelPage({ params }: Props) {
 
           {(pros.length > 0 || cons.length > 0) && (
             <section className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-              <h2 className="mb-4 text-base font-semibold text-foreground">장점 · 단점</h2>
+              <h2 className="text-base font-semibold text-foreground mb-4">장점 · 단점</h2>
               <div className="grid gap-4 sm:grid-cols-2">
                 {pros.length > 0 && (
                   <div className="rounded-xl border border-emerald-100 bg-emerald-50/60 p-4">
