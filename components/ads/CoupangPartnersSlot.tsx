@@ -20,15 +20,21 @@ type Props = {
   /** Stable rotation seed (model slug / guide id) — first-assign / SSR fallback only. */
   seed?: string;
   /**
-   * Layout chrome:
+   * Layout chrome (inline defaults):
    * - embedded — inside another card (model price band); no outer border
    * - section — guide rhythm matching RelatedModels (border-t + heading)
    * - card — standalone rounded card (default)
+   *
+   * Ignored when `placement` is rail-* or bottom (those set their own chrome).
    */
   variant?: "embedded" | "section" | "card";
   /**
-   * Placement hint for future rail/bottom chrome (design follow-up).
-   * Today only sets `data-coupang-placement` — no layout change.
+   * Placement chrome/sizing only — does not change A/B, URLs, or tracking.
+   * - inline — existing in-flow mounts (mobile + desktop)
+   * - rail-left / rail-right — narrow sticky gutters (desktop lg+/xl via CoupangRails)
+   * - bottom — after Related (border-t section tone)
+   *
+   * Sets `data-coupang-placement` (from #46). A/B cookie/weights stay in lib/coupang.
    */
   placement?: CoupangPlacement | (string & {});
 };
@@ -86,17 +92,62 @@ export function CoupangPartnersSlot({
   const { offer, variant: abVariant } = resolved;
   const tracking =
     process.env.NEXT_PUBLIC_COUPANG_TRACKING_CODE || "AF0520396";
-  const headingId = "coupang-partners-heading";
+  const placementKey = String(placement || "inline");
+  const isRail =
+    placementKey === "rail-left" || placementKey === "rail-right";
+  const isBottom = placementKey === "bottom";
+  const headingId = `coupang-partners-heading-${placementKey}`;
 
   const slotAttrs = {
     "data-coupang-slot": true,
     "data-coupang-tracking": tracking,
     "data-coupang-variant": abVariant.id,
-    "data-coupang-placement": placement,
+    "data-coupang-placement": placementKey,
     "data-coupang-subid": abVariant.subId,
   } as const;
 
-  const productRow = (
+  const heading = (
+    <h2
+      id={headingId}
+      className={
+        isRail
+          ? "mb-2 text-xs font-semibold leading-snug text-foreground"
+          : "mb-3 text-base font-semibold text-foreground"
+      }
+    >
+      관련 소모품·충전기
+    </h2>
+  );
+
+  const productRow = isRail ? (
+    <a
+      href={offer.bannerHref}
+      target="_blank"
+      rel="noopener noreferrer sponsored"
+      referrerPolicy="unsafe-url"
+      className="flex flex-col items-center gap-2 rounded-xl border border-slate-100 bg-slate-50/80 p-2 transition hover:border-blue-200 hover:bg-white dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-slate-700"
+    >
+      {showBanner ? (
+        // eslint-disable-next-line @next/next/no-img-element -- affiliate CDN; avoid next/image remote allowlist
+        <img
+          src={offer.bannerSrc}
+          alt={offer.bannerAlt}
+          width={72}
+          height={72}
+          className="size-[72px] shrink-0 rounded-lg bg-white object-contain p-1 dark:bg-slate-950"
+          loading="lazy"
+        />
+      ) : null}
+      <span className="min-w-0 text-center">
+        <span className="line-clamp-3 text-[11px] font-medium leading-snug text-foreground">
+          {offer.bannerAlt}
+        </span>
+        <span className="mt-1.5 inline-flex text-[11px] font-semibold text-blue-600 dark:text-blue-400">
+          {offer.textLabel}
+        </span>
+      </span>
+    </a>
+  ) : (
     <a
       href={offer.bannerHref}
       target="_blank"
@@ -127,7 +178,13 @@ export function CoupangPartnersSlot({
   );
 
   const textLink = (
-    <p className="mt-2 text-center text-xs sm:text-left">
+    <p
+      className={
+        isRail
+          ? "mt-1.5 text-center text-[10px]"
+          : "mt-2 text-center text-xs sm:text-left"
+      }
+    >
       <a
         href={offer.textHref}
         target="_blank"
@@ -141,15 +198,15 @@ export function CoupangPartnersSlot({
   );
 
   const disclosure = (
-    <p className="mt-2 text-[10px] leading-snug text-muted-foreground">
+    <p
+      className={
+        isRail
+          ? "mt-1.5 text-[9px] leading-snug text-muted-foreground"
+          : "mt-2 text-[10px] leading-snug text-muted-foreground"
+      }
+    >
       {COUPANG_DISCLOSURE}
     </p>
-  );
-
-  const heading = (
-    <h2 id={headingId} className="mb-3 text-base font-semibold text-foreground">
-      관련 소모품·충전기
-    </h2>
   );
 
   const body = (
@@ -160,6 +217,43 @@ export function CoupangPartnersSlot({
       {disclosure}
     </>
   );
+
+  // Placement chrome takes precedence over variant for rail/bottom.
+  if (isRail) {
+    return (
+      <aside
+        className={`w-full max-w-[200px] rounded-xl border border-slate-100 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-950 ${
+          className ?? ""
+        }`}
+        {...slotAttrs}
+        aria-labelledby={headingId}
+      >
+        {body}
+      </aside>
+    );
+  }
+
+  if (isBottom || (placementKey === "inline" && variant === "section")) {
+    return (
+      <section
+        className={`mt-12 border-t border-slate-100 pt-6 dark:border-slate-800 ${
+          className ?? ""
+        }`}
+        {...slotAttrs}
+        aria-labelledby={headingId}
+      >
+        {body}
+      </section>
+    );
+  }
+
+  if (placementKey === "inline" && variant === "embedded") {
+    return (
+      <div className={className} {...slotAttrs} aria-labelledby={headingId}>
+        {body}
+      </div>
+    );
+  }
 
   if (variant === "embedded") {
     return (
