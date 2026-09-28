@@ -2,6 +2,7 @@ import { readFile } from "fs/promises";
 import path from "path";
 import Link from "next/link";
 import { RelatedModels } from "@/components/blog/RelatedModels";
+import { CoupangPartnersSlot } from "@/components/ads/CoupangPartnersSlot";
 import { GuideToc, type TocItem } from "@/components/guides/GuideToc";
 import type { Guide } from "@/lib/guides";
 import { guidesIndexPath } from "@/lib/guides";
@@ -90,6 +91,12 @@ export async function GuideArticle({ guide, locale }: Props) {
               : "본문을 불러오지 못했습니다."}
           </p>
         )}
+
+        {lang === "ko" ? (
+          <div className="mt-8">
+            <CoupangPartnersSlot seed={guide.slug} />
+          </div>
+        ) : null}
 
         {guide.relatedModelSlugs.length > 0 ? (
           <RelatedModels slugs={guide.relatedModelSlugs} />
