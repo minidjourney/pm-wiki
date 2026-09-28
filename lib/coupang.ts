@@ -9,7 +9,7 @@ const DEFAULT_TRACKING_CODE = "AF0520396";
 export const COUPANG_AB_COOKIE = "pmwiki_coupang_ab";
 export const COUPANG_AB_COOKIE_MAX_AGE_SEC = 30 * 24 * 60 * 60;
 
-/** Future placement chrome keys — UI handled by design; today only sets data attrs. */
+/** Placement chrome keys — Design CoupangRails / slot sizing; A/B stays cookie+weights. */
 export type CoupangPlacement = "inline" | "rail-left" | "rail-right" | "bottom";
 
 /** 1차 승인·노출용: 충전기/소모품 위주 2~3개 (순환). */
