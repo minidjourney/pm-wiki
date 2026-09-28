@@ -55,6 +55,7 @@ function resolvePreferredLocale(request: NextRequest): AutoLocaleCode | "skip" {
   // No cookie: crawlers stay on the URL they hit (critical for KO Google indexing).
   if (isSearchCrawler(request.headers.get("user-agent"))) return "skip";
 
+  // No cookie: KR geo wins over Accept-Language so Korean IPs stay on KO.
   return detectPreferredAutoLocale({
     acceptLanguage: request.headers.get("accept-language"),
     country:
