@@ -94,7 +94,7 @@ export async function GuideArticle({ guide, locale }: Props) {
 
         {lang === "ko" ? (
           <div className="mt-8">
-            <CoupangPartnersSlot />
+            <CoupangPartnersSlot seed={guide.slug} />
           </div>
         ) : null}
 

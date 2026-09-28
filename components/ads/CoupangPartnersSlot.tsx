@@ -1,27 +1,29 @@
 import {
   COUPANG_DISCLOSURE,
-  getCoupangBannerImage,
-  getCoupangBannerLink,
-  getCoupangTextLink,
   isCoupangPartnersEnabled,
+  pickCoupangOffer,
 } from "@/lib/coupang";
 
 type Props = {
   className?: string;
   /** Show Coupang-provided image banner (helps channel-approval screenshots). */
   showBanner?: boolean;
+  /** Stable rotation seed (model slug / guide id). */
+  seed?: string;
 };
 
 /**
- * KO-only Coupang Partners unit: optional image banner + text link + required disclosure.
+ * KO-only Coupang Partners unit: image banner + text link + required disclosure.
  * Mount only under Korean routes (`app/models`, `app/guides`) — never `/en` or `/ja`.
  */
-export function CoupangPartnersSlot({ className, showBanner = true }: Props) {
+export function CoupangPartnersSlot({
+  className,
+  showBanner = true,
+  seed,
+}: Props) {
   if (!isCoupangPartnersEnabled()) return null;
 
-  const textHref = getCoupangTextLink();
-  const bannerHref = getCoupangBannerLink();
-  const bannerSrc = getCoupangBannerImage();
+  const offer = pickCoupangOffer(seed);
 
   return (
     <aside
@@ -29,11 +31,12 @@ export function CoupangPartnersSlot({ className, showBanner = true }: Props) {
         className ?? ""
       }`}
       data-coupang-slot
+      data-coupang-tracking={process.env.NEXT_PUBLIC_COUPANG_TRACKING_CODE || "AF0520396"}
       aria-label="쿠팡 파트너스 추천"
     >
       {showBanner ? (
         <a
-          href={bannerHref}
+          href={offer.bannerHref}
           target="_blank"
           rel="noopener noreferrer sponsored"
           referrerPolicy="unsafe-url"
@@ -41,8 +44,8 @@ export function CoupangPartnersSlot({ className, showBanner = true }: Props) {
         >
           {/* eslint-disable-next-line @next/next/no-img-element -- affiliate CDN; avoid next/image remote allowlist */}
           <img
-            src={bannerSrc}
-            alt="쿠팡 파트너스 추천 상품"
+            src={offer.bannerSrc}
+            alt={offer.bannerAlt}
             width={120}
             height={240}
             className="mx-auto h-auto max-h-[240px] w-auto"
@@ -53,13 +56,13 @@ export function CoupangPartnersSlot({ className, showBanner = true }: Props) {
 
       <p className="mt-2 text-center text-sm">
         <a
-          href={textHref}
+          href={offer.textHref}
           target="_blank"
           rel="noopener noreferrer sponsored"
           referrerPolicy="unsafe-url"
           className="font-medium text-primary underline-offset-2 hover:underline"
         >
-          쿠팡에서 관련 용품 보기
+          {offer.textLabel}
         </a>
       </p>
 
