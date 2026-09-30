@@ -121,7 +121,7 @@ export function CoupangPartnersSlot({
       className={
         isRail
           ? "mb-2 text-sm font-semibold leading-snug text-foreground"
-          : "mb-3 text-lg font-semibold text-foreground"
+          : "mb-3 text-base font-semibold text-foreground"
       }
     >
       관련 소모품·충전기
@@ -131,11 +131,11 @@ export function CoupangPartnersSlot({
   // Portrait banner box: Coupang CDN assets are 240×480 (1:2).
   // Rails fill most of the ~216px gutter; inline/bottom use ~120×240.
   const railImgBox =
-    "h-[360px] w-full min-h-[360px] min-w-0 max-w-[192px] shrink-0 rounded-lg bg-white object-contain p-1 dark:bg-slate-950";
+    "mx-auto h-[360px] w-full min-h-[360px] min-w-0 max-w-[192px] shrink-0 rounded-lg bg-white object-contain p-1 dark:bg-slate-950";
   const inlineImgBox =
     "h-[240px] w-[120px] min-h-[240px] min-w-[120px] shrink-0 rounded-lg bg-white object-contain p-1 dark:bg-slate-950";
   const placeholderRail =
-    "flex h-[360px] w-full min-h-[360px] max-w-[192px] shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-900";
+    "mx-auto flex h-[360px] w-full min-h-[360px] max-w-[192px] shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-900";
   const placeholderInline =
     "flex h-[240px] w-[120px] min-h-[240px] min-w-[120px] shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-900";
 
@@ -185,14 +185,14 @@ export function CoupangPartnersSlot({
       target="_blank"
       rel="noopener noreferrer sponsored"
       referrerPolicy="unsafe-url"
-      className="flex min-h-[256px] items-center gap-4 rounded-xl border border-slate-100 bg-slate-50/80 p-4 transition hover:border-blue-200 hover:bg-white dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-slate-700"
+      className="flex min-h-[256px] items-start gap-4 rounded-xl border border-slate-100 bg-slate-50/80 p-4 transition hover:border-blue-200 hover:bg-white dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-slate-700"
     >
       {bannerImg}
-      <span className="min-w-0 flex-1">
-        <span className="line-clamp-3 text-base font-medium leading-snug text-foreground">
+      <span className="min-w-0 flex-1 pt-1">
+        <span className="line-clamp-3 text-sm font-medium leading-snug text-foreground">
           {offer.bannerAlt}
         </span>
-        <span className="mt-2 inline-flex text-base font-semibold text-blue-600 dark:text-blue-400">
+        <span className="mt-2 inline-flex text-sm font-semibold text-blue-600 dark:text-blue-400">
           {offer.textLabel}
         </span>
       </span>
@@ -204,7 +204,7 @@ export function CoupangPartnersSlot({
       className={
         isRail
           ? "mt-2 text-center text-[11px]"
-          : "mt-2.5 text-center text-sm sm:text-left"
+          : "mt-2.5 text-center text-xs sm:text-left"
       }
     >
       <a
