@@ -21,6 +21,7 @@ type Props = {
 /**
  * Desktop gutter wrapper: left + right Coupang rails beside main content.
  * Rails are lg+ only (hidden on mobile) — mobile keeps inline + optional bottom.
+ * Gutter width ~216px for portrait Coupang banners (240×480).
  * Reuses #46 `placement` / `data-coupang-placement` API; does not invent A/B logic.
  */
 export function CoupangRails({
@@ -32,13 +33,13 @@ export function CoupangRails({
 }: Props) {
   return (
     <div
-      className={`mx-auto flex w-full max-w-[74rem] justify-center gap-4 px-2 sm:px-4 ${
+      className={`mx-auto flex w-full max-w-[78rem] justify-center gap-4 px-2 sm:px-4 ${
         className ?? ""
       }`}
     >
       {showRails ? (
         <aside
-          className="hidden w-[168px] shrink-0 lg:block"
+          className="hidden w-[216px] shrink-0 lg:block"
           aria-label="쿠팡 파트너스 좌측"
           data-coupang-rail="left"
         >
@@ -52,7 +53,7 @@ export function CoupangRails({
 
       {showRails ? (
         <aside
-          className="hidden w-[168px] shrink-0 lg:block"
+          className="hidden w-[216px] shrink-0 lg:block"
           aria-label="쿠팡 파트너스 우측"
           data-coupang-rail="right"
         >
