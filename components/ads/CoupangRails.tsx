@@ -21,6 +21,7 @@ type Props = {
 /**
  * Desktop gutter wrapper: left + right Coupang rails beside main content.
  * Rails are lg+ only (hidden on mobile) — mobile keeps inline + optional bottom.
+ * Gutter width ~216px for portrait Coupang banners (240×480).
  * Reuses #46 `placement` / `data-coupang-placement` API; does not invent A/B logic.
  */
 export function CoupangRails({
