@@ -78,7 +78,10 @@ export const COUPANG_OFFERS: CoupangOffer[] = [
  * COO/user into `helmet` (헬멧·보호구) or `consumable` (타이어·튜브·소모품).
  * Do not invent link.coupang.com or banner CDN URLs.
  *
- * Empty arrays fall back to the charger pool inside `resolveOfferPool`.
+ * `charger` documents the same 3 creatives as COUPANG_OFFERS / A/B rotation,
+ * but must NOT override sticky variant.offers for inline (or any charger slot).
+ * Only non-empty helmet/consumable sets win in resolveOfferPool /
+ * pickOfferForPlacement. Empty arrays fall back to the variant rotation.
  */
 export const COUPANG_OFFER_SETS: Record<CoupangCategory, readonly CoupangOffer[]> = {
   charger: COUPANG_OFFERS,
@@ -87,9 +90,10 @@ export const COUPANG_OFFER_SETS: Record<CoupangCategory, readonly CoupangOffer[]
 };
 
 /**
- * Intended category per slot. Until helmet/consumable have real links, those
- * slots fall back to the charger rotation with `PLACEMENT_OFFSET` so
- * inline ≠ rail-left ≠ bottom on one page.
+ * Intended category per slot. Charger slots always use the sticky A/B
+ * variant rotation (variant.offers). Until helmet/consumable have real
+ * links, those slots fall back to the same charger rotation with
+ * PLACEMENT_OFFSET so inline ≠ rail-left ≠ bottom on one page.
  */
 export const COUPANG_PLACEMENT_CATEGORY: Record<CoupangPlacement, CoupangCategory> = {
   inline: "charger",
@@ -228,8 +232,11 @@ export function normalizeCoupangPlacement(
 }
 
 /**
- * Pool for a slot. A non-empty category set wins (future helmet/tire links).
- * An empty set falls back to this variant's charger rotation (hero first).
+ * Pool for a slot. Only a non-empty non-charger category set (helmet /
+ * consumable) overrides the sticky A/B rotation. The charger set is the
+ * documented creative list and must not win over variant.offers for inline.
+ * Empty / charger slots use this variant's rotation (hero first), then
+ * COUPANG_OFFERS.
  */
 export function resolveOfferPool(
   variant: CoupangVariant,
@@ -238,9 +245,11 @@ export function resolveOfferPool(
   const place = normalizeCoupangPlacement(placement);
   const category = COUPANG_PLACEMENT_CATEGORY[place];
   const categoryOffers = COUPANG_OFFER_SETS[category];
-  if (categoryOffers.length > 0) return categoryOffers;
+  // Charger creatives belong to sticky A/B (variant.offers). Only helmet /
+  // consumable may override when they have real Partners links.
+  if (category !== "charger" && categoryOffers.length > 0) return categoryOffers;
   if (variant.offers.length > 0) return variant.offers;
-  return COUPANG_OFFER_SETS.charger;
+  return COUPANG_OFFERS;
 }
 
 /**
@@ -249,6 +258,12 @@ export function resolveOfferPool(
  * pool so one page can show up to 3 distinct charger creatives. Hashing `seed`
  * rotates the whole page together (SSR-stable). Offsets keep inline, rail-left,
  * and bottom on different creatives when the pool has at least 3 offers.
+ *
+ * variantBias applies only when a real non-charger category set is active
+ * (shared helmet/consumable pool needs variant mixing). Charger / fallback
+ * pools already encode A/B via variant.offers — do not add bias there or
+ * inline will collide with rail-left for some seeds (e.g. ninebot-max-g2 +
+ * charger-48v both resolving to multi).
  */
 export function pickOfferForPlacement(
   variant: CoupangVariant,
@@ -258,18 +273,19 @@ export function pickOfferForPlacement(
   const place = normalizeCoupangPlacement(placement);
   const category = COUPANG_PLACEMENT_CATEGORY[place];
   const categoryOffers = COUPANG_OFFER_SETS[category];
-  const usingCategorySet = categoryOffers.length > 0;
+  // Same rule as resolveOfferPool: charger never overrides A/B rotation.
+  const usingCategorySet = category !== "charger" && categoryOffers.length > 0;
   const pool = usingCategorySet
     ? categoryOffers
     : variant.offers.length > 0
       ? variant.offers
-      : COUPANG_OFFER_SETS.charger;
+      : COUPANG_OFFERS;
   if (pool.length === 0) {
     throw new Error("Coupang offer pool is empty");
   }
   const seedHash = seed && seed.length > 0 ? hashString(seed) : 0;
   // Variant rotation already encodes A/B on the charger fallback pool.
-  // A real category set is shared, so mix the variant id in as well.
+  // A real non-charger category set is shared, so mix the variant id in as well.
   const variantBias = usingCategorySet ? hashString(variant.id) : 0;
   const index =
     (seedHash + variantBias + PLACEMENT_OFFSET[place]) % pool.length;
