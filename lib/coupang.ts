@@ -9,16 +9,30 @@ const DEFAULT_TRACKING_CODE = "AF0520396";
 export const COUPANG_AB_COOKIE = "pmwiki_coupang_ab";
 export const COUPANG_AB_COOKIE_MAX_AGE_SEC = 30 * 24 * 60 * 60;
 
-/** Future placement chrome keys — UI handled by design; today only sets data attrs. */
+/** Placement chrome keys. Also offsets which creative a slot renders. */
 export type CoupangPlacement = "inline" | "rail-left" | "rail-right" | "bottom";
 
-/** 1차 승인·노출용: 충전기/소모품 위주 2~3개 (순환). */
+/**
+ * Product family for a Partners creative.
+ * Add a union member when a new set is introduced. Only `charger` has real
+ * link.coupang.com URLs today.
+ */
+export type CoupangCategory = "charger" | "helmet" | "consumable";
+
+/** 1차 승인·노출용: 충전기 3개. 헬멧·소모품은 실링크가 오면 세트에 추가. */
 export type CoupangOffer = {
   textHref: string;
   bannerHref: string;
   bannerSrc: string;
   bannerAlt: string;
+  /** Legacy secondary label; prefer `ctaLabel` for the primary button. */
   textLabel: string;
+  /** Short benefit hook under the title (CTR). Optional for CTO category sets. */
+  benefitLine?: string;
+  /** Primary CTA button copy. Defaults to "쿠팡에서 보기" in the slot UI. */
+  ctaLabel?: string;
+  /** Which set this creative belongs to. Omitted offers are treated as charger. */
+  category?: CoupangCategory;
 };
 
 export const COUPANG_OFFERS: CoupangOffer[] = [
@@ -28,7 +42,10 @@ export const COUPANG_OFFERS: CoupangOffer[] = [
     bannerSrc:
       "https://image3.coupangcdn.com/image/affiliate/banner/d8db1ecba903922cf6872b9f816ae774@2x.jpg",
     bannerAlt: "전동킥보드·전기자전거 배터리 충전기 (48V용)",
-    textLabel: "쿠팡에서 배터리 충전기 보기",
+    textLabel: "쿠팡에서 보기",
+    benefitLine: "48V 호환 · 배터리 충전",
+    ctaLabel: "쿠팡에서 보기",
+    category: "charger",
   },
   {
     textHref: "https://link.coupang.com/a/hpxhNWAC1Q",
@@ -36,7 +53,10 @@ export const COUPANG_OFFERS: CoupangOffer[] = [
     bannerSrc:
       "https://img1c.coupangcdn.com/image/affiliate/banner/f0566bd26410bf202f721b7c586ff0b3@2x.jpg",
     bannerAlt: "전동킥보드·전기자전거 멀티 전압 충전기",
-    textLabel: "쿠팡에서 멀티 충전기 보기",
+    textLabel: "쿠팡에서 보기",
+    benefitLine: "멀티 전압 · 폭넓은 호환",
+    ctaLabel: "쿠팡에서 보기",
+    category: "charger",
   },
   {
     textHref: "https://link.coupang.com/a/hpxiNstbKC",
@@ -44,14 +64,62 @@ export const COUPANG_OFFERS: CoupangOffer[] = [
     bannerSrc:
       "https://image7.coupangcdn.com/image/affiliate/banner/2a670e40718663d33230b6f92f0a06a3@2x.jpg",
     bannerAlt: "나인봇·세그웨이용 배터리 충전기",
-    textLabel: "쿠팡에서 나인봇 충전기 보기",
+    textLabel: "쿠팡에서 보기",
+    benefitLine: "나인봇·세그웨이 전용",
+    ctaLabel: "쿠팡에서 보기",
+    category: "charger",
   },
 ];
 
 /**
- * A/B offer sets. Each charger offer is its own sticky variant (equal weight).
- * Raise `weight` later to bias traffic toward efficient creatives — we only choose
- * which offer set to show; Coupang's own recommendation logic is untouched.
+ * Category pools keyed for expansion.
+ *
+ * Paste real Partners links (text + banner href + Coupang CDN banner) from
+ * COO/user into `helmet` (헬멧·보호구) or `consumable` (타이어·튜브·소모품).
+ * Do not invent link.coupang.com or banner CDN URLs.
+ *
+ * Empty arrays fall back to the charger pool inside `resolveOfferPool`.
+ */
+export const COUPANG_OFFER_SETS: Record<CoupangCategory, readonly CoupangOffer[]> = {
+  charger: COUPANG_OFFERS,
+  helmet: [],
+  consumable: [],
+};
+
+/**
+ * Intended category per slot. Until helmet/consumable have real links, those
+ * slots fall back to the charger rotation with `PLACEMENT_OFFSET` so
+ * inline ≠ rail-left ≠ bottom on one page.
+ */
+export const COUPANG_PLACEMENT_CATEGORY: Record<CoupangPlacement, CoupangCategory> = {
+  inline: "charger",
+  "rail-left": "helmet",
+  "rail-right": "consumable",
+  bottom: "consumable",
+};
+
+/**
+ * Offset into the active pool. Same seed shifts every slot together;
+ * the offset keeps them apart.
+ *
+ * With only the 3 charger creatives, offset 3 aliases inline (mod 3) so
+ * rail-right matches the in-flow unit until a 4th offer or a non-empty
+ * helmet/consumable set exists. inline (0), rail-left (1) and bottom (2)
+ * stay distinct — the pairs that render together on mobile, plus the gutters.
+ */
+const PLACEMENT_OFFSET: Record<CoupangPlacement, number> = {
+  inline: 0,
+  "rail-left": 1,
+  "rail-right": 3,
+  bottom: 2,
+};
+
+/**
+ * A/B offer sets. Cookie still assigns one sticky variant (weights + subId).
+ * `offers` is a rotation pool of the real charger creatives, hero first, so
+ * placements can cycle distinct banners without a second affiliate link.
+ * Raise `weight` later to bias traffic toward efficient creatives — we only
+ * choose which offer set to show; Coupang's own recommendation logic is untouched.
  */
 export type CoupangVariant = {
   id: string;
@@ -61,24 +129,32 @@ export type CoupangVariant = {
   offers: CoupangOffer[];
 };
 
+function rotateOffers(start: number): CoupangOffer[] {
+  const list = COUPANG_OFFERS;
+  const n = list.length;
+  if (n === 0) return [];
+  const s = ((start % n) + n) % n;
+  return [...list.slice(s), ...list.slice(0, s)];
+}
+
 export const COUPANG_VARIANTS: CoupangVariant[] = [
   {
     id: "charger-48v",
     weight: 1,
     subId: "ab_charger_48v",
-    offers: [COUPANG_OFFERS[0]!],
+    offers: rotateOffers(0),
   },
   {
     id: "charger-multi",
     weight: 1,
     subId: "ab_charger_multi",
-    offers: [COUPANG_OFFERS[1]!],
+    offers: rotateOffers(1),
   },
   {
     id: "charger-ninebot",
     weight: 1,
     subId: "ab_charger_ninebot",
-    offers: [COUPANG_OFFERS[2]!],
+    offers: rotateOffers(2),
   },
 ];
 
@@ -137,6 +213,69 @@ export function pickWeightedCoupangVariant(
   return pickByTicket(list, day);
 }
 
+export function normalizeCoupangPlacement(
+  placement?: string | null,
+): CoupangPlacement {
+  if (
+    placement === "inline" ||
+    placement === "rail-left" ||
+    placement === "rail-right" ||
+    placement === "bottom"
+  ) {
+    return placement;
+  }
+  return "inline";
+}
+
+/**
+ * Pool for a slot. A non-empty category set wins (future helmet/tire links).
+ * An empty set falls back to this variant's charger rotation (hero first).
+ */
+export function resolveOfferPool(
+  variant: CoupangVariant,
+  placement: CoupangPlacement | string = "inline",
+): readonly CoupangOffer[] {
+  const place = normalizeCoupangPlacement(placement);
+  const category = COUPANG_PLACEMENT_CATEGORY[place];
+  const categoryOffers = COUPANG_OFFER_SETS[category];
+  if (categoryOffers.length > 0) return categoryOffers;
+  if (variant.offers.length > 0) return variant.offers;
+  return COUPANG_OFFER_SETS.charger;
+}
+
+/**
+ * Creative for one slot.
+ * Sticky variant supplies subId + rotation hero; `placement` offsets into the
+ * pool so one page can show up to 3 distinct charger creatives. Hashing `seed`
+ * rotates the whole page together (SSR-stable). Offsets keep inline, rail-left,
+ * and bottom on different creatives when the pool has at least 3 offers.
+ */
+export function pickOfferForPlacement(
+  variant: CoupangVariant,
+  placement: CoupangPlacement | string = "inline",
+  seed?: string,
+): CoupangOffer {
+  const place = normalizeCoupangPlacement(placement);
+  const category = COUPANG_PLACEMENT_CATEGORY[place];
+  const categoryOffers = COUPANG_OFFER_SETS[category];
+  const usingCategorySet = categoryOffers.length > 0;
+  const pool = usingCategorySet
+    ? categoryOffers
+    : variant.offers.length > 0
+      ? variant.offers
+      : COUPANG_OFFER_SETS.charger;
+  if (pool.length === 0) {
+    throw new Error("Coupang offer pool is empty");
+  }
+  const seedHash = seed && seed.length > 0 ? hashString(seed) : 0;
+  // Variant rotation already encodes A/B on the charger fallback pool.
+  // A real category set is shared, so mix the variant id in as well.
+  const variantBias = usingCategorySet ? hashString(variant.id) : 0;
+  const index =
+    (seedHash + variantBias + PLACEMENT_OFFSET[place]) % pool.length;
+  return pool[index]!;
+}
+
 export type PickCoupangVariantInput = {
   /** Raw value of `pmwiki_coupang_ab` when present. */
   cookie?: string | null;
@@ -144,6 +283,8 @@ export type PickCoupangVariantInput = {
   seed?: string;
   /** When true and cookie misses, use Math.random for a fresh sticky assign. */
   random?: boolean;
+  /** Slot key. Offsets the creative inside the variant pool. */
+  placement?: CoupangPlacement | string;
 };
 
 export type PickCoupangVariantResult = {
@@ -157,20 +298,21 @@ export type PickCoupangVariantResult = {
 /**
  * Sticky per-user variant: cookie wins if it matches a known id;
  * otherwise weighted pick (random on client first-assign, else seed/day).
+ * The offer itself is placement-aware (`pickOfferForPlacement`).
  */
 export function pickCoupangVariant({
   cookie,
   seed,
   random = false,
+  placement = "inline",
 }: PickCoupangVariantInput = {}): PickCoupangVariantResult {
   const trimmed = cookie?.trim();
   if (trimmed) {
     const known = getCoupangVariantById(trimmed);
     if (known) {
-      const offer = known.offers[0] ?? pickCoupangOffer(seed);
       return {
         variant: known,
-        offer,
+        offer: pickOfferForPlacement(known, placement, seed),
         fromCookie: true,
         shouldSetCookie: true, // refresh max-age
       };
@@ -178,10 +320,9 @@ export function pickCoupangVariant({
   }
 
   const variant = pickWeightedCoupangVariant(seed, { random });
-  const offer = variant.offers[0] ?? pickCoupangOffer(seed);
   return {
     variant,
-    offer,
+    offer: pickOfferForPlacement(variant, placement, seed),
     fromCookie: false,
     shouldSetCookie: true,
   };
