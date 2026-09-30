@@ -29,12 +29,14 @@ type Props = {
    */
   variant?: "embedded" | "section" | "card";
   /**
-   * Placement chrome/sizing only — does not change A/B, URLs, or tracking.
+   * Placement selects chrome AND which creative is shown (see lib/coupang).
    * - inline — existing in-flow mounts (mobile + desktop)
    * - rail-left / rail-right — narrow sticky gutters (desktop lg+/xl via CoupangRails)
    * - bottom — after Related (border-t section tone)
    *
-   * Sets `data-coupang-placement` (from #46). A/B cookie/weights stay in lib/coupang.
+   * Sets `data-coupang-placement`. A/B cookie/weights/subId stay in lib/coupang.
+   * CTR button chrome is design-owned (#51) — this file only passes placement
+   * into the offer picker.
    */
   placement?: CoupangPlacement | (string & {});
 };
@@ -50,13 +52,13 @@ type Resolved = {
  *
  * A/B: sticky cookie `pmwiki_coupang_ab` picks a weighted offer-set variant;
  * outbound links get that variant's `subId`. Tracking AF0520396 unchanged.
+ * Placement offsets the creative inside that variant's pool so rails/inline/bottom differ.
  *
  * Banner assets from Coupang CDN are 240×480 portrait JPEGs — slots use
  * portrait aspect boxes (not square) so object-contain does not shrink to a
  * near-blank strip.
  *
  * CTR chrome (#51 design): benefit line + primary button CTA + 44px+ tap targets.
- * Offer category diversity stays with CTO offer-set PRs.
  */
 export function CoupangPartnersSlot({
   className,
@@ -68,12 +70,12 @@ export function CoupangPartnersSlot({
   // SSR / first paint: deterministic seed|day pick (not user-sticky).
   // Client mount: cookie wins, else weighted random + set sticky cookie.
   const initial = useMemo(() => {
-    const picked = pickCoupangVariant({ seed });
+    const picked = pickCoupangVariant({ seed, placement });
     return {
       variant: picked.variant,
       offer: offerWithSubId(picked.offer, picked.variant.subId),
     } satisfies Resolved;
-  }, [seed]);
+  }, [seed, placement]);
 
   const [resolved, setResolved] = useState<Resolved>(initial);
   const [imgFailed, setImgFailed] = useState(false);
@@ -84,6 +86,7 @@ export function CoupangPartnersSlot({
     const picked = pickCoupangVariant({
       cookie,
       seed,
+      placement,
       random: !cookie?.trim(),
     });
     if (picked.shouldSetCookie) {
@@ -94,7 +97,7 @@ export function CoupangPartnersSlot({
       offer: offerWithSubId(picked.offer, picked.variant.subId),
     });
     setImgFailed(false);
-  }, [seed]);
+  }, [seed, placement]);
 
   if (!isCoupangPartnersEnabled()) return null;
 
@@ -118,7 +121,10 @@ export function CoupangPartnersSlot({
     "data-coupang-variant": abVariant.id,
     "data-coupang-placement": placementKey,
     "data-coupang-subid": abVariant.subId,
-  } as const;
+    "data-coupang-cta": ctaLabel,
+    ...(offer.category ? { "data-coupang-category": offer.category } : {}),
+    ...(benefitLine ? { "data-coupang-benefit": benefitLine } : {}),
+  };
 
   const heading = (
     <h2
