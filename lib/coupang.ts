@@ -18,7 +18,12 @@ export type CoupangOffer = {
   bannerHref: string;
   bannerSrc: string;
   bannerAlt: string;
+  /** Legacy secondary label; prefer `ctaLabel` for the primary button. */
   textLabel: string;
+  /** Short benefit hook under the title (CTR). Optional for CTO category sets. */
+  benefitLine?: string;
+  /** Primary CTA button copy. Defaults to "쿠팡에서 보기" in the slot UI. */
+  ctaLabel?: string;
 };
 
 export const COUPANG_OFFERS: CoupangOffer[] = [
@@ -28,7 +33,9 @@ export const COUPANG_OFFERS: CoupangOffer[] = [
     bannerSrc:
       "https://image3.coupangcdn.com/image/affiliate/banner/d8db1ecba903922cf6872b9f816ae774@2x.jpg",
     bannerAlt: "전동킥보드·전기자전거 배터리 충전기 (48V용)",
-    textLabel: "쿠팡에서 배터리 충전기 보기",
+    textLabel: "쿠팡에서 보기",
+    benefitLine: "48V 호환 · 배터리 충전",
+    ctaLabel: "쿠팡에서 보기",
   },
   {
     textHref: "https://link.coupang.com/a/hpxhNWAC1Q",
@@ -36,7 +43,9 @@ export const COUPANG_OFFERS: CoupangOffer[] = [
     bannerSrc:
       "https://img1c.coupangcdn.com/image/affiliate/banner/f0566bd26410bf202f721b7c586ff0b3@2x.jpg",
     bannerAlt: "전동킥보드·전기자전거 멀티 전압 충전기",
-    textLabel: "쿠팡에서 멀티 충전기 보기",
+    textLabel: "쿠팡에서 보기",
+    benefitLine: "멀티 전압 · 폭넓은 호환",
+    ctaLabel: "쿠팡에서 보기",
   },
   {
     textHref: "https://link.coupang.com/a/hpxiNstbKC",
@@ -44,7 +53,9 @@ export const COUPANG_OFFERS: CoupangOffer[] = [
     bannerSrc:
       "https://image7.coupangcdn.com/image/affiliate/banner/2a670e40718663d33230b6f92f0a06a3@2x.jpg",
     bannerAlt: "나인봇·세그웨이용 배터리 충전기",
-    textLabel: "쿠팡에서 나인봇 충전기 보기",
+    textLabel: "쿠팡에서 보기",
+    benefitLine: "나인봇·세그웨이 전용",
+    ctaLabel: "쿠팡에서 보기",
   },
 ];
 
