@@ -45,7 +45,10 @@ function CommandDialog({
   return (
     <Dialog {...props}>
       <DialogHeader className="sr-only">
-        <DialogTitle>{title}</DialogTitle>
+        {/* Avoid document-level H2 from Radix DialogTitle when dialog is closed/mounted */}
+        <DialogTitle asChild>
+          <div>{title}</div>
+        </DialogTitle>
         <DialogDescription>{description}</DialogDescription>
       </DialogHeader>
       <DialogContent

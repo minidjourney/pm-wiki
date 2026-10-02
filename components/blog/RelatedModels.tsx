@@ -18,21 +18,31 @@ function formatPrice(value: number | null) {
  * Related-model rail — visual tone matches SimilarModelsRail
  * (horizontal snap scroll, image / ImageOff, name clamp, price).
  * Shared by guides and blog.
+ * Soft-fails when Supabase is unavailable (e.g. egress 402) — never crashes the page.
+ * Links always point at `/models/{slug}` when rows resolve.
  */
 export async function RelatedModels({ slugs }: RelatedModelsProps) {
   if (!slugs?.length) return null;
 
-  const supabase = await createClient();
-  const { data: models } = await supabase
-    .from("pm_models")
-    .select("*")
-    .eq("status", "published")
-    .in("slug", slugs);
+  let models: PmModel[] = [];
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("pm_models")
+      .select("*")
+      .eq("status", "published")
+      .in("slug", slugs);
+    if (error) {
+      // Quota / network / schema errors — hide rail, keep guide usable
+      return null;
+    }
+    models = (data ?? []) as PmModel[];
+  } catch {
+    return null;
+  }
 
-  const bySlug = new Map(
-    ((models ?? []) as PmModel[]).map((m) => [m.slug, m])
-  );
-  // Preserve author-specified order when possible
+  const bySlug = new Map(models.map((m) => [m.slug, m]));
+  // Preserve author-specified order when possible; skip slugs with no published row
   const list = slugs
     .map((s) => bySlug.get(s))
     .filter((m): m is PmModel => Boolean(m));

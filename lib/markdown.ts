@@ -20,8 +20,24 @@ function isTintHeading(raw: string): boolean {
   return /레드플래그|체크리스트/.test(raw);
 }
 
-export function markdownToHtml(src: string): string {
+export type MarkdownToHtmlOptions = {
+  /**
+   * When true (guide shells): drop the leading markdown `#` title so the page
+   * keeps a single H1, and demote any later `#` to `<h2>`.
+   */
+  demoteH1?: boolean;
+};
+
+export function markdownToHtml(
+  src: string,
+  options: MarkdownToHtmlOptions = {}
+): string {
+  const { demoteH1 = false } = options;
   let text = stripFrontmatter(src).replace(/\r\n/g, "\n");
+  if (demoteH1) {
+    // Strip first ATX H1 (duplicate of GuideArticle shell title)
+    text = text.replace(/^#\s+.+(?:\n+|$)/, "");
+  }
 
   // fenced code
   text = text.replace(/```[\w-]*\n([\s\S]*?)```/g, (_m, code: string) => {
@@ -122,7 +138,8 @@ export function markdownToHtml(src: string): string {
     const h = /^(#{1,4})\s+(.+)$/.exec(line);
     if (h) {
       closeLists();
-      const level = h[1].length;
+      const rawLevel = h[1].length;
+      const level = demoteH1 && rawLevel === 1 ? 2 : rawLevel;
       const raw = h[2].replace(/\s*\{#[^}]+\}\s*$/, "").trim();
       const id = slugifyHeading(raw);
 
@@ -134,8 +151,8 @@ export function markdownToHtml(src: string): string {
         `<h${level} id="${id}" class="scroll-mt-24">${inline(raw)}</h${level}>`
       );
 
-      // Tint section bodies only for H2+ (skip H1 page title matching 체크리스트)
-      if (level >= 2 && isTintHeading(raw) && !tintOpen) {
+      // Tint section bodies only for authored H2+ (never page-title H1)
+      if (rawLevel >= 2 && isTintHeading(raw) && !tintOpen) {
         tintOpen = true;
         tintLevel = level;
         out.push(
@@ -226,4 +243,85 @@ function inline(s: string): string {
     '<code class="rounded bg-slate-100 px-1 py-0.5 text-[0.9em] dark:bg-slate-800">$1</code>'
   );
   return t;
+}
+
+
+/** Strip simple markdown emphasis/links for schema text that matches visible copy. */
+function plainTextFromInlineMd(s: string): string {
+  return s
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Extract FAQ Q/A pairs from a guide markdown body.
+ * Matches visible "### Qn. …" headings under an FAQ section.
+ */
+export function extractGuideFaqs(src: string): { question: string; answer: string }[] {
+  const text = stripFrontmatter(src).replace(/\r\n/g, "\n");
+  const lines = text.split("\n");
+  const faqs: { question: string; answer: string }[] = [];
+  let inFaq = false;
+  let currentQ: string | null = null;
+  let answerParts: string[] = [];
+
+  const flush = () => {
+    if (currentQ && answerParts.length) {
+      faqs.push({
+        question: plainTextFromInlineMd(currentQ),
+        answer: plainTextFromInlineMd(answerParts.join(" ")),
+      });
+    }
+    currentQ = null;
+    answerParts = [];
+  };
+
+  for (const line of lines) {
+    const h2 = /^##\s+(.+)$/.exec(line);
+    if (h2) {
+      const label = h2[1].replace(/\s*\{#[^}]+\}\s*$/, "").trim();
+      if (/FAQ|자주\s*묻는\s*질문/i.test(label)) {
+        flush();
+        inFaq = true;
+        continue;
+      }
+      if (inFaq) {
+        flush();
+        inFaq = false;
+      }
+      continue;
+    }
+
+    if (!inFaq) continue;
+
+    const q = /^###\s+(?:Q\d+\.\s*)?(.+)$/i.exec(line);
+    if (q) {
+      flush();
+      currentQ = q[1].trim();
+      continue;
+    }
+
+    if (/^#{1,4}\s+/.test(line)) {
+      flush();
+      continue;
+    }
+
+    if (!line.trim() || /^---+$/.test(line.trim())) continue;
+    if (currentQ) answerParts.push(line.trim());
+  }
+  flush();
+  return faqs;
+}
+
+/** Read optional `updated:` / `publishedAt`-style date from YAML frontmatter. */
+export function readFrontmatterDate(src: string, key: string): string | undefined {
+  if (!src.startsWith("---")) return undefined;
+  const end = src.indexOf("\n---", 3);
+  if (end === -1) return undefined;
+  const fm = src.slice(3, end);
+  const m = new RegExp(`^${key}:\\s*(.+)$`, "m").exec(fm);
+  return m ? m[1].trim().replace(/^["']|["']$/g, "") : undefined;
 }

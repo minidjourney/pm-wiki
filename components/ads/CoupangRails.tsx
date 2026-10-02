@@ -20,9 +20,11 @@ type Props = {
 
 /**
  * Desktop gutter wrapper: left + right Coupang rails beside main content.
- * Rails are lg+ only (hidden on mobile) — mobile keeps inline + optional bottom.
+ * Semantic DOM: primary content first, then rails as siblings (CSS `order`
+ * restores left | content | right visually on lg+). Rails are lg+ only.
  * Gutter width ~216px for portrait Coupang banners (240×480).
  * Reuses #46 `placement` / `data-coupang-placement` API; does not invent A/B logic.
+ * Tracking AF0520396 unchanged (set in CoupangPartnersSlot / lib/coupang).
  */
 export function CoupangRails({
   seed,
@@ -37,9 +39,18 @@ export function CoupangRails({
         className ?? ""
       }`}
     >
+      {/* Primary content first in source order for screen readers / AI extractors */}
+      <div
+        className={`min-w-0 w-full ${contentMaxClassName} ${
+          showRails ? "order-2" : ""
+        }`}
+      >
+        {children}
+      </div>
+
       {showRails ? (
         <aside
-          className="hidden w-[216px] shrink-0 lg:block"
+          className="order-1 hidden w-[216px] shrink-0 lg:block"
           aria-label="쿠팡 파트너스 좌측"
           data-coupang-rail="left"
         >
@@ -49,11 +60,9 @@ export function CoupangRails({
         </aside>
       ) : null}
 
-      <div className={`min-w-0 w-full ${contentMaxClassName}`}>{children}</div>
-
       {showRails ? (
         <aside
-          className="hidden w-[216px] shrink-0 lg:block"
+          className="order-3 hidden w-[216px] shrink-0 lg:block"
           aria-label="쿠팡 파트너스 우측"
           data-coupang-rail="right"
         >
