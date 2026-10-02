@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { GuideArticle } from "@/components/guides/GuideArticle";
 import { getGuide, listGuides } from "@/lib/guides";
 import { hreflangLanguages } from "@/lib/locale";
-import { SITE_URL } from "@/lib/site";
+import { absoluteUrl } from "@/lib/seo";
 
 export const revalidate = 3600;
 
@@ -17,15 +17,30 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const guide = getGuide(slug);
   if (!guide) return { title: "Guide not found" };
+
+  const title = guide.title.en;
+  const description = guide.description.en;
+  const url = absoluteUrl(`/en/guides/${slug}`);
+
   return {
-    title: guide.title.en,
-    description: guide.description.en,
+    title,
+    description,
     alternates: {
-      canonical: `${SITE_URL}/en/guides/${slug}`,
-      languages: hreflangLanguages(
-        `/guides/${slug}`,
-        `/en/guides/${slug}`
-      ),
+      canonical: url,
+      languages: hreflangLanguages(`/guides/${slug}`, `/en/guides/${slug}`),
+    },
+    openGraph: {
+      type: "article",
+      locale: "en_US",
+      url,
+      siteName: "Pumo Wiki",
+      title,
+      description,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
     },
   };
 }
