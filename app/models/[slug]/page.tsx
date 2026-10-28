@@ -1,3 +1,4 @@
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase/url";
 import type { ReactElement } from "react";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -52,8 +53,8 @@ import { brandedModelTitle, displayModelName, shouldShowSubModel } from "@/lib/l
 export const revalidate = 3600;
 
 const getSupabase = () => createStaticClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
 );
 
 type Props = { params: Promise<{ slug: string }> };

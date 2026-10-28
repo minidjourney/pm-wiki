@@ -1,3 +1,4 @@
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase/url";
 import type { MetadataRoute } from "next";
 import { createClient } from "@supabase/supabase-js";
 import { listGuides } from "@/lib/guides";
@@ -5,8 +6,8 @@ import { SITE_URL } from "@/lib/site";
 
 const getSupabase = () =>
   createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
   );
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

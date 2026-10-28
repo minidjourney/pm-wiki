@@ -1,3 +1,4 @@
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase/url";
 import type { ReactElement } from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -39,8 +40,8 @@ import type { RankingSignalScores } from "@/types/database";
 export const revalidate = 300;
 
 const getSupabase = () => createStaticClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
 );
 
 type Props = { params: Promise<{ slug: string }> };
