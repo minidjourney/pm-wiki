@@ -372,5 +372,7 @@ export default async function ModelPage({ params }: Props) {
   );
 }
 
-// 모델 페이지는 빌드 때 미리 만들지 않는다(generateStaticParams 없음): 루트 레이아웃이 요청 머리를 읽어
-// 어차피 방문 때 만들어진다. 빈 목록을 돌려주면 정적 경로로 분류돼 방문 때 500(DYNAMIC_SERVER_USAGE)이 난다.
+// 전체 모델을 빌드하지 않고, 첫 방문에 만든 저장본을 기존 주기로 재생성한다.
+export function generateStaticParams() {
+  return [];
+}

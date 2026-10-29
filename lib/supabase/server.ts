@@ -1,27 +1,16 @@
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase/url";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { createClient as createPublicClient } from "@supabase/supabase-js";
 
 export async function createClient() {
-  const cookieStore = await cookies();
-
-  return createServerClient(
+  // 공개 카탈로그·블로그 읽기 전용. 요청 쿠키를 읽으면 ISR이 꺼진다.
+  return createPublicClient(
     SUPABASE_URL,
     SUPABASE_ANON_KEY,
     {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
-          } catch {
-            // Server Component에서는 무시
-          }
-        },
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
       },
     }
   );

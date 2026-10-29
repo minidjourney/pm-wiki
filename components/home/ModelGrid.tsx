@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type { PmModel, PmCategory } from "@/types/database";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import type { PmCategory } from "@/types/database";
+import type { ModelCardData } from "@/lib/home-payload";
+import { SearchParamsSync } from "@/components/layout/SearchParamsSync";
 import { CategoryFilter } from "./CategoryFilter";
 import { ModelCard } from "./ModelCard";
 import { getLocaleFromPath } from "@/lib/locale";
@@ -27,11 +29,12 @@ function parseCategory(
 }
 
 interface ModelGridProps {
-  models: PmModel[];
+  models: ModelCardData[];
 }
 
 export function ModelGrid({ models }: ModelGridProps) {
-  const searchParams = useSearchParams();
+  const [queryString, setQueryString] = useState("");
+  const searchParams = new URLSearchParams(queryString);
   const router = useRouter();
   const pathname = usePathname();
   const locale = getLocaleFromPath(pathname ?? "/");
@@ -66,6 +69,9 @@ export function ModelGrid({ models }: ModelGridProps) {
 
   return (
     <div className="space-y-5 sm:space-y-6">
+      <Suspense fallback={null}>
+        <SearchParamsSync onChange={setQueryString} />
+      </Suspense>
       <CategoryFilter
         selected={selectedCategory}
         onSelect={setSelectedCategory}

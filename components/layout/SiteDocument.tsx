@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import "@/app/globals.css";
 import { Header } from "@/components/layout/Header";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { CompareBar } from "@/components/layout/CompareBar";
 import { AdSenseScript } from "@/components/ads/AdSenseScript";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { SITE_URL } from "@/lib/site";
-import { headers } from "next/headers";
-import { getLocaleFromPath } from "@/lib/locale";
+import type { LocaleCode } from "@/lib/locale";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,7 +22,7 @@ const geistMono = Geist_Mono({
 const siteDescription =
   "킥보드·전기자전거·외발휠 중고 적정가, 스펙, 고질병, 직거래 체크리스트를 한곳에서. 퍼모위키.";
 
-export const metadata: Metadata = {
+export const siteMetadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default: "퍼모위키 | 퍼스널 모빌리티 중고 시세·스펙",
@@ -86,13 +85,13 @@ const organizationJsonLd = {
   ],
 };
 
-export default async function RootLayout({
+export function SiteDocument({
   children,
+  lang,
 }: Readonly<{
   children: React.ReactNode;
+  lang: LocaleCode;
 }>) {
-  const pathname = (await headers()).get("x-pathname") ?? "/";
-  const lang = getLocaleFromPath(pathname);
   return (
     <html lang={lang}>
       <body

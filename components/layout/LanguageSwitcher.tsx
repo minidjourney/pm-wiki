@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { Suspense, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { SearchParamsSync } from "@/components/layout/SearchParamsSync";
 import { Check, ChevronDown, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -58,7 +59,8 @@ function LocaleLink({
 
 export function LanguageSwitcher({ variant = "header" }: LanguageSwitcherProps) {
   const pathname = usePathname() ?? "/";
-  const searchParams = useSearchParams();
+  const [queryString, setQueryString] = useState("");
+  const searchParams = new URLSearchParams(queryString);
   const current = getLocaleFromPath(pathname);
   const currentMeta = localeMeta(current);
   const [open, setOpen] = useState(false);
@@ -88,6 +90,9 @@ export function LanguageSwitcher({ variant = "header" }: LanguageSwitcherProps) 
   if (variant === "menu") {
     return (
       <nav aria-label="Language" className="flex flex-col gap-1">
+        <Suspense fallback={null}>
+          <SearchParamsSync onChange={setQueryString} />
+        </Suspense>
         <p className="px-4 pb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Language
         </p>
@@ -123,6 +128,9 @@ export function LanguageSwitcher({ variant = "header" }: LanguageSwitcherProps) 
 
   return (
     <div ref={rootRef} className="relative">
+      <Suspense fallback={null}>
+        <SearchParamsSync onChange={setQueryString} />
+      </Suspense>
       {/* Mobile: one control instead of three cramped chips */}
       <div className="sm:hidden">
         <button

@@ -7,6 +7,7 @@ import type { Metadata } from "next";
 import type { PmModel, RankingSignalScores } from "@/types/database";
 import { SITE_URL } from "@/lib/site";
 import { hreflangLanguages } from "@/lib/locale";
+import { buildHomePayload } from "@/lib/home-payload";
 
 export const metadata: Metadata = {
   // Same-segment page ignores `app/en/layout.tsx` title.template and would
@@ -103,6 +104,7 @@ export default async function EnglishHome() {
     .eq("locale", "en");
 
   const signalsByModelId = buildSignalsByModelId(signalRows);
+  const home = buildHomePayload(publishedModels, "en", signalsByModelId);
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950" lang="en">
@@ -131,9 +133,8 @@ export default async function EnglishHome() {
       <section className="mx-auto max-w-6xl px-4 pt-10 pb-4">
         {!error && publishedModels.length > 0 ? (
           <CategoryTop10
-            models={publishedModels}
+            topByCategory={home.topByCategory}
             locale="en"
-            signalsByModelId={signalsByModelId}
           />
         ) : null}
       </section>
@@ -151,7 +152,7 @@ export default async function EnglishHome() {
           </div>
         ) : (
           <Suspense fallback={<ModelGridFallback />}>
-            <ModelGrid models={publishedModels} />
+            <ModelGrid models={home.models} />
           </Suspense>
         )}
       </section>

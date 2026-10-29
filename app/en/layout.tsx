@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SetHtmlLang } from "@/components/layout/SetHtmlLang";
+import { SiteDocument, siteMetadata } from "@/components/layout/SiteDocument";
 import { SITE_URL } from "@/lib/site";
 import { hreflangLanguages } from "@/lib/locale";
 
@@ -10,6 +10,7 @@ import { hreflangLanguages } from "@/lib/locale";
  * page sets `title.absolute` instead.
  */
 export const metadata: Metadata = {
+  ...siteMetadata,
   title: {
     default: "Personal Mobility Used Prices & Specs | Pumo Wiki",
     template: "%s | Pumo Wiki",
@@ -33,9 +34,8 @@ export default function EnglishLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
-      <SetHtmlLang lang="en" />
+    <SiteDocument lang="en">
       {children}
-    </>
+    </SiteDocument>
   );
 }

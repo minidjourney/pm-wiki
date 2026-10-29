@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { PmModel } from "@/types/database";
+import type { ModelCardData } from "@/lib/home-payload";
 import { Gauge, Weight, Zap, GaugeCircle, Scale } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -29,7 +29,7 @@ function formatUsd(n: number) {
 }
 
 /** EN: researched USD only — never KRW / never FX. */
-function enPriceBlock(model: PmModel): { label: string; value: string } {
+function enPriceBlock(model: ModelCardData): { label: string; value: string } {
   const min = model.used_price_min_usd;
   const max = model.used_price_max_usd;
   const hasUsed =
@@ -48,7 +48,7 @@ function enPriceBlock(model: PmModel): { label: string; value: string } {
 }
 
 interface ModelCardProps {
-  model: PmModel;
+  model: ModelCardData;
   /** 1-based rank when shown inside category TOP 10 */
   rank?: number;
 }

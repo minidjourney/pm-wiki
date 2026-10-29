@@ -7,6 +7,7 @@ import type { Metadata } from "next";
 import type { PmModel, RankingSignalScores } from "@/types/database";
 import { SITE_URL } from "@/lib/site";
 import { hreflangLanguages } from "@/lib/locale";
+import { buildHomePayload } from "@/lib/home-payload";
 
 export const metadata: Metadata = {
   title: "퍼스널 모빌리티 중고 시세·스펙 비교",
@@ -89,6 +90,7 @@ export default async function Home() {
     .eq("locale", "ko");
 
   const signalsByModelId = buildSignalsByModelId(signalRows);
+  const home = buildHomePayload(publishedModels, "ko", signalsByModelId);
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -119,9 +121,8 @@ export default async function Home() {
       <section className="mx-auto max-w-6xl px-4 pt-10 pb-4">
         {!error && publishedModels.length > 0 ? (
           <CategoryTop10
-            models={publishedModels}
+            topByCategory={home.topByCategory}
             locale="ko"
-            signalsByModelId={signalsByModelId}
           />
         ) : null}
       </section>
@@ -141,7 +142,7 @@ export default async function Home() {
           </div>
         ) : (
           <Suspense fallback={<ModelGridFallback />}>
-            <ModelGrid models={publishedModels} />
+            <ModelGrid models={home.models} />
           </Suspense>
         )}
       </section>

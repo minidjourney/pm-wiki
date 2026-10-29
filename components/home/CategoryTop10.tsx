@@ -1,38 +1,28 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import type { PmCategory, PmModel, RankingSignalScores } from "@/types/database";
+import { useState } from "react";
+import type { PmCategory } from "@/types/database";
+import type { HomeTopByCategory } from "@/lib/home-payload";
 import type { LocaleCode } from "@/lib/locale";
 import { CATEGORY_LABELS } from "@/lib/locale";
 import { uiCopy } from "@/lib/ui-copy";
-import { pickTopByCategory } from "@/lib/retention";
+
 import { ModelCard } from "@/components/home/ModelCard";
 
 const CATS: Array<"all" | PmCategory> = ["all", "kickboard", "ebike", "scooter", "unicycle"];
 
 export function CategoryTop10({
-  models,
+  topByCategory,
   locale = "ko",
-  signalsByModelId,
 }: {
-  models: PmModel[];
+  topByCategory: HomeTopByCategory;
   locale?: LocaleCode;
-  /** Serializable ranking_signals scores keyed by model_id (from server). */
-  signalsByModelId?: Record<string, RankingSignalScores | null | undefined>;
 }) {
   const t = uiCopy(locale === "ja" ? "ja" : locale);
   const loc: LocaleCode = locale === "ja" ? "ko" : locale;
   const [cat, setCat] = useState<"all" | PmCategory>("all");
 
-  const top = useMemo(
-    () =>
-      pickTopByCategory(models, cat, {
-        locale: loc,
-        limit: 10,
-        signalsByModelId,
-      }),
-    [models, cat, loc, signalsByModelId]
-  );
+  const top = topByCategory[cat];
 
   const labels = CATEGORY_LABELS[loc];
 
