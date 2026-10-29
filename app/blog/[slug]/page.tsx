@@ -5,13 +5,16 @@ import type { Metadata } from "next";
 import type { BlogPost } from "@/types/database";
 import { RelatedModels } from "@/components/blog/RelatedModels";
 import { createClient as createStaticClient } from "@supabase/supabase-js";
+import { absoluteUrl } from "@/lib/seo";
+import { decodeSlugParam } from "@/lib/locale-routing";
 
 export const revalidate = 3600;
 
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = decodeSlugParam(rawSlug);
   const supabase = await createClient();
   const { data } = await supabase
     .from("blog_posts")
@@ -23,11 +26,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: data.title,
     description: (data as { title: string }).title,
+    // Without this the root layout's canonical (home) applied to every post.
+    alternates: { canonical: absoluteUrl(`/blog/${encodeURIComponent(slug)}`) },
   };
 }
 
 export default async function BlogPostPage({ params }: Props) {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = decodeSlugParam(rawSlug);
   const supabase = await createClient();
   const { data: post, error } = await supabase
     .from("blog_posts")

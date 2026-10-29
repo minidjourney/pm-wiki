@@ -2,12 +2,15 @@ import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import type { BlogPost } from "@/types/database";
+import { SITE_URL } from "@/lib/site";
 
 export const revalidate = 3600;
 
 export const metadata = {
   title: "블로그",
   description: "퍼스널 모빌리티 구매 가이드, 비교 후기, 시세 정보",
+  // Without this the root layout's canonical (home) applied to the blog list.
+  alternates: { canonical: `${SITE_URL}/blog` },
 };
 
 export default async function BlogListPage() {

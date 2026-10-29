@@ -48,7 +48,8 @@ import {
   buildModelFaqs,
 } from "@/lib/seo";
 import { SITE_URL } from "@/lib/site";
-import { brandedModelTitle, displayModelName, shouldShowSubModel } from "@/lib/locale";
+import { brandedModelTitle, displayModelName, hreflangLanguages, shouldShowSubModel } from "@/lib/locale";
+import { decodeSlugParam, modelPath } from "@/lib/locale-routing";
 
 export const revalidate = 3600;
 
@@ -67,26 +68,33 @@ const CATEGORY_LABEL: Record<string, string> = {
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = decodeSlugParam(rawSlug);
   const supabase = getSupabase();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("pm_models")
     .select(
       "model_name, manufacturer, one_line_summary, used_price_min, used_price_max, range_official, weight, image_url, category"
     )
     .eq("slug", slug)
-    .single();
+    .eq("status", "published")
+    .maybeSingle();
+  // A failed read must not be cached as "모델 없음" (ISR keeps the last good page).
+  if (error) throw new Error(`[model metadata] query failed: ${error.message}`);
   if (!data) return { title: "모델 없음" };
 
   const title = `${brandedModelTitle(data, "ko")} 중고가·스펙·고질병`;
   const description = buildModelDescription(data);
-  const url = absoluteUrl(`/models/${slug}`);
+  const url = absoluteUrl(modelPath(slug, "ko"));
   const images = data.image_url ? [{ url: data.image_url }] : undefined;
 
   return {
     title,
     description,
-    alternates: { canonical: url },
+    alternates: {
+      canonical: url,
+      languages: hreflangLanguages(modelPath(slug, "ko"), modelPath(slug, "en")),
+    },
     openGraph: {
       type: "website",
       locale: "ko_KR",
@@ -106,11 +114,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ModelPage({ params }: Props) {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = decodeSlugParam(rawSlug);
   const supabase = getSupabase();
-  const { data: model, error } = await supabase.from("pm_models").select("*").eq("slug", slug).single();
+  const { data: model, error } = await supabase
+    .from("pm_models")
+    .select("*")
+    .eq("slug", slug)
+    .eq("status", "published")
+    .maybeSingle();
 
-  if (error || !model) notFound();
+  if (error) throw new Error(`[model page] query failed: ${error.message}`);
+  if (!model) notFound();
 
   const { data: peerRows } = await supabase
     .from("pm_models")

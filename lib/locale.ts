@@ -3,6 +3,7 @@
  */
 
 import { SITE_URL } from "@/lib/site";
+import { hasEnglishRoute } from "@/lib/locale-routing";
 import {
   displayManufacturer,
   displayNameFromSlug,
@@ -52,17 +53,9 @@ export function hrefForLocale(code: LocaleCode, pathname: string): string {
 
   if (code === "ja") return "/ja";
 
-  // code === "en" — catalog, models, guides, blog
+  // code === "en" — catalog, models, guides (no /en/blog route → EN home)
   if (rest === "/") return "/en";
-  if (
-    rest.startsWith("/models/") ||
-    rest === "/guides" ||
-    rest.startsWith("/guides/") ||
-    rest === "/blog" ||
-    rest.startsWith("/blog/")
-  ) {
-    return `/en${rest}`;
-  }
+  if (hasEnglishRoute(rest)) return `/en${rest}`;
   return "/en";
 }
 

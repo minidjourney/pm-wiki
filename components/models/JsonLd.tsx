@@ -1,5 +1,6 @@
 import { SITE_URL } from "@/lib/site";
 import { absoluteUrl, type FaqItem } from "@/lib/seo";
+import { modelPath } from "@/lib/locale-routing";
 
 function additionalProperties(model: any) {
   const props: { "@type": "PropertyValue"; name: string; value: string }[] = [];
@@ -36,9 +37,8 @@ export function JsonLd({
 }) {
   const isEn = locale === "en";
   const validUntilYear = new Date().getFullYear() + 1;
-  const pageUrl = absoluteUrl(
-    isEn ? `/en/models/${model.slug}` : `/models/${model.slug}`
-  );
+  // Same encoded URL as the page canonical (slugs may contain spaces).
+  const pageUrl = absoluteUrl(modelPath(String(model.slug), isEn ? "en" : "ko"));
   const homeUrl = isEn ? absoluteUrl("/en") : SITE_URL;
   const orgId = `${SITE_URL}/#organization`;
   const websiteId = `${SITE_URL}/#website`;

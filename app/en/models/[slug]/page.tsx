@@ -28,10 +28,12 @@ import {
 import {
   brandedModelTitle,
   displayModelNameWithoutBrand,
+  hreflangLanguages,
   pickLocalizedArray,
   pickLocalizedStringArray,
   pickLocalizedText,
 } from "@/lib/locale";
+import { decodeSlugParam, modelPath } from "@/lib/locale-routing";
 import { uiCopy } from "@/lib/ui-copy";
 import { EnModelView } from "./EnModelView";
 import { pickSimilarModels } from "@/lib/retention";
@@ -47,27 +49,34 @@ const getSupabase = () => createStaticClient(
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = decodeSlugParam(rawSlug);
   const supabase = getSupabase();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("pm_models")
     .select(
       "model_name, model_name_en, manufacturer, one_line_summary, one_line_summary_en, used_price_min_usd, used_price_max_usd, original_price_usd, range_official, weight, image_url, category"
     )
     .eq("slug", slug)
-    .single();
+    .eq("status", "published")
+    .maybeSingle();
+  // A failed read must not be cached as "Model not found" (ISR keeps the last good page).
+  if (error) throw new Error(`[model metadata] query failed: ${error.message}`);
   if (!data) return { title: "Model not found" };
 
   const modelForMeta = { ...data, slug };
   const title = `${brandedModelTitle(modelForMeta, "en")} used price, specs & issues`;
   const description = buildModelDescriptionEn(modelForMeta);
-  const url = absoluteUrl(`/en/models/${slug}`);
+  const url = absoluteUrl(modelPath(slug, "en"));
   const images = data.image_url ? [{ url: data.image_url }] : undefined;
 
   return {
     title,
     description,
-    alternates: { canonical: url },
+    alternates: {
+      canonical: url,
+      languages: hreflangLanguages(modelPath(slug, "ko"), modelPath(slug, "en")),
+    },
     openGraph: {
       type: "website",
       locale: "en_US",
@@ -87,11 +96,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ModelPage({ params }: Props) {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = decodeSlugParam(rawSlug);
   const supabase = getSupabase();
-  const { data: model, error } = await supabase.from("pm_models").select("*").eq("slug", slug).single();
+  const { data: model, error } = await supabase
+    .from("pm_models")
+    .select("*")
+    .eq("slug", slug)
+    .eq("status", "published")
+    .maybeSingle();
 
-  if (error || !model) notFound();
+  if (error) throw new Error(`[model page] query failed: ${error.message}`);
+  if (!model) notFound();
 
   const { data: peerRows } = await supabase
     .from("pm_models")

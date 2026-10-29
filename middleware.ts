@@ -4,6 +4,7 @@ import {
   detectPreferredAutoLocale,
   type AutoLocaleCode,
 } from "@/lib/locale";
+import { autoLocaleRedirectPath, isSearchCrawler } from "@/lib/locale-routing";
 
 function shouldSkip(pathname: string): boolean {
   if (pathname.startsWith("/_next")) return true;
@@ -17,33 +18,6 @@ function shouldSkip(pathname: string): boolean {
   // Static assets (images, fonts, etc.)
   if (/\.[a-zA-Z0-9]+$/.test(pathname)) return true;
   return false;
-}
-
-/** Search crawlers must keep the URL they request (no KO↔EN bounce). */
-function isSearchCrawler(userAgent: string | null): boolean {
-  if (!userAgent) return false;
-  const ua = userAgent.toLowerCase();
-  return (
-    ua.includes("googlebot") ||
-    ua.includes("google-inspectiontool") ||
-    ua.includes("bingbot") ||
-    ua.includes("slurp") ||
-    ua.includes("duckduckbot") ||
-    ua.includes("baiduspider") ||
-    ua.includes("yandex") ||
-    ua.includes("applebot") ||
-    ua.includes("naver") ||
-    ua.includes("yeti") ||
-    ua.includes("facebookexternalhit") ||
-    ua.includes("twitterbot") ||
-    ua.includes("linkedinbot") ||
-    ua.includes("bytespider") ||
-    ua.includes("petalbot") ||
-    ua.includes("semrushbot") ||
-    ua.includes("ahrefsbot") ||
-    ua.includes("gptbot") ||
-    ua.includes("claudebot")
-  );
 }
 
 function resolvePreferredLocale(request: NextRequest): AutoLocaleCode | "skip" {
@@ -63,44 +37,6 @@ function resolvePreferredLocale(request: NextRequest): AutoLocaleCode | "skip" {
   });
 }
 
-/**
- * Map KO ↔ EN for home + model detail only (no loops).
- * Returns null when already on the correct locale path.
- */
-function redirectPath(
-  preferred: AutoLocaleCode,
-  pathname: string
-): string | null {
-  const isEn = pathname === "/en" || pathname.startsWith("/en/");
-
-  if (preferred === "en") {
-    if (isEn) return null;
-    if (pathname === "/" || pathname === "") return "/en";
-    if (
-      pathname.startsWith("/models/") ||
-      pathname === "/guides" ||
-      pathname.startsWith("/guides/") ||
-      pathname === "/blog" ||
-      pathname.startsWith("/blog/")
-    ) {
-      return `/en${pathname}`;
-    }
-    return null;
-  }
-
-  // preferred === "ko"
-  if (!isEn) return null;
-  if (pathname === "/en" || pathname === "/en/") return "/";
-  if (pathname.startsWith("/en/models/")) return pathname.slice(3) || "/";
-  if (pathname === "/en/guides" || pathname.startsWith("/en/guides/")) {
-    return pathname.slice(3) || "/";
-  }
-  if (pathname === "/en/blog" || pathname.startsWith("/en/blog/")) {
-    return pathname.slice(3) || "/";
-  }
-  return null;
-}
-
 /** Forward pathname to the root layout for SSR html lang. */
 function withPathname(request: NextRequest): NextResponse {
   const requestHeaders = new Headers(request.headers);
@@ -117,7 +53,8 @@ export function middleware(request: NextRequest) {
   const preferred = resolvePreferredLocale(request);
   if (preferred === "skip") return withPathname(request);
 
-  const target = redirectPath(preferred, pathname);
+  // KO↔EN for home, models and guides only (blog has no /en route; no loops).
+  const target = autoLocaleRedirectPath(preferred, pathname);
   if (!target) return withPathname(request);
 
   const url = request.nextUrl.clone();
