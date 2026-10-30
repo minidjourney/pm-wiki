@@ -53,7 +53,7 @@ export function middleware(request: NextRequest) {
   const preferred = resolvePreferredLocale(request);
   if (preferred === "skip") return withPathname(request);
 
-  // KO↔EN for home, models and guides only (blog has no /en route; no loops).
+  // 첫 화면만 자동 선택한다. 모델·안내·블로그의 명시적 주소는 보존한다.
   const target = autoLocaleRedirectPath(preferred, pathname);
   if (!target) return withPathname(request);
 

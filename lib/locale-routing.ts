@@ -18,32 +18,18 @@ export function hasEnglishRoute(koPath: string): boolean {
 }
 
 /**
- * Auto-locale redirect target for middleware (no loops).
+ * 첫 화면만 언어를 자동 선택한다. 명시적인 본문 주소는 보존한다.
  * Returns null when the request should stay on its URL.
  */
 export function autoLocaleRedirectPath(
   preferred: RoutingLocale,
   pathname: string
 ): string | null {
-  const isEn = pathname === "/en" || pathname.startsWith("/en/");
-
-  if (preferred === "en") {
-    if (isEn) return null;
-    if (pathname === "/" || pathname === "") return "/en";
-    if (hasEnglishRoute(pathname)) return `/en${pathname}`;
-    return null;
+  if (preferred === "en" && (pathname === "/" || pathname === "")) {
+    return "/en";
   }
-
-  // preferred === "ko"
-  if (!isEn) return null;
-  if (pathname === "/en" || pathname === "/en/") return "/";
-  if (pathname.startsWith("/en/models/")) return pathname.slice(3) || "/";
-  if (pathname === "/en/guides" || pathname.startsWith("/en/guides/")) {
-    return pathname.slice(3) || "/";
-  }
-  // `/en/blog` does not exist; send Korean-preferring visitors to the real page.
-  if (pathname === "/en/blog" || pathname.startsWith("/en/blog/")) {
-    return pathname.slice(3) || "/";
+  if (preferred === "ko" && (pathname === "/en" || pathname === "/en/")) {
+    return "/";
   }
   return null;
 }
@@ -66,6 +52,7 @@ export const CRAWLER_UA_MARKERS: readonly string[] = [
   "applebot",
   "naver",
   "yeti",
+  "daumoa",
   "facebookexternalhit",
   "twitterbot",
   "linkedinbot",

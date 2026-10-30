@@ -14,7 +14,24 @@ declare global {
   interface Window {
     dataLayer?: unknown[];
     gtag?: (...args: unknown[]) => void;
+    pmwikiGaReady?: boolean;
   }
+}
+
+/** 측정 주소만 정리한다. 인라인 초기화에서도 쓰므로 외부 값에 의존하지 않는다. */
+function analyticsUrl(value: string): string {
+  const url = new URL(value);
+  const category = url.searchParams.get("category");
+  url.search = "";
+  url.hash = "";
+  if (
+    (url.pathname === "/" || url.pathname === "/en") &&
+    category &&
+    ["all", "kickboard", "ebike", "scooter", "unicycle"].includes(category)
+  ) {
+    url.searchParams.set("category", category);
+  }
+  return url.href;
 }
 
 /**
@@ -86,19 +103,32 @@ function waitForDocumentTitle(
 function GoogleAnalyticsPageViews() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const lastSentKeyRef = useRef<string | null>(null);
+  const lastQueuedKeyRef = useRef<string | null>(null);
+  const pendingPageViewsRef = useRef<
+    Array<{ page_path: string; page_title: string; page_location: string }>
+  >([]);
 
   useEffect(() => {
     const search = searchParams?.toString() ?? "";
-    const pagePath = search ? `${pathname}?${search}` : pathname;
-    const navKey = pagePath;
+    const navKey = search ? `${pathname}?${search}` : pathname;
+    const pageLocation = analyticsUrl(window.location.href);
+    const location = new URL(pageLocation);
+    const pagePath = location.pathname + location.search;
     const titleAtNavStart = document.title?.trim() ?? "";
     let cancelled = false;
 
-    const sendPageView = async () => {
-      if (lastSentKeyRef.current === navKey) return;
+    const flushPending = () => {
+      if (!window.pmwikiGaReady || typeof window.gtag !== "function") return;
+      while (pendingPageViewsRef.current.length > 0) {
+        const page = pendingPageViewsRef.current.shift()!;
+        window.gtag("event", "page_view", page);
+      }
+    };
 
-      const isFirstHit = lastSentKeyRef.current === null;
+    const queuePageView = async () => {
+      if (lastQueuedKeyRef.current === navKey) return;
+
+      const isFirstHit = lastQueuedKeyRef.current === null;
       let pageTitle: string | null;
 
       if (isFirstHit) {
@@ -121,24 +151,28 @@ function GoogleAnalyticsPageViews() {
       }
 
       if (cancelled) return;
-      if (lastSentKeyRef.current === navKey) return;
+      if (lastQueuedKeyRef.current === navKey) return;
 
       // Never send empty title — that becomes GA `(not set)` / `(설정 안함)`.
       if (!pageTitle) return;
-      if (typeof window.gtag !== "function") return;
 
-      lastSentKeyRef.current = navKey;
-      window.gtag("event", "page_view", {
+      lastQueuedKeyRef.current = navKey;
+      pendingPageViewsRef.current.push({
         page_path: pagePath,
         page_title: pageTitle,
-        page_location: window.location.href,
+        page_location: pageLocation,
       });
+      flushPending();
     };
 
-    void sendPageView();
+    // 먼저 구독한 뒤 준비 상태를 읽어 어느 실행 순서에서도 놓치지 않는다.
+    window.addEventListener("pmwiki:ga-ready", flushPending);
+    flushPending();
+    void queuePageView();
 
     return () => {
       cancelled = true;
+      window.removeEventListener("pmwiki:ga-ready", flushPending);
     };
   }, [pathname, searchParams]);
 
@@ -157,7 +191,14 @@ export function GoogleAnalytics() {
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
-          gtag('config', '${GA_MEASUREMENT_ID}', { send_page_view: false });
+          const analyticsUrl = ${analyticsUrl.toString()};
+          gtag('config', '${GA_MEASUREMENT_ID}', {
+            send_page_view: false,
+            page_location: analyticsUrl(window.location.href),
+            page_referrer: document.referrer ? analyticsUrl(document.referrer) : ''
+          });
+          window.pmwikiGaReady = true;
+          window.dispatchEvent(new Event('pmwiki:ga-ready'));
         `}
       </Script>
       <Suspense fallback={null}>
