@@ -62,7 +62,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .maybeSingle();
   // A failed read must not be cached as "Model not found" (ISR keeps the last good page).
   if (error) throw new Error(`[model metadata] query failed: ${error.message}`);
-  if (!data) return { title: "Model not found" };
+  if (!data) return { title: "Model not found", robots: { index: false, follow: true } };
 
   const modelForMeta = { ...data, slug };
   const title = `${brandedModelTitle(modelForMeta, "en")} used price, specs & issues`;

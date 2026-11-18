@@ -16,13 +16,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug: rawSlug } = await params;
   const slug = decodeSlugParam(rawSlug);
   const supabase = await createClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("blog_posts")
     .select("title")
     .eq("slug", slug)
-    .single();
+    .maybeSingle();
 
-  if (!data) return { title: "글 없음" };
+  if (error) throw new Error(`[blog post] query failed: ${error.message}`);
+  if (!data) return { title: "글 없음", robots: { index: false, follow: true } };
   return {
     title: data.title,
     description: (data as { title: string }).title,
@@ -39,9 +40,10 @@ export default async function BlogPostPage({ params }: Props) {
     .from("blog_posts")
     .select("*")
     .eq("slug", slug)
-    .single();
+    .maybeSingle();
 
-  if (error || !post) notFound();
+  if (error) throw new Error(`[blog post] query failed: ${error.message}`);
+  if (!post) notFound();
 
   const typedPost = post as BlogPost;
   const relatedSlugs = typedPost.related_models ?? [];
