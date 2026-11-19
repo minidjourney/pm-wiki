@@ -81,7 +81,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .maybeSingle();
   // A failed read must not be cached as "모델 없음" (ISR keeps the last good page).
   if (error) throw new Error(`[model metadata] query failed: ${error.message}`);
-  if (!data) return { title: "모델 없음", robots: { index: false, follow: true } };
+  if (!data) return { title: "모델 없음", robots: { index: false, follow: true }, alternates: null };
 
   const title = `${brandedModelTitle(data, "ko")} 중고가·스펙·고질병`;
   const description = buildModelDescription(data);

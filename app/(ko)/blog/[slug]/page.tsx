@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .maybeSingle();
 
   if (error) throw new Error(`[blog post] query failed: ${error.message}`);
-  if (!data) return { title: "글 없음", robots: { index: false, follow: true } };
+  if (!data) return { title: "글 없음", robots: { index: false, follow: true }, alternates: null };
   return {
     title: data.title,
     description: (data as { title: string }).title,
